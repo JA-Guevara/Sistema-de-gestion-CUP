@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}ExamenParcial-2{% endblock %}</title>
+
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+    <header class="app-header">
+        <nav class="app-nav">
+            <a href="{{ path('auth_login') }}" class="app-nav__brand">ExamenParcial-2</a>
+            <ul class="app-nav__menu">
+                <li><a href="{{ path('auth_login') }}">Iniciar sesión</a></li>
+                <li><a href="{{ path('auth_register') }}">Crear cuenta</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="app-main">
+        {% block body %}{% endblock %}
+    </main>
+
+    {% block javascripts %}{% endblock %}
+</body>
+</html>

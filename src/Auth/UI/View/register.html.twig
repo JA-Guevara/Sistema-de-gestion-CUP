@@ -1,0 +1,81 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Crear cuenta · ExamenParcial-2{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/auth/css/auth.css">
+{% endblock %}
+
+{% block body %}
+    <section class="auth-card">
+        <h1 class="auth-card__title">Crear cuenta</h1>
+        <p class="auth-card__subtitle">Es rápido y fácil.</p>
+
+        {% for message in app.flashes('error') %}
+            <div class="alert alert--error" role="alert">{{ message }}</div>
+        {% endfor %}
+
+        <form method="post" action="{{ path('auth_register') }}" data-auth-form novalidate>
+            <div class="auth-form__row">
+                <div class="auth-form__field">
+                    <label class="auth-form__label" for="register-first-name">Nombre</label>
+                    <input
+                        id="register-first-name"
+                        class="auth-form__input"
+                        type="text"
+                        name="firstName"
+                        autocomplete="given-name"
+                        required
+                    >
+                </div>
+
+                <div class="auth-form__field">
+                    <label class="auth-form__label" for="register-last-name">Apellido</label>
+                    <input
+                        id="register-last-name"
+                        class="auth-form__input"
+                        type="text"
+                        name="lastName"
+                        autocomplete="family-name"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="auth-form__field">
+                <label class="auth-form__label" for="register-email">Correo electrónico</label>
+                <input
+                    id="register-email"
+                    class="auth-form__input"
+                    type="email"
+                    name="email"
+                    autocomplete="email"
+                    required
+                >
+            </div>
+
+            <div class="auth-form__field">
+                <label class="auth-form__label" for="register-password">Contraseña</label>
+                <input
+                    id="register-password"
+                    class="auth-form__input"
+                    type="password"
+                    name="password"
+                    autocomplete="new-password"
+                    required
+                >
+                <p class="auth-form__hint">Mínimo 6 caracteres.</p>
+            </div>
+
+            <button type="submit" class="auth-form__submit">Registrarme</button>
+        </form>
+
+        <p class="auth-form__footer">
+            ¿Ya tenés cuenta? <a href="{{ path('auth_login') }}">Iniciar sesión</a>
+        </p>
+    </section>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="/assets/auth/js/auth.js" defer></script>
+{% endblock %}

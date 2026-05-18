@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mi cuenta · ExamenParcial-2{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/auth/css/auth.css">
+{% endblock %}
+
+{% block body %}
+    <section class="user-card">
+        <h1 class="auth-card__title">Mi cuenta</h1>
+        <p class="auth-card__subtitle">Sesión activa.</p>
+
+        <dl>
+            <dt>Nombre</dt>
+            <dd>{{ user.firstName }} {{ user.lastName }}</dd>
+
+            <dt>Correo</dt>
+            <dd>{{ user.email }}</dd>
+
+            <dt>Creado</dt>
+            <dd>{{ user.createdAt|date('d/m/Y H:i') }}</dd>
+        </dl>
+
+        <div class="user-card__actions">
+            <a href="{{ path('auth_logout') }}" class="btn--secondary">Cerrar sesión</a>
+        </div>
+    </section>
+{% endblock %}

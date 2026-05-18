@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Iniciar sesión · ExamenParcial-2{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/auth/css/auth.css">
+{% endblock %}
+
+{% block body %}
+    <section class="auth-card">
+        <h1 class="auth-card__title">Iniciar sesión</h1>
+        <p class="auth-card__subtitle">Ingresá con tu correo y contraseña.</p>
+
+        {% for message in app.flashes('error') %}
+            <div class="alert alert--error" role="alert">{{ message }}</div>
+        {% endfor %}
+
+        {% for message in app.flashes('success') %}
+            <div class="alert alert--success" role="status">{{ message }}</div>
+        {% endfor %}
+
+        <form method="post" action="{{ path('auth_login') }}" data-auth-form novalidate>
+            <div class="auth-form__field">
+                <label class="auth-form__label" for="login-email">Correo</label>
+                <input
+                    id="login-email"
+                    class="auth-form__input"
+                    type="email"
+                    name="email"
+                    autocomplete="email"
+                    required
+                >
+            </div>
+
+            <div class="auth-form__field">
+                <label class="auth-form__label" for="login-password">Contraseña</label>
+                <input
+                    id="login-password"
+                    class="auth-form__input"
+                    type="password"
+                    name="password"
+                    autocomplete="current-password"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="auth-form__submit">Entrar</button>
+        </form>
+
+        <p class="auth-form__footer">
+            ¿No tenés cuenta? <a href="{{ path('auth_register') }}">Crear cuenta</a>
+        </p>
+    </section>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="/assets/auth/js/auth.js" defer></script>
+{% endblock %}
