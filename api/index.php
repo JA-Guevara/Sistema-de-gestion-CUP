@@ -28,7 +28,7 @@ $resolvedDatabaseUrl = is_string($databaseUrl) && $databaseUrl !== ''
     : $neonDatabaseUrl;
 
 if (is_string($resolvedDatabaseUrl) && $resolvedDatabaseUrl !== '') {
-    $resolvedDatabaseUrl = withNeonEndpointOption($resolvedDatabaseUrl);
+    $resolvedDatabaseUrl = withNeonEndpointPassword($resolvedDatabaseUrl);
     $_SERVER['DATABASE_URL'] = $resolvedDatabaseUrl;
     $_ENV['DATABASE_URL'] = $resolvedDatabaseUrl;
     putenv('DATABASE_URL='.$resolvedDatabaseUrl);
@@ -44,22 +44,33 @@ $response = $kernel->handle($request);
 $response->send();
 $kernel->terminate($request, $response);
 
-function withNeonEndpointOption(string $databaseUrl): string
+function withNeonEndpointPassword(string $databaseUrl): string
 {
     $parts = parse_url($databaseUrl);
     $host = $parts['host'] ?? '';
-    $query = $parts['query'] ?? '';
 
-    if ($host === '' || !str_contains($host, '.neon.tech') || str_contains($query, 'options=')) {
+    if ($host === '' || !str_contains($host, '.neon.tech')) {
         return $databaseUrl;
     }
 
     $endpointId = explode('.', $host)[0] ?? '';
+    $endpointId = preg_replace('/-pooler$/', '', $endpointId) ?? $endpointId;
     if ($endpointId === '') {
         return $databaseUrl;
     }
 
-    $separator = str_contains($databaseUrl, '?') ? '&' : '?';
+    $password = $parts['pass'] ?? '';
+    if ($password === '' || str_starts_with(rawurldecode($password), 'endpoint=')) {
+        return $databaseUrl;
+    }
 
-    return $databaseUrl.$separator.'options='.rawurlencode('endpoint='.$endpointId);
+    $prefixedPassword = rawurlencode('endpoint='.$endpointId.';'.rawurldecode($password));
+    $currentPassword = rawurlencode(rawurldecode($password));
+
+    return preg_replace(
+        '/:'.preg_quote($currentPassword, '/').'@/',
+        ':'.$prefixedPassword.'@',
+        $databaseUrl,
+        1
+    ) ?? $databaseUrl;
 }
