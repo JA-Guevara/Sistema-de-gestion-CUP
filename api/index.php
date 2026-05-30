@@ -24,6 +24,7 @@ $neonDatabaseUrl = $_SERVER['DATABASE_POSTGRES_URL']
     ?: ($_SERVER['DATABASE_URL_UNPOOLED'] ?? $_ENV['DATABASE_URL_UNPOOLED'] ?? getenv('DATABASE_URL_UNPOOLED') ?: null);
 
 if ($databaseUrl === null && is_string($neonDatabaseUrl) && $neonDatabaseUrl !== '') {
+    $neonDatabaseUrl = withNeonEndpointOption($neonDatabaseUrl);
     $_SERVER['DATABASE_URL'] = $neonDatabaseUrl;
     $_ENV['DATABASE_URL'] = $neonDatabaseUrl;
     putenv('DATABASE_URL='.$neonDatabaseUrl);
@@ -38,3 +39,23 @@ $response = $kernel->handle($request);
 
 $response->send();
 $kernel->terminate($request, $response);
+
+function withNeonEndpointOption(string $databaseUrl): string
+{
+    $parts = parse_url($databaseUrl);
+    $host = $parts['host'] ?? '';
+    $query = $parts['query'] ?? '';
+
+    if ($host === '' || !str_contains($host, '.neon.tech') || str_contains($query, 'options=')) {
+        return $databaseUrl;
+    }
+
+    $endpointId = explode('.', $host)[0] ?? '';
+    if ($endpointId === '') {
+        return $databaseUrl;
+    }
+
+    $separator = str_contains($databaseUrl, '?') ? '&' : '?';
+
+    return $databaseUrl.$separator.'options='.rawurlencode('endpoint='.$endpointId);
+}
