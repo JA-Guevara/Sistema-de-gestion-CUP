@@ -1,0 +1,110 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Inicio · CUP FICCT{% endblock %}
+
+{% block app_content %}
+    <section class="app-content__greeting">
+        <p class="app-content__greeting-eyebrow">Bienvenido</p>
+        <h1 class="app-content__title">Hola, {{ user.firstName }}</h1>
+        <p class="app-content__subtitle">
+            Estás a un paso de comenzar tu curso pre-universitario. Para acceder a horarios, notas y tu perfil completo,
+            primero completá tu inscripción CUP.
+        </p>
+    </section>
+
+    {# Cards de acciones / módulos disponibles #}
+    <div class="app-grid">
+        {# Featured: módulo disponible #}
+        <article class="app-card app-card--featured">
+            <div class="app-card__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10 9 9 9 8 9"/>
+                </svg>
+            </div>
+            <h2 class="app-card__title">Inscripción CUP</h2>
+            <p class="app-card__subtitle">
+                Completá tus datos de postulación: documento, fecha de nacimiento, carrera, colegio y demás.
+                Una vez enviado, te asignaremos fecha de presentación.
+            </p>
+            <a href="#" class="app-card__cta">
+                Comenzar pre-inscripción
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </a>
+        </article>
+
+        {# Locked: horarios #}
+        <article class="app-card">
+            <div class="app-card__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+            </div>
+            <h2 class="app-card__title">Horarios</h2>
+            <p class="app-card__subtitle">
+                Disponible una vez que tu inscripción esté aprobada y se asignen los grupos del curso.
+            </p>
+            <span class="app-card__cta app-card__cta--locked">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                Bloqueado
+            </span>
+        </article>
+
+        {# Locked: notas #}
+        <article class="app-card">
+            <div class="app-card__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10"/>
+                    <line x1="12" y1="20" x2="12" y2="4"/>
+                    <line x1="6" y1="20" x2="6" y2="14"/>
+                </svg>
+            </div>
+            <h2 class="app-card__title">Notas y evaluaciones</h2>
+            <p class="app-card__subtitle">
+                Vas a ver tu progreso en Computación, Matemáticas, Inglés y Física cuando comiencen los exámenes.
+            </p>
+            <span class="app-card__cta app-card__cta--locked">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                Bloqueado
+            </span>
+        </article>
+    </div>
+
+    {# Mini-panel del usuario (datos básicos de la cuenta) #}
+    <section class="app-profile">
+        <div class="app-profile__header">
+            <div class="app-profile__avatar" aria-hidden="true">{{ user.firstName|first }}</div>
+            <div>
+                <h2 class="app-profile__name">{{ user.firstName }} {{ user.lastName }}</h2>
+                <p class="app-profile__email">{{ user.email }}</p>
+            </div>
+        </div>
+        <dl class="app-profile__dl">
+            <dt>Cuenta creada</dt>
+            <dd>{{ user.createdAt|date('d/m/Y') }}</dd>
+
+            {% if user.lastLoginAt %}
+                <dt>Último ingreso</dt>
+                <dd>{{ user.lastLoginAt|date('d/m/Y H:i') }}</dd>
+            {% endif %}
+
+            <dt>Estado</dt>
+            <dd>Cuenta activa · Pendiente de inscripción</dd>
+        </dl>
+    </section>
+{% endblock %}

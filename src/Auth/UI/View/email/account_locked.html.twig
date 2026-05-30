@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Cuenta bloqueada</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2933;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f5f6f8;padding:32px 0;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="520" cellspacing="0" cellpadding="0" border="0" style="background:#ffffff;border:1px solid #d9dde3;border-radius:8px;padding:32px;">
+                    <tr>
+                        <td>
+                            <h1 style="margin:0 0 16px;font-size:22px;color:#1f2933;">Cuenta bloqueada</h1>
+
+                            <p style="margin:0 0 16px;line-height:1.5;">
+                                Hola <strong>{{ user.firstName }}</strong>,
+                            </p>
+
+                            <p style="margin:0 0 16px;line-height:1.5;">
+                                Detectamos varios intentos fallidos de iniciar sesión en tu cuenta de <strong>CUP FICCT</strong>.
+                                Como medida de seguridad, la bloqueamos temporalmente.
+                            </p>
+
+                            <p style="margin:0 0 8px;line-height:1.5;">
+                                Tu código de desbloqueo es:
+                            </p>
+
+                            <p style="margin:16px 0 24px;text-align:center;">
+                                <span style="display:inline-block;background:#f5f6f8;border:1px solid #d9dde3;border-radius:8px;padding:16px 32px;font-size:32px;font-weight:700;letter-spacing:8px;color:#1f2933;font-family:'Courier New',monospace;">
+                                    {{ code }}
+                                </span>
+                            </p>
+
+                            <p style="margin:0 0 24px;text-align:center;">
+                                <a
+                                    href="{{ unlock_url }}"
+                                    style="display:inline-block;background:#2c5cff;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:20px;font-weight:600;"
+                                >
+                                    Ir al formulario de desbloqueo
+                                </a>
+                            </p>
+
+                            <p style="margin:0 0 8px;line-height:1.5;font-size:13px;color:#5b6573;">
+                                Este código expira en <strong>{{ expires_minutes }} minutos</strong> y sólo puede usarse una vez.
+                            </p>
+
+                            <p style="margin:0 0 16px;line-height:1.5;font-size:13px;color:#5b6573;">
+                                Si vos no intentaste ingresar, alguien más puede estar tratando de acceder a tu cuenta.
+                                Te recomendamos cambiar tu contraseña apenas la desbloquees.
+                            </p>
+
+                            <hr style="border:none;border-top:1px solid #d9dde3;margin:24px 0;">
+
+                            <p style="margin:0;font-size:12px;color:#5b6573;line-height:1.5;">
+                                Si el botón no funciona, ingresá manualmente a:<br>
+                                <span style="word-break:break-all;color:#2c5cff;">{{ unlock_url }}</span>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+
+                <p style="margin:16px 0 0;font-size:12px;color:#5b6573;">
+                    CUP FICCT · Curso Pre-Universitario · Facultad de Ingeniería en Ciencias de la Computación
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

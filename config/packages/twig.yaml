@@ -3,6 +3,8 @@ twig:
     file_name_pattern: '*.twig'
     paths:
         '%kernel.project_dir%/src/Auth/UI/View': auth
+        '%kernel.project_dir%/src/Home/UI/View': home
+        '%kernel.project_dir%/src/Bitacora/UI/View': bitacora
 
 when@test:
     twig:

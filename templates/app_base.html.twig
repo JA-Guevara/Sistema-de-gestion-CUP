@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}CUP FICCT{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="alternate icon" type="image/png" href="/favicon.png">
+    <link rel="shortcut icon" href="/favicon.svg">
+
+    <link rel="stylesheet" href="/assets/app/css/app.css">
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+    <div class="app-shell">
+
+        {# ==================== TOP BAR ==================== #}
+        <header class="app-topbar">
+            <a href="{{ path('home') }}" class="app-topbar__brand">
+                <img src="/assets/auth/logos/ficct.png" alt="FICCT" class="app-topbar__logo">
+                <span class="app-topbar__brand-text">
+                    <span class="app-topbar__brand-acronym">CUP · FICCT</span>
+                    <span class="app-topbar__brand-sub">Admisión 2026</span>
+                </span>
+            </a>
+
+            <div class="app-topbar__user">
+                <div class="app-topbar__user-info">
+                    <span class="app-topbar__user-name">{{ user.firstName }} {{ user.lastName }}</span>
+                    <span class="app-topbar__user-role">Postulante</span>
+                </div>
+                <div class="app-topbar__avatar" aria-hidden="true">{{ user.firstName|first }}</div>
+                <a href="{{ path('auth_logout') }}" class="app-topbar__logout">Cerrar sesión</a>
+            </div>
+        </header>
+
+        <div class="app-shell__body">
+
+            {# ==================== SIDEBAR ==================== #}
+            <aside class="app-sidebar">
+                <p class="app-sidebar__section-title">Menú</p>
+
+                <nav class="app-sidebar__nav">
+                    {% set current = app.request.attributes.get('_route') %}
+
+                    {# Inicio (activo cuando estás en / ) #}
+                    <a href="{{ path('home') }}" class="app-sidebar__item {{ current == 'home' ? 'app-sidebar__item--active' : '' }}">
+                        <span class="app-sidebar__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                <polyline points="9 22 9 12 15 12 15 22"/>
+                            </svg>
+                        </span>
+                        <span class="app-sidebar__label">Inicio</span>
+                    </a>
+
+                    {# Inscripción CUP — habilitado pero sin ruta aún #}
+                    <a href="#" class="app-sidebar__item">
+                        <span class="app-sidebar__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                                <polyline points="10 9 9 9 8 9"/>
+                            </svg>
+                        </span>
+                        <span class="app-sidebar__label">Inscripción CUP</span>
+                    </a>
+
+                    <p class="app-sidebar__section-title">Auditoría</p>
+
+                    {# Bitácora — disponible #}
+                    <a href="{{ path('bitacora_index') }}" class="app-sidebar__item {{ current == 'bitacora_index' ? 'app-sidebar__item--active' : '' }}">
+                        <span class="app-sidebar__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 11l3 3L22 4"/>
+                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                            </svg>
+                        </span>
+                        <span class="app-sidebar__label">Bitácora</span>
+                    </a>
+
+                    <p class="app-sidebar__section-title">Próximamente</p>
+
+                    {# Horarios — bloqueado #}
+                    <span class="app-sidebar__item app-sidebar__item--disabled">
+                        <span class="app-sidebar__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                        </span>
+                        <span class="app-sidebar__label">Horarios</span>
+                        <svg class="app-sidebar__lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                    </span>
+
+                    {# Notas — bloqueado #}
+                    <span class="app-sidebar__item app-sidebar__item--disabled">
+                        <span class="app-sidebar__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="20" x2="18" y2="10"/>
+                                <line x1="12" y1="20" x2="12" y2="4"/>
+                                <line x1="6" y1="20" x2="6" y2="14"/>
+                            </svg>
+                        </span>
+                        <span class="app-sidebar__label">Notas</span>
+                        <svg class="app-sidebar__lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                    </span>
+
+                    {# Perfil — bloqueado por ahora #}
+                    <span class="app-sidebar__item app-sidebar__item--disabled">
+                        <span class="app-sidebar__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </span>
+                        <span class="app-sidebar__label">Perfil</span>
+                        <svg class="app-sidebar__lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                    </span>
+
+                    {% block app_nav_extra %}{% endblock %}
+                </nav>
+            </aside>
+
+            {# ==================== MAIN CONTENT ==================== #}
+            <main class="app-shell__main">
+                <div class="app-content">
+                    {% block app_content %}{% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
+
+    {% block javascripts %}{% endblock %}
+</body>
+</html>

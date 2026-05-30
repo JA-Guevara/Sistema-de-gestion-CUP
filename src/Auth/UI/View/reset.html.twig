@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nueva contraseña · ExamenParcial-2{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/auth/css/auth.css">
+{% endblock %}
+
+{% block body %}
+    <section class="auth-card">
+        <h1 class="auth-card__title">Nueva contraseña</h1>
+        <p class="auth-card__subtitle">Elegí una contraseña nueva para tu cuenta.</p>
+
+        {% for message in app.flashes('error') %}
+            <div class="alert alert--error" role="alert">{{ message }}</div>
+        {% endfor %}
+
+        <form method="post" action="{{ path('auth_reset', {'token': token}) }}" novalidate>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+
+            <div class="auth-form__field">
+                <label class="auth-form__label" for="reset-password">Nueva contraseña</label>
+                <input
+                    id="reset-password"
+                    class="auth-form__input"
+                    type="password"
+                    name="password"
+                    autocomplete="new-password"
+                    required
+                >
+                <p class="auth-form__hint">Mínimo 6 caracteres.</p>
+            </div>
+
+            <div class="auth-form__field">
+                <label class="auth-form__label" for="reset-password-confirmation">Repetí la contraseña</label>
+                <input
+                    id="reset-password-confirmation"
+                    class="auth-form__input"
+                    type="password"
+                    name="passwordConfirmation"
+                    autocomplete="new-password"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="auth-form__submit">Cambiar contraseña</button>
+        </form>
+
+        <p class="auth-form__footer">
+            <a href="{{ path('auth_login') }}">Volver al inicio de sesión</a>
+        </p>
+    </section>
+{% endblock %}

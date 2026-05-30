@@ -1,0 +1,41 @@
+<div class="bitacora-table__wrap">
+    <table class="bitacora-table">
+        <thead>
+            <tr>
+                <th class="bitacora-table__col-num">#</th>
+                <th>Usuario</th>
+                <th>Acción</th>
+                <th>Módulo</th>
+                <th>Descripción</th>
+                <th>Fecha</th>
+                <th>IP</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% set baseIndex = (page - 1) * perPage %}
+            {% for entry in items %}
+                <tr class="bitacora-table__row bitacora-table__row--{{ entry.level|lower }}">
+                    <td class="bitacora-table__num">{{ baseIndex + loop.index }}</td>
+                    <td class="bitacora-table__user">{{ entry.userLabel }}</td>
+                    <td>
+                        <span class="bitacora-badge bitacora-badge--{{ entry.level|lower }} bitacora-badge--action-{{ entry.action|lower|replace({'_': '-'}) }}">
+                            {{ entry.action }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="bitacora-table__module">{{ entry.module }}</span>
+                    </td>
+                    <td class="bitacora-table__desc">{{ entry.description }}</td>
+                    <td class="bitacora-table__date">{{ entry.createdAt|date('d/m/Y H:i:s') }}</td>
+                    <td class="bitacora-table__ip">{{ entry.ip|default('—') }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="7" class="bitacora-table__empty">
+                        Sin registros que coincidan con los filtros aplicados.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Auth\Application\UseCase;
 
-use App\Auth\Entity\User;
 use App\Auth\Domain\Exception\EmailAlreadyRegistered;
 use App\Auth\Domain\Exception\InvalidRegistrationData;
+use App\Auth\Entity\User;
 use App\Auth\Infrastructure\Persistence\UserRepository;
 use App\Auth\UI\Request\RegisterRequest;
 

@@ -1,0 +1,66 @@
+<form method="get" action="{{ path('bitacora_index') }}" class="bitacora-filters" data-bitacora-filters>
+    <div class="bitacora-filters__field">
+        <label class="bitacora-filters__label" for="filter-usuario">Usuario</label>
+        <select id="filter-usuario" name="usuario" class="bitacora-filters__input">
+            <option value="">Todos</option>
+            {% for label in userLabels %}
+                <option value="{{ label }}" {% if filter.userLabel == label %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="bitacora-filters__field">
+        <label class="bitacora-filters__label" for="filter-accion">Acción</label>
+        <select id="filter-accion" name="accion" class="bitacora-filters__input">
+            <option value="">Todas</option>
+            {% for action in actions %}
+                <option value="{{ action }}" {% if filter.action == action %}selected{% endif %}>{{ action }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="bitacora-filters__field">
+        <label class="bitacora-filters__label" for="filter-modulo">Módulo</label>
+        <select id="filter-modulo" name="modulo" class="bitacora-filters__input">
+            <option value="">Todos</option>
+            {% for mod in modules %}
+                <option value="{{ mod }}" {% if filter.module == mod %}selected{% endif %}>{{ mod }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="bitacora-filters__field">
+        <label class="bitacora-filters__label" for="filter-desde">Desde</label>
+        <input
+            id="filter-desde"
+            name="desde"
+            type="date"
+            class="bitacora-filters__input"
+            value="{{ filter.from ? filter.from|date('Y-m-d') : '' }}"
+        >
+    </div>
+
+    <div class="bitacora-filters__field">
+        <label class="bitacora-filters__label" for="filter-hasta">Hasta</label>
+        <input
+            id="filter-hasta"
+            name="hasta"
+            type="date"
+            class="bitacora-filters__input"
+            value="{{ filter.to ? filter.to|date('Y-m-d') : '' }}"
+        >
+    </div>
+
+    <div class="bitacora-filters__actions">
+        <a href="{{ path('bitacora_index') }}" class="bitacora-filters__btn bitacora-filters__btn--clear" aria-label="Limpiar filtros" title="Limpiar filtros">
+            <svg class="bitacora-filters__btn-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 17l6.5-6.5 4 4L7 21H3v-4z"/>
+                <path d="M13.5 3.5l7 7-4 4-7-7 4-4z"/>
+                <path d="M7 21h14"/>
+            </svg>
+        </a>
+        <button type="submit" class="bitacora-filters__btn bitacora-filters__btn--apply">
+            Filtrar
+        </button>
+    </div>
+</form>

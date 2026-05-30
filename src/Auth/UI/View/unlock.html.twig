@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Desbloquear cuenta · ExamenParcial-2{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/auth/css/auth.css">
+{% endblock %}
+
+{% block body %}
+    <section class="auth-card">
+        <h1 class="auth-card__title">Desbloquear cuenta</h1>
+        <p class="auth-card__subtitle">
+            Enviamos un código de 6 dígitos a <strong>{{ masked_email }}</strong>.
+            Ingresalo abajo para reactivar tu cuenta.
+        </p>
+
+        {% for message in app.flashes('error') %}
+            <div class="alert alert--error" role="alert">{{ message }}</div>
+        {% endfor %}
+
+        {% for message in app.flashes('success') %}
+            <div class="alert alert--success" role="status">{{ message }}</div>
+        {% endfor %}
+
+        <form method="post" action="{{ path('auth_unlock') }}" novalidate>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+
+            <div class="auth-form__field">
+                <label class="auth-form__label" for="unlock-code">Código de desbloqueo</label>
+                <input
+                    id="unlock-code"
+                    class="auth-form__input"
+                    type="text"
+                    name="code"
+                    inputmode="numeric"
+                    pattern="[0-9]{6}"
+                    maxlength="6"
+                    autocomplete="one-time-code"
+                    autofocus
+                    required
+                >
+                <p class="auth-form__hint">El código expira a los 60 minutos de haberse generado.</p>
+            </div>
+
+            <button type="submit" class="auth-form__submit">Desbloquear</button>
+        </form>
+
+        <form method="post" action="{{ path('auth_unlock_resend') }}" style="margin-top: 12px;">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+
+            <button
+                type="submit"
+                class="auth-form__submit"
+                style="background: transparent; color: var(--color-primary); border: 1px solid var(--color-border);"
+            >
+                Reenviar código
+            </button>
+        </form>
+
+        <p class="auth-form__footer">
+            <a href="{{ path('auth_login') }}">Volver al inicio de sesión</a>
+        </p>
+    </section>
+{% endblock %}

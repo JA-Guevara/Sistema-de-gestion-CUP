@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Recuperar contraseña · ExamenParcial-2{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/auth/css/auth.css">
+{% endblock %}
+
+{% block body %}
+    <section class="auth-card">
+        <h1 class="auth-card__title">Recuperar contraseña</h1>
+        <p class="auth-card__subtitle">Ingresá el correo con el que te registraste. Te vamos a enviar un enlace para crear una contraseña nueva.</p>
+
+        {% for message in app.flashes('error') %}
+            <div class="alert alert--error" role="alert">{{ message }}</div>
+        {% endfor %}
+
+        <form method="post" action="{{ path('auth_forgot') }}" data-auth-form novalidate>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+
+            <div class="auth-form__field">
+                <label class="auth-form__label" for="forgot-email">Correo electrónico</label>
+                <input
+                    id="forgot-email"
+                    class="auth-form__input"
+                    type="email"
+                    name="email"
+                    autocomplete="email"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="auth-form__submit">Enviar enlace de recuperación</button>
+        </form>
+
+        <p class="auth-form__footer">
+            <a href="{{ path('auth_login') }}">Volver al inicio de sesión</a>
+        </p>
+    </section>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="/assets/auth/js/auth.js" defer></script>
+{% endblock %}

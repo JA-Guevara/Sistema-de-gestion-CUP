@@ -20,6 +20,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Auth/Entity'
                 prefix: 'App\Auth\Entity'
                 alias: Auth
+            Bitacora:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Bitacora/Domain/Entity'
+                prefix: 'App\Bitacora\Domain\Entity'
+                alias: Bitacora
 
 when@test:
     doctrine:

@@ -1,0 +1,49 @@
+{% if totalPages > 1 %}
+    {% set start = (page - 1) * perPage + 1 %}
+    {% set end = (start + items|length - 1) %}
+
+    <nav class="bitacora-pagination" aria-label="Paginación">
+        <p class="bitacora-pagination__info">
+            Mostrando <strong>{{ start }}–{{ end }}</strong> de <strong>{{ total }}</strong>
+        </p>
+
+        <ul class="bitacora-pagination__list">
+            {# Previo #}
+            {% if page > 1 %}
+                <li>
+                    <a class="bitacora-pagination__btn" href="{{ path('bitacora_index', app.request.query.all|merge({page: page - 1})) }}">‹</a>
+                </li>
+            {% else %}
+                <li>
+                    <span class="bitacora-pagination__btn bitacora-pagination__btn--disabled">‹</span>
+                </li>
+            {% endif %}
+
+            {# Páginas (máx 5 alrededor de la actual) #}
+            {% set from = max(1, page - 2) %}
+            {% set to = min(totalPages, page + 2) %}
+            {% for p in from..to %}
+                {% if p == page %}
+                    <li>
+                        <span class="bitacora-pagination__btn bitacora-pagination__btn--active">{{ p }}</span>
+                    </li>
+                {% else %}
+                    <li>
+                        <a class="bitacora-pagination__btn" href="{{ path('bitacora_index', app.request.query.all|merge({page: p})) }}">{{ p }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {# Siguiente #}
+            {% if page < totalPages %}
+                <li>
+                    <a class="bitacora-pagination__btn" href="{{ path('bitacora_index', app.request.query.all|merge({page: page + 1})) }}">›</a>
+                </li>
+            {% else %}
+                <li>
+                    <span class="bitacora-pagination__btn bitacora-pagination__btn--disabled">›</span>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}

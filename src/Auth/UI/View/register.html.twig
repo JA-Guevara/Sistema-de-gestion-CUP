@@ -16,6 +16,8 @@
         {% endfor %}
 
         <form method="post" action="{{ path('auth_register') }}" data-auth-form novalidate>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+
             <div class="auth-form__row">
                 <div class="auth-form__field">
                     <label class="auth-form__label" for="register-first-name">Nombre</label>

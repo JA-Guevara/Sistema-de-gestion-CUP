@@ -1,56 +1,116 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Iniciar sesión · ExamenParcial-2{% endblock %}
+{% block title %}Iniciar sesion - CUP FICCT{% endblock %}
 
 {% block stylesheets %}
     <link rel="stylesheet" href="/assets/auth/css/auth.css">
 {% endblock %}
 
-{% block body %}
-    <section class="auth-card">
-        <h1 class="auth-card__title">Iniciar sesión</h1>
-        <p class="auth-card__subtitle">Ingresá con tu correo y contraseña.</p>
+{% block app_chrome %}{% endblock %}
 
-        {% for message in app.flashes('error') %}
-            <div class="alert alert--error" role="alert">{{ message }}</div>
-        {% endfor %}
+{% block main %}
+    <div class="auth-shell">
+        <aside class="auth-shell__hero">
+            <div class="auth-shell__hero-content">
+                <div class="auth-brand">
+                    <img
+                        src="/assets/auth/logos/ficct.png"
+                        alt="Escudo FICCT - Universidad Autonoma Gabriel Rene Moreno"
+                        class="auth-brand__logo"
+                    >
+                    <div class="auth-brand__text">
+                        <span class="auth-brand__text-acronym">FICCT</span>
+                        <span class="auth-brand__text-name">Facultad de Ingenieria en Ciencias de la Computacion y Telecomunicaciones</span>
+                        <span class="auth-brand__text-uni">Universidad Autonoma Gabriel Rene Moreno</span>
+                    </div>
+                </div>
 
-        {% for message in app.flashes('success') %}
-            <div class="alert alert--success" role="status">{{ message }}</div>
-        {% endfor %}
+                <h2 class="auth-hero__tagline">
+                    Tu camino a la <span class="auth-hero__accent">universidad</span> empieza aqui.
+                </h2>
 
-        <form method="post" action="{{ path('auth_login') }}" data-auth-form novalidate>
-            <div class="auth-form__field">
-                <label class="auth-form__label" for="login-email">Correo</label>
-                <input
-                    id="login-email"
-                    class="auth-form__input"
-                    type="email"
-                    name="email"
-                    autocomplete="email"
-                    required
-                >
+                <div class="auth-hero__program">
+                    <span class="auth-hero__program-label">Curso Pre-Universitario FICCT</span>
+                    <span class="auth-hero__program-text">La gestion academica se habilita segun la convocatoria vigente.</span>
+                </div>
             </div>
 
-            <div class="auth-form__field">
-                <label class="auth-form__label" for="login-password">Contraseña</label>
-                <input
-                    id="login-password"
-                    class="auth-form__input"
-                    type="password"
-                    name="password"
-                    autocomplete="current-password"
-                    required
-                >
+            <div class="auth-shell__shape auth-shell__shape--1"></div>
+            <div class="auth-shell__shape auth-shell__shape--2"></div>
+            <div class="auth-shell__shape auth-shell__shape--3"></div>
+            <div class="auth-shell__shape auth-shell__shape--4"></div>
+        </aside>
+
+        <main class="auth-shell__main">
+            <div class="auth-form-pane">
+                <h1 class="auth-form-pane__title">Iniciar sesion</h1>
+                <p class="auth-form-pane__subtitle">Ingresa con tu correo y contrasena para continuar.</p>
+
+                {% for message in app.flashes('error') %}
+                    <div class="alert alert--error" role="alert">{{ message }}</div>
+                {% endfor %}
+
+                {% for message in app.flashes('success') %}
+                    <div class="alert alert--success" role="status">{{ message }}</div>
+                {% endfor %}
+
+                <form method="post" action="{{ path('auth_login') }}" data-auth-form novalidate>
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+
+                    <div class="auth-form__field">
+                        <label for="login-email" class="sr-only">Correo electronico</label>
+                        <input
+                            id="login-email"
+                            class="auth-form__input"
+                            type="email"
+                            name="email"
+                            placeholder="Correo electronico"
+                            autocomplete="email"
+                            required
+                        >
+                    </div>
+
+                    <div class="auth-form__field">
+                        <label for="login-password" class="sr-only">Contrasena</label>
+                        <input
+                            id="login-password"
+                            class="auth-form__input"
+                            type="password"
+                            name="password"
+                            placeholder="Contrasena"
+                            autocomplete="current-password"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="auth-form__submit">Iniciar sesion</button>
+                </form>
+
+                <p class="auth-form-pane__link">
+                    <a href="{{ path('auth_forgot') }}">Olvidaste tu contrasena?</a>
+                </p>
+
+                <div class="auth-form__divider" role="separator">
+                    <span class="auth-form__divider-text">o</span>
+                </div>
+
+                <button type="button" class="auth-form__provider" onclick="return false;">
+                    <svg class="auth-form__provider-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" aria-hidden="true">
+                        <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+                        <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
+                        <path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/>
+                        <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+                    </svg>
+                    <span>Continuar con Google</span>
+                </button>
+
+                <p class="auth-form-pane__signup">
+                    No tienes cuenta?
+                    <a href="{{ path('auth_register') }}">Crear cuenta nueva</a>
+                </p>
             </div>
-
-            <button type="submit" class="auth-form__submit">Entrar</button>
-        </form>
-
-        <p class="auth-form__footer">
-            ¿No tenés cuenta? <a href="{{ path('auth_register') }}">Crear cuenta</a>
-        </p>
-    </section>
+        </main>
+    </div>
 {% endblock %}
 
 {% block javascripts %}

@@ -1,0 +1,28 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Bitácora del Sistema · CUP FICCT{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/bitacora/css/bitacora.css">
+{% endblock %}
+
+{% block javascripts %}
+    <script src="/assets/bitacora/js/bitacora.js" defer></script>
+{% endblock %}
+
+{% block app_content %}
+    <section class="app-content__greeting bitacora-header">
+        <p class="app-content__greeting-eyebrow">Auditoría</p>
+        <h1 class="app-content__title">Bitácora del Sistema</h1>
+        <p class="app-content__subtitle">
+            Registro de eventos del sistema: accesos, cambios y acciones administrativas.
+            Total: <strong>{{ total }}</strong> registro{{ total == 1 ? '' : 's' }}.
+        </p>
+    </section>
+
+    <article class="app-card bitacora-card">
+        {% include '@bitacora/_filtros.html.twig' %}
+        {% include '@bitacora/_tabla.html.twig' %}
+        {% include '@bitacora/_paginacion.html.twig' %}
+    </article>
+{% endblock %}

@@ -4,23 +4,30 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}ExamenParcial-2{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="alternate icon" type="image/png" href="/favicon.png">
+    <link rel="shortcut icon" href="/favicon.svg">
 
     {% block stylesheets %}{% endblock %}
 </head>
 <body>
-    <header class="app-header">
-        <nav class="app-nav">
-            <a href="{{ path('auth_login') }}" class="app-nav__brand">ExamenParcial-2</a>
-            <ul class="app-nav__menu">
-                <li><a href="{{ path('auth_login') }}">Iniciar sesión</a></li>
-                <li><a href="{{ path('auth_register') }}">Crear cuenta</a></li>
-            </ul>
-        </nav>
-    </header>
+    {% block app_chrome %}
+        <header class="app-header">
+            <nav class="app-nav">
+                <a href="{{ path('auth_login') }}" class="app-nav__brand">ExamenParcial-2</a>
+                <ul class="app-nav__menu">
+                    <li><a href="{{ path('auth_login') }}">Iniciar sesión</a></li>
+                    <li><a href="{{ path('auth_register') }}">Crear cuenta</a></li>
+                </ul>
+            </nav>
+        </header>
+    {% endblock %}
 
-    <main class="app-main">
-        {% block body %}{% endblock %}
-    </main>
+    {% block main %}
+        <main class="app-main">
+            {% block body %}{% endblock %}
+        </main>
+    {% endblock %}
 
     {% block javascripts %}{% endblock %}
 </body>
