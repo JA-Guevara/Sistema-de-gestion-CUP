@@ -7,6 +7,7 @@ namespace App\Bitacora\Application\UseCase;
 use App\Bitacora\Domain\Catalog\ActionCatalog;
 use App\Bitacora\Domain\Entity\LogEntry;
 use App\Bitacora\Infrastructure\Persistence\LogEntryRepository;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -48,7 +49,7 @@ final readonly class RecordLogEntry
             $entry->description = trim($description);
             $entry->level = ActionCatalog::level($action);
             $entry->metadata = $metadata;
-            $entry->ip = $request?->getClientIp();
+            $entry->ip = $request !== null ? $this->resolveClientIp($request) : null;
             $entry->userAgent = $request?->headers->get('User-Agent');
             $entry->createdAt = new \DateTimeImmutable();
 
@@ -57,5 +58,25 @@ final readonly class RecordLogEntry
             // Auditoría no debe romper el flujo principal.
             // En producción esto se podría enviar a un error tracker.
         }
+    }
+
+    private function resolveClientIp(Request $request): ?string
+    {
+        $forwardedFor = $request->headers->get('x-forwarded-for');
+        if (is_string($forwardedFor) && trim($forwardedFor) !== '') {
+            $ips = array_filter(array_map('trim', explode(',', $forwardedFor)));
+            $firstIp = reset($ips);
+
+            if (is_string($firstIp) && filter_var($firstIp, FILTER_VALIDATE_IP)) {
+                return $firstIp;
+            }
+        }
+
+        $realIp = $request->headers->get('x-real-ip');
+        if (is_string($realIp) && filter_var($realIp, FILTER_VALIDATE_IP)) {
+            return $realIp;
+        }
+
+        return $request->getClientIp();
     }
 }
