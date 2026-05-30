@@ -23,11 +23,15 @@ $neonDatabaseUrl = $_SERVER['DATABASE_POSTGRES_URL']
     ?? getenv('DATABASE_POSTGRES_URL')
     ?: ($_SERVER['DATABASE_URL_UNPOOLED'] ?? $_ENV['DATABASE_URL_UNPOOLED'] ?? getenv('DATABASE_URL_UNPOOLED') ?: null);
 
-if ($databaseUrl === null && is_string($neonDatabaseUrl) && $neonDatabaseUrl !== '') {
-    $neonDatabaseUrl = withNeonEndpointOption($neonDatabaseUrl);
-    $_SERVER['DATABASE_URL'] = $neonDatabaseUrl;
-    $_ENV['DATABASE_URL'] = $neonDatabaseUrl;
-    putenv('DATABASE_URL='.$neonDatabaseUrl);
+$resolvedDatabaseUrl = is_string($databaseUrl) && $databaseUrl !== ''
+    ? $databaseUrl
+    : $neonDatabaseUrl;
+
+if (is_string($resolvedDatabaseUrl) && $resolvedDatabaseUrl !== '') {
+    $resolvedDatabaseUrl = withNeonEndpointOption($resolvedDatabaseUrl);
+    $_SERVER['DATABASE_URL'] = $resolvedDatabaseUrl;
+    $_ENV['DATABASE_URL'] = $resolvedDatabaseUrl;
+    putenv('DATABASE_URL='.$resolvedDatabaseUrl);
 }
 
 $env = $_SERVER['APP_ENV'] ?? $_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: 'prod';
