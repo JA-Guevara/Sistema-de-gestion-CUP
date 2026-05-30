@@ -4,9 +4,10 @@ framework:
 
     # Note that the session will be started ONLY if you read or write from it.
     session:
-        cookie_lifetime: 0       # 0 = la cookie muere al cerrar el navegador
-        cookie_secure: auto      # secure cuando se sirve por HTTPS
-        cookie_samesite: lax     # protección extra contra CSRF
+        cookie_lifetime: 0
+        cookie_secure: auto
+        cookie_samesite: lax
+        save_path: '%kernel.cache_dir%/sessions'
 
     #esi: true
     #fragments: true
