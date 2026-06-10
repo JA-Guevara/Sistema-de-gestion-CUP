@@ -1,0 +1,35 @@
+{% set flashMessages = app.flashes %}
+
+{% if flashMessages is not empty %}
+    <div class="gestion-toast-stack" aria-live="polite" aria-atomic="true">
+        {% for type, messages in flashMessages %}
+            {% for message in messages %}
+                <div class="gestion-toast gestion-toast--{{ type }}" role="{{ type == 'error' ? 'alert' : 'status' }}" data-gestion-toast>
+                    <span class="gestion-toast__icon" aria-hidden="true">
+                        {% if type == 'error' %}
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="9"/>
+                                <path d="M12 7v6"/>
+                                <path d="M12 17h.01"/>
+                            </svg>
+                        {% else %}
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="9"/>
+                                <path d="m8 12 3 3 5-6"/>
+                            </svg>
+                        {% endif %}
+                    </span>
+                    <span class="gestion-toast__message">{{ message }}</span>
+                    <button class="gestion-toast__close" type="button" aria-label="Cerrar mensaje" data-gestion-toast-close>
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M18 6 6 18"/>
+                            <path d="m6 6 12 12"/>
+                        </svg>
+                    </button>
+                    <span class="gestion-toast__bar" aria-hidden="true"></span>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+    <script src="/assets/gestion/js/gestion-toast.js?v=4" defer></script>
+{% endif %}

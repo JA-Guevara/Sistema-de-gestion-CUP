@@ -1,0 +1,49 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Detalle de horario{% endblock %}
+
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=8">{% endblock %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Administracion academica</p>
+            <h1 class="app-content__title">Detalle de horario</h1>
+        </div>
+        <div class="gestion-actions">
+            <a href="{{ path('horario_edit', {id: horario.id}) }}" class="gestion-button gestion-button--primary">Editar</a>
+            <form method="post" action="{{ path('horario_delete', {id: horario.id}) }}" data-confirm="Â¿Eliminar esta franja de horario?">
+                <button class="gestion-button gestion-button--danger" type="submit">Eliminar</button>
+            </form>
+            <a href="{{ path('horario_index') }}" class="gestion-button">Volver</a>
+        </div>
+    </section>
+
+    <section class="gestion-panel">
+        <div class="gestion-panel__header">
+            <div>
+                <h2>{{ horario.grupo.codigo }} / {{ horario.materia.nombre }}</h2>
+                <p class="gestion-panel__hint">{{ horario.grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }} - {{ horario.dia }} - {{ horario.horaInicio|date('H:i') }} a {{ horario.horaFin|date('H:i') }}</p>
+            </div>
+        </div>
+        <div class="gestion-dashboard">
+            <article class="gestion-metric">
+                <span class="gestion-metric__label">Grupo</span>
+                <strong>{{ horario.grupo.codigo }}</strong>
+            </article>
+            <article class="gestion-metric">
+                <span class="gestion-metric__label">Materia</span>
+                <strong>{{ horario.materia.nombre }}</strong>
+            </article>
+            <article class="gestion-metric">
+                <span class="gestion-metric__label">Aula</span>
+                <strong>{{ horario.aula.codigo }}</strong>
+            </article>
+            <article class="gestion-metric">
+                <span class="gestion-metric__label">Horario</span>
+                <strong>{{ horario.horaInicio|date('H:i') }} - {{ horario.horaFin|date('H:i') }}</strong>
+            </article>
+        </div>
+    </section>
+
+{% endblock %}

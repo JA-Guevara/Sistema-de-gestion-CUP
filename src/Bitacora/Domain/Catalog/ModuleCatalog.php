@@ -4,32 +4,46 @@ declare(strict_types=1);
 
 namespace App\Bitacora\Domain\Catalog;
 
-/**
- * Catálogo central de módulos del sistema.
- *
- * Cuando cada módulo emite logs, usa estas constantes para identificar
- * a qué área pertenece el evento.
- */
 final class ModuleCatalog
 {
-    public const AUTH = 'Autenticación';
+    public const AUTH = 'Autenticacion';
+    public const USUARIOS = 'Usuarios';
     public const POSTULANTES = 'Postulantes';
-    public const EXAMENES = 'Exámenes';
-    public const GRUPOS = 'Asignación de Grupos';
+    public const INSCRIPCIONES = 'Inscripciones';
+    public const EXAMENES = 'Examenes';
+    public const GRUPOS = 'Asignacion de Grupos';
+    public const TURNOS = 'Turnos';
+    public const CRONOGRAMAS = 'Cronogramas';
     public const REPORTES = 'Reportes';
     public const ADMIN = 'Panel Administrativo';
-    public const BITACORA = 'Bitácora';
+    public const CONFIGURACION = 'Configuracion';
+    public const GESTIONES_CUP = 'Gestiones CUP';
+    public const CARRERAS = 'Carreras';
+    public const MATERIAS = 'Materias';
+    public const AULAS = 'Aulas';
+    public const HORARIOS = 'Horarios';
+    public const BITACORA = 'Bitacora';
 
-    /** Lista todos los módulos (para el filtro del UI). */
+    /** @return list<string> */
     public static function all(): array
     {
         return [
             self::AUTH,
+            self::USUARIOS,
             self::POSTULANTES,
+            self::INSCRIPCIONES,
             self::EXAMENES,
             self::GRUPOS,
+            self::TURNOS,
+            self::CRONOGRAMAS,
             self::REPORTES,
             self::ADMIN,
+            self::CONFIGURACION,
+            self::GESTIONES_CUP,
+            self::CARRERAS,
+            self::MATERIAS,
+            self::AULAS,
+            self::HORARIOS,
             self::BITACORA,
         ];
     }

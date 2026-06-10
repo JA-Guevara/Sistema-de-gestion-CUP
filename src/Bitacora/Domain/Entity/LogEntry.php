@@ -53,7 +53,7 @@ class LogEntry
     #[ORM\Column(length: 255, nullable: true)]
     public ?string $userAgent = null;
 
-    /** Contexto adicional estructurado (ej. {old:..., new:...}). */
+    /** Contexto adicional estructurado (ej. {antes:..., despues:..., observaciones:...}). */
     #[ORM\Column(type: 'json', nullable: true)]
     public ?array $metadata = null;
 
@@ -63,6 +63,6 @@ class LogEntry
     public function __construct()
     {
         $this->level = ActionCatalog::LEVEL_INFO;
-        $this->createdAt = new \DateTimeImmutable();
+        $this->createdAt = new \DateTimeImmutable('now', new \DateTimeZone('America/La_Paz'));
     }
 }

@@ -1,0 +1,189 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Grupos{% endblock %}
+
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=13">{% endblock %}
+
+{% block javascripts %}
+    <script src="/assets/gestion/js/gestion-toggle-panel.js?v=9" defer></script>
+    <script src="/assets/gestion/js/gestion-filters.js?v=9" defer></script>
+    <script src="/assets/gestion/js/gestion-bulk-actions.js?v=9" defer></script>
+{% endblock %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Administracion academica</p>
+            <h1 class="app-content__title">Grupos</h1>
+        </div>
+        <div class="gestion-head__actions">
+            <button class="gestion-button gestion-button--primary" type="button" data-panel-toggle="grupo-generator" data-open-label="Generar grupos" data-close-label="Ocultar generador">
+                Generar grupos
+            </button>
+            <button class="gestion-button" type="button" data-panel-toggle="grupo-manual" data-open-label="Crear manual" data-close-label="Ocultar formulario">
+                Crear manual
+            </button>
+        </div>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    <div class="gestion-toolbar">
+        <p class="gestion-toolbar__copy">
+            Los grupos se administran por gestion academica. Puedes generarlos automaticamente desde inscritos o crear uno manual cuando necesites ajustar la planificacion.
+        </p>
+    </div>
+
+    <form id="grupo-generator" method="post" action="{{ path('grupo_generate') }}" class="gestion-form" hidden>
+        <section class="gestion-panel">
+            <div class="gestion-panel__header">
+                <div>
+                    <h2>Generar grupos por inscritos</h2>
+                    <p class="gestion-panel__hint">El sistema divide el total de inscritos usando el maximo de estudiantes por grupo definido en la gestion.</p>
+                </div>
+            </div>
+            <div class="gestion-grid">
+                <label>
+                    Gestion
+                    <select name="gestionId" required>
+                        {% for gestion in gestiones %}
+                            <option value="{{ gestion.id }}">{{ gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }} - {{ gestion.nombre|replace({'Curso Preuniversitario 2026-I': 'Curso Preuniversitario CUP 1-2026'}) }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Total inscritos <input type="number" name="totalInscritos" min="1" required></label>
+            </div>
+            <div class="gestion-actions"><button class="gestion-button gestion-button--primary" type="submit">Generar grupos</button></div>
+        </section>
+    </form>
+
+    <form id="grupo-manual" method="post" action="{{ path('grupo_new') }}" class="gestion-form" hidden>
+        <section class="gestion-panel">
+            <div class="gestion-panel__header">
+                <div>
+                    <h2>Crear grupo manual</h2>
+                    <p class="gestion-panel__hint">Usa esta opcion para crear un grupo puntual sin recalcular todos los grupos de la gestion.</p>
+                </div>
+            </div>
+            <div class="gestion-grid gestion-grid--four">
+                <label>
+                    Gestion
+                    <select name="gestionId" required>
+                        {% for gestion in gestiones %}
+                            <option value="{{ gestion.id }}">{{ gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Codigo <input name="codigo" placeholder="G-01" required></label>
+                <label>Nombre <input name="nombre" placeholder="Grupo 01" required></label>
+                <label>Cupo <input type="number" name="cupo" min="1" value="70" required></label>
+                <label>Inscritos estimados <input type="number" name="inscritosEstimados" min="0" value="0"></label>
+            </div>
+            <div class="gestion-actions"><button class="gestion-button" type="submit">Crear grupo</button></div>
+        </section>
+    </form>
+
+    <section class="gestion-panel gestion-panel--grupos" data-bulk-root>
+        <div class="gestion-panel__header">
+            <div>
+                <h2>Historial de grupos</h2>
+                <p class="gestion-panel__hint">Filtra por gestion, codigo, nombre o estado. La tabla se adapta al ancho disponible y mantiene las acciones separadas de los formularios.</p>
+            </div>
+        </div>
+        <form class="gestion-filters" data-gestion-filters data-filter-target="grupos">
+            <div class="gestion-filters__field">
+                <label>Gestion</label>
+                <select data-filter-field="gestion">
+                    <option value="">Todas</option>
+                    {% for gestion in gestiones %}
+                        <option value="{{ gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}">{{ gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="gestion-filters__field">
+                <label>Codigo o nombre</label>
+                <input data-filter-field="texto" placeholder="Buscar grupo">
+            </div>
+            <div class="gestion-filters__field">
+                <label>Estado</label>
+                <select data-filter-field="estado">
+                    <option value="">Todos</option>
+                    <option value="ABIERTO">Abierto</option>
+                    <option value="CERRADO">Cerrado</option>
+                </select>
+            </div>
+            <div class="gestion-filters__field gestion-filters__field--clear">
+                <label aria-hidden="true">Limpiar</label>
+                <button class="gestion-filters__clear" type="button" data-filter-clear aria-label="Limpiar filtros">
+                    <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m6 10 1 10h10l1-10"/><path d="M10 14v3"/><path d="M14 14v3"/></svg>
+                </button>
+            </div>
+        </form>
+        <form id="grupo-bulk-form" method="post" action="{{ path('grupo_bulk_state') }}" class="gestion-bulk-actions" data-bulk-actions hidden>
+            <div class="gestion-bulk-actions__info">
+                <span class="gestion-bulk-actions__count"><strong data-bulk-count>0</strong> grupos seleccionados</span>
+                <button type="button" class="gestion-bulk-actions__clear" data-bulk-clear>Deseleccionar</button>
+            </div>
+            <div class="gestion-bulk-actions__buttons">
+                <button type="submit" name="accion" value="OPEN" class="gestion-button gestion-button--soft" data-bulk-submit disabled>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                    Abrir
+                </button>
+                <button type="submit" name="accion" value="CLOSE" class="gestion-button gestion-button--danger" data-bulk-submit disabled>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    Cerrar
+                </button>
+            </div>
+        </form>
+        <div class="gestion-table-wrap gestion-table-wrap--grupos">
+            <table class="gestion-table gestion-table--grupos" data-gestion-filter-table="grupos">
+                <thead>
+                    <tr>
+                        <th><input class="gestion-bulk-check" type="checkbox" data-bulk-check-all aria-label="Seleccionar grupos visibles"></th>
+                        <th>Grupo</th>
+                        <th>Nombre</th>
+                        <th>Cupo</th>
+                        <th>Estimados</th>
+                        <th>Estado</th>
+                        <th class="gestion-table__actions-cell">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for grupo in grupos %}
+                        <tr data-filter-row data-filter-gestion="{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}" data-filter-texto="{{ grupo.codigo }} {{ grupo.nombre }}" data-filter-estado="{{ grupo.estado }}">
+                            <td><input class="gestion-bulk-check" type="checkbox" name="ids[]" value="{{ grupo.id }}" form="grupo-bulk-form" data-bulk-item aria-label="Seleccionar grupo {{ grupo.codigo }}"></td>
+                            <td>
+                                {{ grupo.codigo }}
+                                <span class="gestion-table__meta">{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}</span>
+                            </td>
+                            <td>{{ grupo.nombre }}</td>
+                            <td>{{ grupo.cupo }}</td>
+                            <td>{{ grupo.inscritosEstimados }}</td>
+                            <td><span class="gestion-badge gestion-badge--{{ grupo.estado|lower }}">{{ grupo.estado|lower|capitalize }}</span></td>
+                            <td class="gestion-table__actions-cell">
+                                <div class="gestion-table__actions">
+                                    <a class="gestion-action-button gestion-action-button--view" href="{{ path('grupo_show', {id: grupo.id}) }}" aria-label="Ver grupo" title="Ver">
+                                        <svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    </a>
+                                    <a class="gestion-action-button gestion-action-button--edit" href="{{ path('grupo_edit', {id: grupo.id}) }}" aria-label="Editar grupo" title="Editar">
+                                        <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                                    </a>
+                                    <form method="post" action="{{ path('grupo_toggle', {id: grupo.id}) }}">
+                                        <button class="gestion-link-button {{ grupo.isOpen ? 'gestion-link-button--danger' : 'gestion-link-button--toggle' }}" type="submit" aria-label="{{ grupo.isOpen ? 'Cerrar grupo' : 'Abrir grupo' }}" title="{{ grupo.isOpen ? 'Cerrar' : 'Abrir' }}">
+                                            {% if grupo.isOpen %}
+                                                <svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                            {% else %}
+                                                <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <tr data-filter-empty {{ grupos ? 'hidden' : '' }}><td colspan="7">Todavia no hay grupos registrados.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}

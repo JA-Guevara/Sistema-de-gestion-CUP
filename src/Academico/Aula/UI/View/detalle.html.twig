@@ -1,0 +1,55 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Aula {{ aula.codigo }}{% endblock %}
+
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=8">{% endblock %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Administracion academica</p>
+            <h1 class="app-content__title">Aula {{ aula.codigo }}</h1>
+        </div>
+        <div class="gestion-head__actions">
+            <a href="{{ path('aula_edit', {id: aula.id}) }}" class="gestion-button gestion-button--primary">Editar</a>
+            <a href="{{ path('aula_index') }}" class="gestion-button">Volver</a>
+        </div>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    <section class="gestion-panel">
+        <div class="gestion-panel__header">
+            <div>
+                <h2>{{ aula.nombre }}</h2>
+                <p class="gestion-panel__hint">{{ aula.ubicacion ?? 'Sin ubicacion registrada' }}</p>
+            </div>
+        </div>
+        <div class="gestion-dashboard">
+            <article class="gestion-metric">
+                <span class="gestion-metric__label">Codigo</span>
+                <strong>{{ aula.codigo }}</strong>
+            </article>
+            <article class="gestion-metric">
+                <span class="gestion-metric__label">Piso</span>
+                <strong>{{ aula.piso }}</strong>
+            </article>
+            <article class="gestion-metric">
+                <span class="gestion-metric__label">Capacidad</span>
+                <strong>{{ aula.capacidad }}</strong>
+            </article>
+            <article class="gestion-metric">
+                <span class="gestion-metric__label">Estado</span>
+                <strong><span class="gestion-badge gestion-badge--{{ aula.estado|lower }}">{{ aula.estado|lower|capitalize }}</span></strong>
+            </article>
+        </div>
+    </section>
+
+    <div class="gestion-page-actions">
+        <form method="post" action="{{ path('aula_toggle', {id: aula.id}) }}">
+            <button class="gestion-button {{ aula.active ? 'gestion-button--danger' : 'gestion-button--primary' }}" type="submit">
+                {{ aula.active ? 'Desactivar aula' : 'Activar aula' }}
+            </button>
+        </form>
+    </div>
+{% endblock %}

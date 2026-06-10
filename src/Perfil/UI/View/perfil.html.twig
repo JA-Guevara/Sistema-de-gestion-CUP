@@ -1,0 +1,309 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Mi perfil · CUP FICCT{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css">
+    <style>
+        .perfil-hero {
+            position: relative;
+            border-radius: var(--ds-radius-lg, 14px);
+            box-shadow: var(--ds-shadow-md, 0 6px 16px rgba(15,23,42,.08));
+            margin-bottom: 64px;
+        }
+        .perfil-hero__cover {
+            height: 140px;
+            border-radius: var(--ds-radius-lg, 14px) var(--ds-radius-lg, 14px) 0 0;
+            background:
+                radial-gradient(ellipse 70% 95% at 100% 0%, rgba(155, 28, 28, 0.60) 0%, transparent 60%),
+                linear-gradient(120deg, #0c1a4e 0%, #1e3a8a 48%, #7a1414 118%);
+        }
+        .perfil-hero__body {
+            background: var(--ds-surface, #fff);
+            border-radius: 0 0 var(--ds-radius-lg, 14px) var(--ds-radius-lg, 14px);
+            padding: 0 var(--ds-space-6, 24px) var(--ds-space-5, 20px);
+            display: flex;
+            align-items: flex-end;
+            gap: var(--ds-space-4, 16px);
+            flex-wrap: wrap;
+        }
+        .perfil-photo { margin-top: -56px; position: relative; }
+        .perfil-photo__img {
+            width: 112px; height: 112px; border-radius: 50%;
+            border: 4px solid var(--ds-surface, #fff);
+            background: var(--ds-primary, #1e3a8a);
+            color: #fff; font-size: 40px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; box-shadow: var(--ds-shadow-sm);
+        }
+        .perfil-photo__img img { width: 100%; height: 100%; object-fit: cover; }
+        .perfil-photo__edit { position: relative; margin-top: 8px; }
+        .perfil-photo__trigger {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--ds-primary, #1e3a8a); color: #fff; border: none;
+            padding: 7px 12px; border-radius: var(--ds-radius-full, 999px);
+            font-size: var(--ds-fs-sm, 13px); font-weight: 600; cursor: pointer;
+            box-shadow: var(--ds-shadow-sm); transition: background var(--ds-dur-1,120ms) var(--ds-ease);
+        }
+        .perfil-photo__trigger:hover { background: var(--ds-primary-hover, #244aa8); }
+        .perfil-photo__menu {
+            position: absolute; top: calc(100% + 6px); left: 0; z-index: 20;
+            min-width: 190px; background: var(--ds-surface, #fff);
+            border: 1px solid var(--ds-border, #e2e8f0); border-radius: var(--ds-radius-md, 10px);
+            box-shadow: var(--ds-shadow-lg, 0 10px 30px rgba(15,23,42,.12)); padding: 6px;
+        }
+        .perfil-photo__menu[hidden] { display: none; }
+        .perfil-photo__option {
+            display: flex; align-items: center; gap: 10px; width: 100%;
+            background: none; border: none; cursor: pointer; text-align: left;
+            padding: 9px 10px; border-radius: var(--ds-radius-sm, 6px);
+            font-size: var(--ds-fs-sm, 13px); color: var(--ds-text-soft, #334155);
+            transition: background var(--ds-dur-1,120ms) var(--ds-ease);
+        }
+        .perfil-photo__option:hover { background: var(--ds-primary-soft, #eef2fb); color: var(--ds-primary, #1e3a8a); }
+        .perfil-photo__option svg { width: 18px; height: 18px; }
+        .perfil-hero__info { flex: 1; min-width: 0; padding-bottom: 4px; }
+        .perfil-hero__name { margin: 0; font-size: var(--ds-fs-xl, 20px); font-weight: 700; color: var(--ds-text, #0f172a); }
+        .perfil-hero__email { margin: 2px 0 8px; color: var(--ds-text-muted, #64748b); font-size: var(--ds-fs-sm, 13px); }
+        .perfil-hero__chips { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .perfil-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .perfil-readonly input { background: var(--ds-surface-sunken, #f5f6f8); cursor: default; }
+        .perfil-actions[hidden], .perfil-pass[hidden] { display: none; }
+        .perfil-pass { margin-top: var(--ds-space-3, 12px); }
+        .perfil-fakepass { letter-spacing: 3px; color: var(--ds-text-muted, #64748b); font-size: 18px; }
+
+        .perfil-modal { position: fixed; inset: 0; background: rgba(15,23,42,.6); display: flex; align-items: center; justify-content: center; z-index: 50; }
+        .perfil-modal[hidden] { display: none; }
+
+        .perfil-dialog { position: fixed; inset: 0; background: rgba(15,23,42,.55); display: flex; align-items: center; justify-content: center; z-index: 60; padding: 16px; }
+        .perfil-dialog[hidden] { display: none; }
+        .perfil-dialog__card {
+            width: 100%; max-width: 460px; background: var(--ds-surface, #fff);
+            border-radius: var(--ds-radius-lg, 14px); overflow: hidden;
+            box-shadow: var(--ds-shadow-lg, 0 10px 30px rgba(15,23,42,.12));
+            animation: dsFadeIn var(--ds-dur-3, 260ms) var(--ds-ease, ease) both;
+        }
+        .perfil-dialog__strip { height: 5px; background: linear-gradient(90deg, #7a1414, #1e3a8a); }
+        .perfil-dialog__head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 0; }
+        .perfil-dialog__head h3 { margin: 0; color: var(--ds-text, #0f172a); font-size: var(--ds-fs-lg, 16px); }
+        .perfil-dialog__close { background: none; border: none; font-size: 22px; line-height: 1; cursor: pointer; color: var(--ds-text-muted, #64748b); }
+        .perfil-dialog__card .gestion-form { padding: 12px 20px 20px; }
+        .perfil-dialog__foot { justify-content: flex-end; }
+        .perfil-modal img { max-width: 88vw; max-height: 82vh; border-radius: var(--ds-radius-md, 10px); box-shadow: var(--ds-shadow-lg); }
+        .perfil-modal__close { position: absolute; top: 18px; right: 22px; background: #fff; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer; }
+    </style>
+{% endblock %}
+
+{% block app_content %}
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    {# ===== Cabecera ===== #}
+    <section class="perfil-hero">
+        <div class="perfil-hero__cover"></div>
+        <div class="perfil-hero__body">
+            <div class="perfil-photo">
+                <div class="perfil-photo__img">
+                    {% if avatarUrl %}
+                        <img src="{{ avatarUrl }}" alt="Foto de perfil">
+                    {% else %}
+                        {{ user.firstName|first|upper }}{{ user.lastName|first|upper }}
+                    {% endif %}
+                </div>
+                <div class="perfil-photo__edit" data-photo-root>
+                    <button type="button" class="perfil-photo__trigger" data-photo-trigger>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                        Editar
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="perfil-photo__menu" data-photo-menu hidden>
+                        <button type="button" class="perfil-photo__option" data-photo-ver>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            Ver foto
+                        </button>
+                        <button type="button" class="perfil-photo__option" data-photo-tomar>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                            Tomar foto
+                        </button>
+                        <button type="button" class="perfil-photo__option" data-photo-subir>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            Subir foto
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="perfil-hero__info">
+                <h1 class="perfil-hero__name">{{ user.firstName }} {{ user.lastName }}</h1>
+                <p class="perfil-hero__email">{{ user.email }}</p>
+                <div class="perfil-hero__chips">
+                    <span class="ds-chip ds-chip--success">● Activo</span>
+                    <span class="ds-chip ds-chip--info">Miembro desde {{ user.createdAt|date('m/Y') }}</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# Formularios ocultos para la foto #}
+    <form id="form-foto" method="post" action="{{ path('perfil_foto') }}" enctype="multipart/form-data" hidden>
+        <input type="file" name="foto" accept="image/png,image/jpeg,image/webp" data-foto-input>
+    </form>
+
+    {# ===== Datos personales ===== #}
+    <section class="gestion-panel" data-edit-card>
+        <div class="gestion-panel__header perfil-row">
+            <div>
+                <h2>Datos personales</h2>
+                <p class="gestion-panel__hint">Solo podés editar tu nombre y apellido. El correo es tu identidad y no se cambia aquí.</p>
+            </div>
+            <button type="button" class="gestion-button" data-edit-toggle>Editar</button>
+        </div>
+        <form method="post" action="{{ path('perfil_update') }}" class="gestion-form perfil-readonly" data-edit-form>
+            <div class="gestion-grid">
+                <label>Nombre <input name="firstName" value="{{ user.firstName }}" data-editable readonly required></label>
+                <label>Apellido <input name="lastName" value="{{ user.lastName }}" data-editable readonly required></label>
+            </div>
+            <label>Correo electrónico <input type="email" value="{{ user.email }}" disabled></label>
+            <div class="gestion-actions perfil-actions" data-edit-actions hidden>
+                <button class="gestion-button gestion-button--primary" type="submit">Guardar cambios</button>
+                <button class="gestion-button" type="button" data-edit-cancel>Cancelar</button>
+            </div>
+        </form>
+    </section>
+
+    {# ===== Seguridad ===== #}
+    <section class="gestion-panel">
+        <div class="gestion-panel__header perfil-row">
+            <div>
+                <h2>Seguridad</h2>
+                <p class="gestion-panel__hint">Contraseña <span class="perfil-fakepass">••••••••</span></p>
+            </div>
+            <button type="button" class="gestion-button" data-pass-toggle>Cambiar contraseña</button>
+        </div>
+    </section>
+
+    {# Modal: cambiar contraseña #}
+    <div class="perfil-dialog" data-pass-modal hidden>
+        <div class="perfil-dialog__card">
+            <div class="perfil-dialog__strip"></div>
+            <div class="perfil-dialog__head">
+                <h3>Cambiar contraseña</h3>
+                <button type="button" class="perfil-dialog__close" data-pass-close aria-label="Cerrar">×</button>
+            </div>
+            <form method="post" action="{{ path('perfil_password') }}" class="gestion-form">
+                <p class="gestion-help">Debe tener al menos 8 caracteres con mayúscula, minúscula, número y símbolo.</p>
+                <label>Contraseña actual <input type="password" name="currentPassword" data-pass-first required></label>
+                <label>Nueva contraseña <input type="password" name="newPassword" required></label>
+                <label>Confirmar nueva contraseña <input type="password" name="confirmPassword" required></label>
+                <div class="gestion-actions perfil-dialog__foot">
+                    <button class="gestion-button" type="button" data-pass-close>Cancelar</button>
+                    <button class="gestion-button gestion-button--primary" type="submit">Confirmar cambio</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# Modal ver foto #}
+    <div class="perfil-modal" data-foto-modal hidden>
+        <button type="button" class="perfil-modal__close" data-foto-modal-close aria-label="Cerrar">×</button>
+        <img src="{{ avatarUrl ?? '' }}" alt="Foto de perfil" data-foto-modal-img>
+    </div>
+
+    <script>
+        (function () {
+            var avatarUrl = {{ avatarUrl ? ('"' ~ avatarUrl ~ '"')|raw : 'null' }};
+
+            // --- Menú de foto ---
+            var root = document.querySelector('[data-photo-root]');
+            var trigger = document.querySelector('[data-photo-trigger]');
+            var menu = document.querySelector('[data-photo-menu]');
+            if (trigger && menu) {
+                trigger.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    menu.hidden = !menu.hidden;
+                });
+                document.addEventListener('click', function (e) {
+                    if (root && !root.contains(e.target)) { menu.hidden = true; }
+                });
+            }
+
+            var form = document.getElementById('form-foto');
+            var fotoInput = document.querySelector('[data-foto-input]');
+            if (fotoInput && form) {
+                fotoInput.addEventListener('change', function () {
+                    if (fotoInput.files && fotoInput.files.length) { form.submit(); }
+                });
+            }
+
+            var optSubir = document.querySelector('[data-photo-subir]');
+            var optTomar = document.querySelector('[data-photo-tomar]');
+            if (optSubir && fotoInput) {
+                optSubir.addEventListener('click', function () {
+                    fotoInput.removeAttribute('capture');
+                    fotoInput.setAttribute('accept', 'image/png,image/jpeg,image/webp');
+                    if (menu) { menu.hidden = true; }
+                    fotoInput.click();
+                });
+            }
+            if (optTomar && fotoInput) {
+                optTomar.addEventListener('click', function () {
+                    fotoInput.setAttribute('capture', 'user');
+                    fotoInput.setAttribute('accept', 'image/*');
+                    if (menu) { menu.hidden = true; }
+                    fotoInput.click();
+                });
+            }
+
+            // --- Ver foto (modal) ---
+            var modal = document.querySelector('[data-foto-modal]');
+            var optVer = document.querySelector('[data-photo-ver]');
+            var modalClose = document.querySelector('[data-foto-modal-close]');
+            if (optVer) {
+                optVer.addEventListener('click', function () {
+                    if (!avatarUrl) { (window.appAlert || window.alert)('Todavía no subiste una foto de perfil.'); return; }
+                    if (modal) { modal.hidden = false; }
+                    if (menu) { menu.hidden = true; }
+                });
+            }
+            if (modalClose && modal) { modalClose.addEventListener('click', function () { modal.hidden = true; }); }
+            if (modal) { modal.addEventListener('click', function (e) { if (e.target === modal) { modal.hidden = true; } }); }
+
+            // --- Editar datos (modo lectura por defecto) ---
+            var editToggle = document.querySelector('[data-edit-toggle]');
+            var editForm = document.querySelector('[data-edit-form]');
+            var editActions = document.querySelector('[data-edit-actions]');
+            var editCancel = document.querySelector('[data-edit-cancel]');
+            var editables = document.querySelectorAll('[data-editable]');
+            function setEdit(on) {
+                editables.forEach(function (el) {
+                    if (on) { el.removeAttribute('readonly'); } else { el.setAttribute('readonly', 'readonly'); }
+                });
+                if (editForm) { editForm.classList.toggle('perfil-readonly', !on); }
+                if (editActions) { editActions.hidden = !on; }
+                if (editToggle) { editToggle.hidden = on; }
+            }
+            if (editToggle) { editToggle.addEventListener('click', function () { setEdit(true); if (editables[0]) editables[0].focus(); }); }
+            if (editCancel) { editCancel.addEventListener('click', function () { setEdit(false); }); }
+
+            // --- Cambiar contraseña (modal emergente) ---
+            var passToggle = document.querySelector('[data-pass-toggle]');
+            var passModal = document.querySelector('[data-pass-modal]');
+            var passFirst = document.querySelector('[data-pass-first]');
+            if (passToggle && passModal) {
+                passToggle.addEventListener('click', function () {
+                    passModal.hidden = false;
+                    if (passFirst) { passFirst.focus(); }
+                });
+                document.querySelectorAll('[data-pass-close]').forEach(function (btn) {
+                    btn.addEventListener('click', function () { passModal.hidden = true; });
+                });
+                passModal.addEventListener('click', function (e) {
+                    if (e.target === passModal) { passModal.hidden = true; }
+                });
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape' && !passModal.hidden) { passModal.hidden = true; }
+                });
+            }
+        }());
+    </script>
+{% endblock %}

@@ -4,6 +4,10 @@
 use App\Kernel;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 
+// Misma zona horaria fija que el front controller (hora de Bolivia), para que
+// comandos y migraciones sean consistentes con la app web.
+date_default_timezone_set('America/La_Paz');
+
 if (!is_dir(dirname(__DIR__).'/vendor')) {
     throw new LogicException('Dependencies are missing. Try running "composer install".');
 }

@@ -26,6 +26,48 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Bitacora/Domain/Entity'
                 prefix: 'App\Bitacora\Domain\Entity'
                 alias: Bitacora
+            Gestion:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Gestion/Domain/Entity'
+                prefix: 'App\Gestion\Domain\Entity'
+                alias: Gestion
+            Carrera:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Academico/Carrera/Domain/Entity'
+                prefix: 'App\Academico\Carrera\Domain\Entity'
+                alias: Carrera
+            Materia:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Academico/Materia/Domain/Entity'
+                prefix: 'App\Academico\Materia\Domain\Entity'
+                alias: Materia
+            Aula:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Academico/Aula/Domain/Entity'
+                prefix: 'App\Academico\Aula\Domain\Entity'
+                alias: Aula
+            Turno:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Academico/Turno/Domain/Entity'
+                prefix: 'App\Academico\Turno\Domain\Entity'
+                alias: Turno
+            Grupo:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Academico/Grupo/Domain/Entity'
+                prefix: 'App\Academico\Grupo\Domain\Entity'
+                alias: Grupo
+            Horario:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Academico/Horario/Domain/Entity'
+                prefix: 'App\Academico\Horario\Domain\Entity'
+                alias: Horario
 
 when@test:
     doctrine:

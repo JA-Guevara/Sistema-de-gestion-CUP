@@ -7,26 +7,22 @@ namespace App\Auth\Application\UseCase;
 use App\Auth\Domain\Exception\InvalidRegistrationData;
 use App\Auth\Domain\Exception\PasswordResetTokenExpired;
 use App\Auth\Domain\Exception\PasswordResetTokenInvalid;
+use App\Auth\Domain\Security\PasswordPolicy;
+use App\Auth\Entity\PasswordResetToken;
+use App\Auth\Entity\User;
 use App\Auth\Infrastructure\Persistence\PasswordResetTokenRepository;
 use App\Auth\Infrastructure\Persistence\UserRepository;
 use App\Auth\UI\Request\ResetPasswordRequest;
 
 /**
- * Caso de uso: aplicar la nueva contraseña a partir de un token válido.
- *
- * - Valida que el token exista, no haya expirado y no haya sido usado.
- * - Valida la longitud mínima de la nueva contraseña y la confirmación.
- * - Hashea la nueva contraseña, marca el token como usado.
- * - Invalida cualquier sesión activa del usuario (currentSessionId = null)
- *   por seguridad: cualquier sesión vieja deja de coincidir y queda fuera.
+ * Caso de uso: aplicar la nueva contrasena a partir de un token valido.
  */
 final readonly class ResetPassword
 {
-    private const MIN_PASSWORD_LENGTH = 6;
-
     public function __construct(
         private UserRepository $users,
         private PasswordResetTokenRepository $tokens,
+        private PasswordPolicy $passwordPolicy,
     ) {
     }
 
@@ -37,44 +33,65 @@ final readonly class ResetPassword
      */
     public function execute(ResetPasswordRequest $input): void
     {
-        $token = $this->tokens->findByToken($input->token);
+        $token = $this->loadValidToken($input);
+        $user = $this->loadUser($token);
+        $this->validatePassword($input, $user);
+        $this->updatePassword($user, $input);
+        $this->saveUser($user);
+        $this->consumeToken($token);
+    }
 
+    private function loadValidToken(ResetPasswordRequest $input): PasswordResetToken
+    {
+        $token = $this->tokens->findByToken($input->token);
         if ($token === null || $token->isUsed()) {
-            throw new PasswordResetTokenInvalid('El enlace de recuperación no es válido o ya fue usado.');
+            throw new PasswordResetTokenInvalid('El enlace de recuperacion no es valido o ya fue usado.');
         }
 
         if ($token->isExpired()) {
-            throw new PasswordResetTokenExpired('El enlace de recuperación expiró. Solicitá uno nuevo.');
+            throw new PasswordResetTokenExpired('El enlace de recuperacion expiro. Solicita uno nuevo.');
         }
 
-        if (strlen($input->password) < self::MIN_PASSWORD_LENGTH) {
-            throw new InvalidRegistrationData(
-                sprintf('La contraseña debe tener al menos %d caracteres.', self::MIN_PASSWORD_LENGTH)
-            );
+        return $token;
+    }
+
+    private function loadUser(PasswordResetToken $token): User
+    {
+        $user = $this->users->findById($token->userId);
+        if ($user === null) {
+            throw new PasswordResetTokenInvalid('El enlace de recuperacion no es valido o ya fue usado.');
         }
+
+        return $user;
+    }
+
+    private function validatePassword(ResetPasswordRequest $input, User $user): void
+    {
+        $this->passwordPolicy->validate($input->password);
 
         if ($input->password !== $input->passwordConfirmation) {
-            throw new InvalidRegistrationData('Las contraseñas no coinciden.');
+            throw new InvalidRegistrationData('Las contrasenas no coinciden.');
         }
 
-        $user = $this->users->findById($token->userId);
-
-        // El user fue eliminado entre que pidió el reset y aplicó el cambio.
-        if ($user === null) {
-            throw new PasswordResetTokenInvalid('El enlace de recuperación no es válido o ya fue usado.');
+        if (password_verify($input->password, $user->passwordHash)) {
+            throw new InvalidRegistrationData('La nueva contrasena no puede ser igual a la anterior.');
         }
+    }
 
-        // Actualizar contraseña.
+    private function updatePassword(User $user, ResetPasswordRequest $input): void
+    {
         $user->passwordHash = password_hash($input->password, PASSWORD_DEFAULT);
-
-        // Invalidar cualquier sesión activa: el siguiente request que use la
-        // sesión vieja chocará con SessionGuard y será expulsado.
         $user->currentSessionId = null;
+    }
 
+    private function saveUser(User $user): void
+    {
         $this->users->save($user);
+    }
 
-        // Marcar token como consumido (uso único).
-        $token->usedAt = new \DateTimeImmutable();
+    private function consumeToken(PasswordResetToken $token): void
+    {
+        $token->usedAt = new \DateTimeImmutable('now', new \DateTimeZone('America/La_Paz'));
         $this->tokens->save($token);
     }
 }

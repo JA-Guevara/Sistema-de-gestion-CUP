@@ -1,0 +1,192 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Horario del grupo {{ grupo.codigo }}{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=4">
+    <style>
+        .horario-grid { table-layout: fixed; }
+        .horario-grid th { text-align: center; }
+        .horario-grid__time { white-space: nowrap; font-weight: 600; color: #475569; }
+        .horario-grid__cell { text-align: center; vertical-align: middle; padding: 4px; }
+        .horario-grid__chip {
+            display: block;
+            padding: 6px 8px;
+            border-radius: 8px;
+            line-height: 1.2;
+            color: #1f2937;
+        }
+        .horario-grid__chip strong { display: block; font-size: .9rem; }
+        .horario-grid__chip small { display: block; font-size: .72rem; opacity: .8; }
+        .horario-leyenda { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; }
+        .horario-leyenda__item { display: inline-flex; align-items: center; gap: 6px; font-size: .85rem; color: #475569; }
+        .horario-leyenda__dot { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+        .horario-linea { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 3px 0; }
+        .horario-linea + .horario-linea { border-top: 1px dashed #e2e8f0; }
+        .horario-linea__acciones { display: inline-flex; gap: 4px; }
+        .gestion-wizard__step[data-tab] { cursor: pointer; }
+    </style>
+{% endblock %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Administracion academica</p>
+            <h1 class="app-content__title">Horario · {{ grupo.codigo }}</h1>
+        </div>
+        <a href="{{ path('horario_index') }}" class="gestion-button">Volver</a>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    <section class="gestion-panel" data-horario-tabs>
+        <div class="gestion-panel__header">
+            <div>
+                <h2>{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }} / {{ grupo.codigo }}</h2>
+                <p class="gestion-panel__hint">{{ grupo.nombre }} · {{ horarios|length }} franjas registradas. La asignacion de docentes se controla aparte desde carga docente.</p>
+            </div>
+        </div>
+
+        <ol class="gestion-wizard__steps gestion-wizard__steps--two" aria-label="Vistas del horario">
+            <li class="gestion-wizard__step gestion-wizard__step--active" data-tab="detalle"><span>1</span> Detalle</li>
+            <li class="gestion-wizard__step" data-tab="horario"><span>2</span> Horario</li>
+        </ol>
+
+        {# Vista 1: detalle por materia #}
+        <div data-tab-panel="detalle">
+            <h3>Detalle por materia</h3>
+            <div class="gestion-table-wrap">
+                <table class="gestion-table">
+                    <thead>
+                        <tr>
+                            <th>Sigla</th>
+                            <th>Materia</th>
+                            <th>Grupo</th>
+                            <th>Horario</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for materia in porMateria %}
+                            <tr>
+                                <td>{{ materia.sigla }}</td>
+                                <td>{{ materia.nombre }}</td>
+                                <td>{{ grupo.codigo }}</td>
+                                <td>
+                                    {% for linea in materia.lineas %}
+                                        <div class="horario-linea">
+                                            <span>{{ linea.dia|capitalize }} {{ linea.horaInicio }}-{{ linea.horaFin }} · {{ linea.aula }}</span>
+                                            <span class="horario-linea__acciones">
+                                                <a href="{{ path('horario_show', {id: linea.horarioId}) }}" class="gestion-action-button gestion-action-button--view" title="Ver dia" aria-label="Ver dia">
+                                                    <svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                </a>
+                                                <a href="{{ path('horario_edit', {id: linea.horarioId}) }}" class="gestion-action-button gestion-action-button--edit" title="Editar dia" aria-label="Editar dia">
+                                                    <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                                                </a>
+                                                <form method="post" action="{{ path('horario_delete', {id: linea.horarioId}) }}" data-confirm="¿Eliminar este día del horario?">
+                                                    <button class="gestion-action-button gestion-action-button--danger" type="submit" title="Eliminar dia" aria-label="Eliminar dia">
+                                                        <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m6 10 1 10h10l1-10"/></svg>
+                                                    </button>
+                                                </form>
+                                            </span>
+                                        </div>
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    <form method="post" action="{{ path('horario_grupo_materia_delete', {grupoId: grupo.id, materiaId: materia.materiaId}) }}" data-confirm="¿Eliminar toda la materia {{ materia.nombre }} del horario del grupo?">
+                                        <button class="gestion-button gestion-button--danger" type="submit">Quitar materia</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="5">Este grupo todavia no tiene horario asignado.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if horarios|length > 0 %}
+                <div class="gestion-actions">
+                    <form method="post" action="{{ path('horario_grupo_delete', {grupoId: grupo.id}) }}" data-confirm="¿Eliminar TODO el horario de este grupo? Esta acción no se puede deshacer.">
+                        <button class="gestion-button gestion-button--danger" type="submit">Eliminar todo el horario del grupo</button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+
+        {# Vista 2: cuadricula semanal #}
+        <div data-tab-panel="horario" hidden>
+            {% if grilla.filas is not empty %}
+                <div class="gestion-table-wrap">
+                    <table class="gestion-table horario-grid">
+                        <thead>
+                            <tr>
+                                <th>Horario</th>
+                                {% for dia in grilla.dias %}
+                                    <th>{{ dia|title }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fila in grilla.filas %}
+                                <tr>
+                                    <td class="horario-grid__time">{{ fila.inicio }} - {{ fila.fin }}</td>
+                                    {% for dia in grilla.dias %}
+                                        {% set celda = fila.celdas[dia] %}
+                                        <td class="horario-grid__cell">
+                                            {% if celda %}
+                                                <span class="horario-grid__chip" style="background-color: {{ celda.color }};">
+                                                    <strong>{{ celda.sigla }}</strong>
+                                                    <small>{{ grupo.codigo }} · {{ celda.aula }}</small>
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if grilla.leyenda is not empty %}
+                    <div class="horario-leyenda">
+                        {% for item in grilla.leyenda %}
+                            <span class="horario-leyenda__item"><span class="horario-leyenda__dot" style="background-color: {{ item.color }};"></span>{{ item.materia }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% else %}
+                <p>Este grupo todavia no tiene horario asignado.</p>
+            {% endif %}
+        </div>
+    </section>
+
+    <script>
+        (function () {
+            var root = document.querySelector('[data-horario-tabs]');
+            if (!root) {
+                return;
+            }
+
+            var tabs = root.querySelectorAll('[data-tab]');
+            var panels = root.querySelectorAll('[data-tab-panel]');
+
+            function show(name) {
+                panels.forEach(function (panel) {
+                    panel.hidden = panel.getAttribute('data-tab-panel') !== name;
+                });
+                tabs.forEach(function (tab) {
+                    tab.classList.toggle('gestion-wizard__step--active', tab.getAttribute('data-tab') === name);
+                });
+            }
+
+            tabs.forEach(function (tab) {
+                tab.addEventListener('click', function () {
+                    show(tab.getAttribute('data-tab'));
+                });
+            });
+
+            show('detalle');
+        }());
+    </script>
+{% endblock %}

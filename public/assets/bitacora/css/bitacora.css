@@ -14,11 +14,15 @@
 }
 
 .bitacora-card {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 220px);
+    min-height: 430px;
     width: 100%;
-    max-width: 1240px;
+    max-width: var(--ds-content-max, 1600px);
     margin: 0 auto;
     padding: 0;
-    overflow: visible;
+    overflow: hidden;
 }
 
 /* ---------- FILTROS ---------- */
@@ -39,6 +43,7 @@
     padding: 20px;
     background: #fafafb;
     border-bottom: 1px solid var(--color-border);
+    flex: 0 0 auto;
 }
 
 .bitacora-filters__field {
@@ -249,11 +254,15 @@ select.bitacora-filters__input {
 /* ---------- TABLA ---------- */
 
 .bitacora-table__wrap {
+    flex: 1 1 auto;
+    min-height: 220px;
     position: relative;
     z-index: 1;
-    overflow-x: auto;
+    max-width: 100%;
+    overflow: auto;
     background: #ffffff;
     scrollbar-width: thin;
+    overscroll-behavior: contain;
 }
 
 .bitacora-table {
@@ -267,6 +276,12 @@ select.bitacora-filters__input {
 
 .bitacora-table thead {
     background: #f5f6f8;
+}
+
+.bitacora-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
 
 .bitacora-table th {
@@ -343,6 +358,7 @@ select.bitacora-filters__input {
     max-width: 380px;
     line-height: 1.4;
     text-align: center;
+    overflow-wrap: anywhere;
 }
 
 .bitacora-table__date {
@@ -467,6 +483,7 @@ select.bitacora-filters__input {
     border-top: 1px solid var(--color-border);
     flex-wrap: wrap;
     gap: 12px;
+    flex: 0 0 auto;
 }
 
 .bitacora-pagination__info {
@@ -537,9 +554,17 @@ select.bitacora-filters__input {
 }
 
 @media (max-width: 768px) {
+    .bitacora-card {
+        max-height: none;
+    }
+
     .bitacora-filters {
         padding: 16px;
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .bitacora-table__wrap {
+        max-height: 58vh;
     }
 
     .bitacora-filters__input {
@@ -592,6 +617,17 @@ select.bitacora-filters__input {
     }
 
     .bitacora-table {
-        min-width: 980px;
+        min-width: 900px;
+    }
+}
+
+@media (max-height: 720px) {
+    .bitacora-card {
+        max-height: calc(100vh - 160px);
+        min-height: 360px;
+    }
+
+    .bitacora-table__wrap {
+        min-height: 180px;
     }
 }

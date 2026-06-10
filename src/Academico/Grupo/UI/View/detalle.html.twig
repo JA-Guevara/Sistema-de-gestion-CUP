@@ -1,0 +1,55 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Grupo {{ grupo.codigo }}{% endblock %}
+
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=7">{% endblock %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Administracion academica</p>
+            <h1 class="app-content__title">Grupo {{ grupo.codigo }}</h1>
+        </div>
+        <div class="gestion-head__actions">
+            <a href="{{ path('grupo_edit', {id: grupo.id}) }}" class="gestion-button gestion-button--primary">Editar</a>
+            <a href="{{ path('grupo_index') }}" class="gestion-button">Volver</a>
+        </div>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    <section class="gestion-panel">
+        <div class="gestion-panel__header">
+            <div>
+                <h2>{{ grupo.nombre }}</h2>
+                <p class="gestion-panel__hint">{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }} - {{ grupo.estado|lower|capitalize }}</p>
+            </div>
+        </div>
+        <div class="gestion-dashboard">
+            <article class="gestion-metric">
+                <span class="gestion-metric__label">Codigo</span>
+                <strong>{{ grupo.codigo }}</strong>
+            </article>
+            <article class="gestion-metric">
+                <span class="gestion-metric__label">Cupo</span>
+                <strong>{{ grupo.cupo }}</strong>
+            </article>
+            <article class="gestion-metric">
+                <span class="gestion-metric__label">Inscritos estimados</span>
+                <strong>{{ grupo.inscritosEstimados }}</strong>
+            </article>
+            <article class="gestion-metric">
+                <span class="gestion-metric__label">Estado</span>
+                <strong><span class="gestion-badge gestion-badge--{{ grupo.estado|lower }}">{{ grupo.estado|lower|capitalize }}</span></strong>
+            </article>
+        </div>
+    </section>
+
+    <div class="gestion-page-actions">
+        <form method="post" action="{{ path('grupo_toggle', {id: grupo.id}) }}">
+            <button class="gestion-button {{ grupo.isOpen ? 'gestion-button--danger' : 'gestion-button--primary' }}" type="submit">
+                {{ grupo.isOpen ? 'Cerrar grupo' : 'Abrir grupo' }}
+            </button>
+        </form>
+    </div>
+{% endblock %}

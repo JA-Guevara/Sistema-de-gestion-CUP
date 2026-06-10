@@ -1,0 +1,57 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}{{ carrera ? 'Editar carrera' : 'Nueva carrera' }}{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css">
+{% endblock %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Administracion academica</p>
+            <h1 class="app-content__title">{{ carrera ? 'Editar carrera' : 'Nueva carrera' }}</h1>
+        </div>
+        <a href="{{ path('carrera_index') }}" class="gestion-button">Volver</a>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    <form method="post" class="gestion-form">
+        <section class="gestion-panel">
+            <h2>Datos de carrera</h2>
+            <div class="gestion-grid">
+                <label>
+                    Codigo
+                    <input name="codigo" value="{{ carrera ? carrera.codigo : '' }}" placeholder="SIS" required>
+                </label>
+                <label>
+                    Nombre
+                    <input name="nombre" value="{{ carrera ? carrera.nombre : '' }}" placeholder="Ingenieria de Sistemas" required>
+                </label>
+                <label>
+                    Facultad
+                    <input name="facultad" value="{{ carrera ? carrera.facultad : 'FICCT' }}">
+                </label>
+                <label>
+                    Modalidad
+                    <select name="modalidad" required>
+                        {% set currentModalidad = carrera ? carrera.modalidad : 'Presencial' %}
+                        <option value="Presencial" {{ currentModalidad == 'Presencial' ? 'selected' : '' }}>Presencial</option>
+                        <option value="Virtual" {{ currentModalidad == 'Virtual' ? 'selected' : '' }}>Virtual</option>
+                        <option value="Semipresencial" {{ currentModalidad == 'Semipresencial' ? 'selected' : '' }}>Semipresencial</option>
+                    </select>
+                </label>
+            </div>
+            <label>
+                Descripcion
+                <textarea name="descripcion" rows="3">{{ carrera ? carrera.descripcion : '' }}</textarea>
+            </label>
+        </section>
+
+        <div class="gestion-actions">
+            <button class="gestion-button gestion-button--primary" type="submit">Guardar carrera</button>
+            <a href="{{ path('carrera_index') }}" class="gestion-button">Cancelar</a>
+        </div>
+    </form>
+{% endblock %}

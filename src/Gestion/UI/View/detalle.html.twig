@@ -1,0 +1,136 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}{{ gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=8">
+{% endblock %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Gestion CUP</p>
+            <h1 class="app-content__title">{{ gestion.nombre }}</h1>
+        </div>
+        <div class="gestion-actions gestion-actions--header">
+            <a href="{{ path('gestion_index') }}" class="gestion-button">Volver</a>
+            <a href="{{ path('gestion_edit', {id: gestion.id}) }}" class="gestion-button gestion-button--primary">Editar</a>
+        </div>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    <section class="gestion-dashboard">
+        <article class="gestion-metric">
+            <span class="gestion-metric__label">Codigo</span>
+            <strong>{{ gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}</strong>
+        </article>
+        <article class="gestion-metric">
+            <span class="gestion-metric__label">Estado</span>
+            <strong><span class="gestion-badge gestion-badge--{{ gestion.estado|lower|replace({'_': '-'}) }}">{{ gestion.estado|replace({'_': ' '})|lower|capitalize }}</span></strong>
+        </article>
+        <article class="gestion-metric">
+            <span class="gestion-metric__label">Vigente</span>
+            <strong><span class="gestion-badge gestion-badge--{{ gestion.active ? 'si' : 'no' }}">{{ gestion.active ? 'Si' : 'No' }}</span></strong>
+        </article>
+        <article class="gestion-metric">
+            <span class="gestion-metric__label">Cupo total</span>
+            <strong>{{ gestion.configuracion ? gestion.configuracion.cupoTotal : 0 }}</strong>
+        </article>
+    </section>
+
+    <section class="gestion-panel">
+        <h2>Acciones</h2>
+        <div class="gestion-actions">
+            <form method="post" action="{{ path('gestion_activate', {id: gestion.id}) }}">
+                <button class="gestion-button" type="submit">Activar</button>
+            </form>
+            <form method="post" action="{{ path('gestion_open_inscription', {id: gestion.id}) }}">
+                <button class="gestion-button" type="submit">Abrir inscripcion</button>
+            </form>
+            <form method="post" action="{{ path('gestion_close_inscription', {id: gestion.id}) }}">
+                <button class="gestion-button" type="submit">Cerrar inscripcion</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="gestion-panel">
+        <h2>Cronograma academico</h2>
+        <div class="gestion-table-wrap">
+            <table class="gestion-table">
+                <thead>
+                    <tr>
+                        <th>Periodo</th>
+                        <th>Inicio</th>
+                        <th>Fin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for periodo in gestion.periodos %}
+                        <tr>
+                            <td>{{ periodo.tipoPeriodo }}</td>
+                            <td>{{ periodo.fechaInicio|date('Y-m-d') }}</td>
+                            <td>{{ periodo.fechaFin|date('Y-m-d') }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="gestion-panel">
+        <h2>Carreras habilitadas</h2>
+        <div class="gestion-table-wrap">
+            <table class="gestion-table">
+                <thead>
+                    <tr>
+                        <th>Carrera</th>
+                        <th>Cupo</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for carrera in gestion.carreras %}
+                        <tr>
+                            <td>{{ carrera.carrera.codigo }} - {{ carrera.carrera.nombre }}</td>
+                            <td>{{ carrera.cupoCarrera }}</td>
+                            <td><span class="gestion-badge gestion-badge--{{ carrera.habilitada ? 'si' : 'no' }}">{{ carrera.habilitada ? 'Habilitada' : 'Inactiva' }}</span></td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3">Sin carreras configuradas.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="gestion-panel">
+        <h2>Historial</h2>
+        <div class="gestion-table-wrap">
+            <table class="gestion-table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Accion</th>
+                        <th>Descripcion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in gestion.historial %}
+                        <tr>
+                            <td>{{ item.fecha|date('Y-m-d H:i') }}</td>
+                            <td>{{ item.accion }}</td>
+                            <td>{{ item.descripcion }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3">Sin historial.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}

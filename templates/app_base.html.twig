@@ -10,6 +10,8 @@
 
     <link rel="stylesheet" href="/assets/app/css/app.css">
     {% block stylesheets %}{% endblock %}
+    {# Design System global: tokens + mejoras. Va al final para ganar en cascada y que todo modulo lo herede. #}
+    <link rel="stylesheet" href="/assets/gestion/css/design-system.css?v=9">
 </head>
 <body>
     <div class="app-shell">
@@ -20,18 +22,20 @@
                 <img src="/assets/auth/logos/ficct.png" alt="FICCT" class="app-topbar__logo">
                 <span class="app-topbar__brand-text">
                     <span class="app-topbar__brand-acronym">CUP · FICCT</span>
-                    <span class="app-topbar__brand-sub">Admisión 2026</span>
+                    <span class="app-topbar__brand-sub">Admisiones</span>
                 </span>
             </a>
 
-            <div class="app-topbar__user">
-                <div class="app-topbar__user-info">
-                    <span class="app-topbar__user-name">{{ user.firstName }} {{ user.lastName }}</span>
-                    <span class="app-topbar__user-role">Postulante</span>
+            {% if user is defined and user %}
+                <div class="app-topbar__user">
+                    <div class="app-topbar__user-info">
+                        <span class="app-topbar__user-name">{{ user.firstName }} {{ user.lastName }}</span>
+                        <span class="app-topbar__user-role">Postulante</span>
+                    </div>
+                    <a href="{{ path('perfil_index') }}" class="app-topbar__avatar" title="Mi perfil">{{ user.firstName|first }}</a>
+                    <a href="{{ path('auth_logout') }}" class="app-topbar__logout">Cerrar sesión</a>
                 </div>
-                <div class="app-topbar__avatar" aria-hidden="true">{{ user.firstName|first }}</div>
-                <a href="{{ path('auth_logout') }}" class="app-topbar__logout">Cerrar sesión</a>
-            </div>
+            {% endif %}
         </header>
 
         <div class="app-shell__body">
@@ -68,6 +72,78 @@
                         <span class="app-sidebar__label">Inscripción CUP</span>
                     </a>
 
+                    <p class="app-sidebar__section-title">Administración Académica</p>
+
+                    <a href="{{ path('gestion_index') }}" class="app-sidebar__item {{ current starts with 'gestion_' ? 'app-sidebar__item--active' : '' }}">
+                        <span class="app-sidebar__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="4" y1="21" x2="4" y2="14"/>
+                                <line x1="4" y1="10" x2="4" y2="3"/>
+                                <line x1="12" y1="21" x2="12" y2="12"/>
+                                <line x1="12" y1="8" x2="12" y2="3"/>
+                                <line x1="20" y1="21" x2="20" y2="16"/>
+                                <line x1="20" y1="12" x2="20" y2="3"/>
+                                <line x1="1" y1="14" x2="7" y2="14"/>
+                                <line x1="9" y1="8" x2="15" y2="8"/>
+                                <line x1="17" y1="16" x2="23" y2="16"/>
+                            </svg>
+                        </span>
+                        <span class="app-sidebar__label">Gestion CUP</span>
+                    </a>
+
+                    <a href="{{ path('carrera_index') }}" class="app-sidebar__item {{ current starts with 'carrera_' ? 'app-sidebar__item--active' : '' }}">
+                        <span class="app-sidebar__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 10 12 5 2 10l10 5 10-5Z"/>
+                                <path d="M6 12v5c0 1 2.5 3 6 3s6-2 6-3v-5"/>
+                                <line x1="22" y1="10" x2="22" y2="16"/>
+                            </svg>
+                        </span>
+                        <span class="app-sidebar__label">Carreras</span>
+                    </a>
+
+                    <a href="{{ path('materia_index') }}" class="app-sidebar__item {{ current starts with 'materia_' ? 'app-sidebar__item--active' : '' }}">
+                        <span class="app-sidebar__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                <path d="M20 22V2H6.5A2.5 2.5 0 0 0 4 4.5v15"/>
+                            </svg>
+                        </span>
+                        <span class="app-sidebar__label">Materias</span>
+                    </a>
+
+                    <a href="{{ path('aula_index') }}" class="app-sidebar__item {{ current starts with 'aula_' ? 'app-sidebar__item--active' : '' }}">
+                        <span class="app-sidebar__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 21h18"/>
+                                <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/>
+                            </svg>
+                        </span>
+                        <span class="app-sidebar__label">Aulas</span>
+                    </a>
+
+                    <a href="{{ path('grupo_index') }}" class="app-sidebar__item {{ current starts with 'grupo_' ? 'app-sidebar__item--active' : '' }}">
+                        <span class="app-sidebar__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                            </svg>
+                        </span>
+                        <span class="app-sidebar__label">Grupos</span>
+                    </a>
+
+                    <a href="{{ path('horario_index') }}" class="app-sidebar__item {{ current starts with 'horario_' ? 'app-sidebar__item--active' : '' }}">
+                        <span class="app-sidebar__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                        </span>
+                        <span class="app-sidebar__label">Horarios</span>
+                    </a>
+
                     <p class="app-sidebar__section-title">Auditoría</p>
 
                     {# Bitácora — disponible #}
@@ -81,24 +157,19 @@
                         <span class="app-sidebar__label">Bitácora</span>
                     </a>
 
-                    <p class="app-sidebar__section-title">Próximamente</p>
+                    <p class="app-sidebar__section-title">Cuenta</p>
 
-                    {# Horarios — bloqueado #}
-                    <span class="app-sidebar__item app-sidebar__item--disabled">
+                    <a href="{{ path('perfil_index') }}" class="app-sidebar__item {{ current starts with 'perfil_' ? 'app-sidebar__item--active' : '' }}">
                         <span class="app-sidebar__icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                                <line x1="16" y1="2" x2="16" y2="6"/>
-                                <line x1="8" y1="2" x2="8" y2="6"/>
-                                <line x1="3" y1="10" x2="21" y2="10"/>
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
                             </svg>
                         </span>
-                        <span class="app-sidebar__label">Horarios</span>
-                        <svg class="app-sidebar__lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                        </svg>
-                    </span>
+                        <span class="app-sidebar__label">Perfil</span>
+                    </a>
+
+                    <p class="app-sidebar__section-title">Próximamente</p>
 
                     {# Notas — bloqueado #}
                     <span class="app-sidebar__item app-sidebar__item--disabled">
@@ -110,21 +181,6 @@
                             </svg>
                         </span>
                         <span class="app-sidebar__label">Notas</span>
-                        <svg class="app-sidebar__lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                        </svg>
-                    </span>
-
-                    {# Perfil — bloqueado por ahora #}
-                    <span class="app-sidebar__item app-sidebar__item--disabled">
-                        <span class="app-sidebar__icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                                <circle cx="12" cy="7" r="4"/>
-                            </svg>
-                        </span>
-                        <span class="app-sidebar__label">Perfil</span>
                         <svg class="app-sidebar__lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
@@ -144,6 +200,7 @@
         </div>
     </div>
 
+    <script src="/assets/gestion/js/app-dialogs.js" defer></script>
     {% block javascripts %}{% endblock %}
 </body>
 </html>

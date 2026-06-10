@@ -1,0 +1,324 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Horarios{% endblock %}
+
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=13">{% endblock %}
+
+{% block javascripts %}
+    <script src="/assets/gestion/js/gestion-wizard.js?v=9" defer></script>
+    <script src="/assets/gestion/js/gestion-toggle-panel.js?v=9" defer></script>
+    <script src="/assets/gestion/js/gestion-filters.js?v=9" defer></script>
+    <script src="/assets/gestion/js/gestion-bulk-actions.js?v=9" defer></script>
+    <script src="/assets/gestion/js/horario-turnos.js?v=9" defer></script>
+    <script src="/assets/gestion/js/horario-wizard.js?v=9" defer></script>
+{% endblock %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Administracion academica</p>
+            <h1 class="app-content__title">Horarios</h1>
+        </div>
+        <div class="gestion-head__actions">
+            <button class="gestion-button gestion-button--primary" type="button" data-panel-toggle="horario-generator" data-open-label="Crear horario" data-close-label="Ocultar formulario">
+                Crear horario
+            </button>
+            <button class="gestion-button" type="button" data-panel-toggle="horario-multigrupo" data-open-label="Multi-grupo" data-close-label="Ocultar multi-grupo">
+                Multi-grupo
+            </button>
+        </div>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    <div class="gestion-toolbar">
+        <p class="gestion-toolbar__copy">
+            El horario se arma por grupo y materia. Cada materia ocupa una franja dentro del turno y puede tener su propia aula; la asignacion de docentes se controla despues desde carga docente.
+        </p>
+    </div>
+
+    <form id="horario-generator" method="post" action="{{ path('horario_masivo') }}" class="gestion-form" data-gestion-wizard data-horario-generator hidden>
+        <div class="gestion-wizard">
+            <ol class="gestion-wizard__steps gestion-wizard__steps--three" aria-label="Pasos para generar horarios">
+                <li class="gestion-wizard__step" data-wizard-step><span>1</span> Turno</li>
+                <li class="gestion-wizard__step" data-wizard-step><span>2</span> Materias y aulas</li>
+                <li class="gestion-wizard__step" data-wizard-step><span>3</span> Grupo y dias</li>
+            </ol>
+
+            <section class="gestion-panel" data-wizard-panel>
+                <div class="gestion-panel__header">
+                    <div>
+                        <h2>Turno y duracion de clase</h2>
+                        <p class="gestion-panel__hint">Define el rango del turno. El sistema reparte ese rango en franjas consecutivas, una por materia.</p>
+                    </div>
+                </div>
+                <div class="gestion-grid gestion-grid--four">
+                    <label>
+                        Turno
+                        <select name="turno" data-horario-turno required>
+                            <option value="MANANA">Manana</option>
+                            <option value="TARDE">Tarde</option>
+                            <option value="NOCHE" selected>Noche</option>
+                            <option value="PERSONALIZADO">Personalizado</option>
+                        </select>
+                    </label>
+                    <label>Inicio del turno <input type="time" name="horaInicio" value="18:30" required></label>
+                    <label>Fin del turno <input type="time" name="horaFin" value="21:30" required></label>
+                    <label>Duracion por clase (min) <input type="number" name="duracionMinutos" value="45" min="1" max="600" required></label>
+                </div>
+                <div class="gestion-grid">
+                    <label>Descanso entre clases (min) <input type="number" name="descansoMinutos" value="0" min="0" max="600"></label>
+                </div>
+                <p class="gestion-help" data-horario-preview></p>
+            </section>
+
+            <section class="gestion-panel" data-wizard-panel hidden>
+                <div class="gestion-panel__header">
+                    <div>
+                        <h2>Materias y aulas</h2>
+                        <p class="gestion-panel__hint">Marca las materias del grupo y asigna aula por materia. La franja se calcula automaticamente.</p>
+                    </div>
+                </div>
+                <div class="gestion-table-wrap">
+                    <table class="gestion-table">
+                        <thead>
+                            <tr>
+                                <th>Incluir</th>
+                                <th>Materia</th>
+                                <th>Aula</th>
+                                <th>Franja auto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for materia in materias %}
+                                <tr data-horario-row>
+                                    <td>
+                                        <input type="checkbox" name="incluir[]" value="{{ materia.id }}" checked>
+                                        <input type="hidden" name="orden_{{ materia.id }}" value="{{ loop.index }}">
+                                    </td>
+                                    <td>{{ materia.nombre }}</td>
+                                    <td>
+                                        <select name="aula_{{ materia.id }}">
+                                            <option value="">Seleccione un aula</option>
+                                            {% for aula in aulas %}
+                                                <option value="{{ aula.id }}">{{ aula.codigo }} - Piso {{ aula.piso }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                    <td data-horario-slot>-</td>
+                                </tr>
+                            {% endfor %}
+                            {% if materias is empty %}
+                                <tr><td colspan="4">No hay materias activas para programar.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="gestion-panel" data-wizard-panel hidden>
+                <div class="gestion-panel__header">
+                    <div>
+                        <h2>Grupo y dias</h2>
+                        <p class="gestion-panel__hint">El horario completo se replica en cada dia seleccionado para el grupo.</p>
+                    </div>
+                </div>
+                <div class="gestion-grid">
+                    <label>
+                        Grupo
+                        <select name="grupoId" required>
+                            <option value="">Seleccione un grupo</option>
+                            {% for grupo in grupos %}
+                                <option value="{{ grupo.id }}">{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }} / {{ grupo.codigo }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                </div>
+                <div class="gestion-checks gestion-checks--days">
+                    <label><input type="checkbox" name="dias[]" value="LUNES" checked> Lunes</label>
+                    <label><input type="checkbox" name="dias[]" value="MARTES" checked> Martes</label>
+                    <label><input type="checkbox" name="dias[]" value="MIERCOLES" checked> Miercoles</label>
+                    <label><input type="checkbox" name="dias[]" value="JUEVES" checked> Jueves</label>
+                    <label><input type="checkbox" name="dias[]" value="VIERNES" checked> Viernes</label>
+                    <label><input type="checkbox" name="dias[]" value="SABADO"> Sabado</label>
+                </div>
+                <label class="gestion-check"><input type="checkbox" name="reemplazar" value="1"> Reemplazar los horarios existentes del grupo</label>
+            </section>
+
+            <div class="gestion-wizard__footer">
+                <button class="gestion-button" type="button" data-wizard-prev>Anterior</button>
+                <button class="gestion-button gestion-button--primary" type="button" data-wizard-next>Siguiente</button>
+                <button class="gestion-button gestion-button--primary" type="submit" data-wizard-submit>Generar horario</button>
+            </div>
+        </div>
+    </form>
+
+    <form id="horario-multigrupo" method="post" action="{{ path('horario_multigrupo') }}" class="gestion-form" hidden>
+        <section class="gestion-panel">
+            <div class="gestion-panel__header">
+                <div>
+                    <h2>Generar horario para varios grupos</h2>
+                    <p class="gestion-panel__hint">Elegi un turno, las materias y los grupos (cada grupo con su aula). En modo escalonado las materias rotan entre grupos para que un mismo docente pueda cubrir varios grupos en bloques seguidos.</p>
+                </div>
+            </div>
+
+            <div class="gestion-grid gestion-grid--four">
+                <label>
+                    Turno
+                    <select name="turnoId" required>
+                        <option value="">Seleccione un turno</option>
+                        {% for turno in turnos %}
+                            <option value="{{ turno.id }}">{{ turno.nombre|title }} ({{ turno.horaInicio|date('H:i') }} - {{ turno.horaFin|date('H:i') }})</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Duracion por clase (min) <input type="number" name="duracionMinutos" value="90" min="1" max="600" required></label>
+                <label>Descanso entre clases (min) <input type="number" name="descansoMinutos" value="0" min="0" max="600"></label>
+                <label>
+                    Estrategia
+                    <select name="estrategia" required>
+                        <option value="PARALELO">Paralelo (mismo horario, aula por grupo)</option>
+                        <option value="ESCALONADO">Escalonado (rotacion, un docente cubre varios grupos)</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="gestion-checks gestion-checks--days">
+                <label><input type="checkbox" name="dias[]" value="LUNES" checked> Lunes</label>
+                <label><input type="checkbox" name="dias[]" value="MARTES" checked> Martes</label>
+                <label><input type="checkbox" name="dias[]" value="MIERCOLES" checked> Miercoles</label>
+                <label><input type="checkbox" name="dias[]" value="JUEVES" checked> Jueves</label>
+                <label><input type="checkbox" name="dias[]" value="VIERNES" checked> Viernes</label>
+                <label><input type="checkbox" name="dias[]" value="SABADO"> Sabado</label>
+            </div>
+
+            <div class="gestion-grid gestion-grid--two">
+                <div>
+                    <h3>Materias (en orden)</h3>
+                    <div class="gestion-checks gestion-checks--cards">
+                        {% for materia in materias %}
+                            <label><input type="checkbox" name="materiaIds[]" value="{{ materia.id }}" checked> <span>{{ materia.nombre }}</span></label>
+                        {% else %}
+                            <p>No hay materias activas.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div>
+                    <h3>Grupos y aula</h3>
+                    <div class="gestion-table-wrap">
+                        <table class="gestion-table">
+                            <thead>
+                                <tr><th>Incluir</th><th>Grupo</th><th>Aula</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for grupo in grupos %}
+                                    <tr>
+                                        <td><input type="checkbox" name="grupos[]" value="{{ grupo.id }}"></td>
+                                        <td>{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }} / {{ grupo.codigo }}</td>
+                                        <td>
+                                            <select name="aula_grupo_{{ grupo.id }}">
+                                                <option value="">Seleccione un aula</option>
+                                                {% for aula in aulas %}
+                                                    <option value="{{ aula.id }}">{{ aula.codigo }} - Piso {{ aula.piso }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr><td colspan="3">No hay grupos registrados.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <label class="gestion-check"><input type="checkbox" name="reemplazar" value="1"> Reemplazar los horarios existentes de cada grupo</label>
+            <div class="gestion-actions"><button class="gestion-button gestion-button--primary" type="submit">Generar horarios</button></div>
+        </section>
+    </form>
+
+    <section class="gestion-panel" data-bulk-root>
+        <div class="gestion-panel__header">
+            <div>
+                <h2>Historial por grupo</h2>
+                <p class="gestion-panel__hint">Cada grupo muestra su horario consolidado. Usa el ojito para ver el detalle completo de la semana.</p>
+            </div>
+        </div>
+        <form class="gestion-filters" data-gestion-filters data-filter-target="horarios">
+            <div class="gestion-filters__field">
+                <label>Grupo</label>
+                <select data-filter-field="grupo">
+                    <option value="">Todos</option>
+                    {% for grupo in grupos %}
+                        <option value="{{ grupo.codigo }}">{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }} / {{ grupo.codigo }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="gestion-filters__field gestion-filters__field--clear">
+                <label aria-hidden="true">Limpiar</label>
+                <button class="gestion-filters__clear" type="button" data-filter-clear aria-label="Limpiar filtros">
+                    <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m6 10 1 10h10l1-10"/><path d="M10 14v3"/><path d="M14 14v3"/></svg>
+                </button>
+            </div>
+        </form>
+        <form id="horario-bulk-form" method="post" action="{{ path('horario_grupos_delete') }}" class="gestion-bulk-actions" data-bulk-actions data-confirm="¿Eliminar todos los horarios de los grupos seleccionados?" hidden>
+            <input type="hidden" name="accion" value="DELETE">
+            <div class="gestion-bulk-actions__info">
+                <span class="gestion-bulk-actions__count"><strong data-bulk-count>0</strong> grupos seleccionados</span>
+                <button type="button" class="gestion-bulk-actions__clear" data-bulk-clear>Deseleccionar</button>
+            </div>
+            <div class="gestion-bulk-actions__buttons">
+                <button type="submit" class="gestion-button gestion-button--danger" data-bulk-submit disabled>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m6 10 1 10h10l1-10"/></svg>
+                    Eliminar
+                </button>
+            </div>
+        </form>
+        <div class="gestion-table-wrap">
+            <table class="gestion-table" data-gestion-filter-table="horarios">
+                <thead>
+                    <tr>
+                        <th><input class="gestion-bulk-check" type="checkbox" data-bulk-check-all aria-label="Seleccionar horarios visibles"></th>
+                        <th>Grupo</th>
+                        <th>Materias</th>
+                        <th>Dias</th>
+                        <th>Rango horario</th>
+                        <th>Franjas</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fila in resumen %}
+                        <tr data-filter-row data-filter-grupo="{{ fila.grupo.codigo }}">
+                            <td><input class="gestion-bulk-check" type="checkbox" name="ids[]" value="{{ fila.grupo.id }}" form="horario-bulk-form" data-bulk-item aria-label="Seleccionar horario del grupo {{ fila.grupo.codigo }}"></td>
+                            <td>
+                                {{ fila.grupo.codigo }}
+                                <span class="gestion-table__meta">{{ fila.grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}</span>
+                            </td>
+                            <td>{{ fila.materias }}</td>
+                            <td>{{ fila.dias|join(', ')|title }}</td>
+                            <td>
+                                {% if fila.horaInicio %}{{ fila.horaInicio|date('H:i') }} - {{ fila.horaFin|date('H:i') }}{% else %}-{% endif %}
+                            </td>
+                            <td>{{ fila.total }}</td>
+                            <td>
+                                <div class="gestion-table__actions">
+                                    <a href="{{ path('horario_grupo_show', {grupoId: fila.grupo.id}) }}" class="gestion-action-button gestion-action-button--view" title="Ver detalle del grupo" aria-label="Ver detalle del grupo">
+                                        <svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    </a>
+                                    <form method="post" action="{{ path('horario_grupo_delete', {grupoId: fila.grupo.id}) }}" data-confirm="¿Eliminar TODO el horario del grupo {{ fila.grupo.codigo }}? Esta acción no se puede deshacer.">
+                                        <button class="gestion-action-button gestion-action-button--danger" type="submit" title="Eliminar horario del grupo" aria-label="Eliminar horario del grupo">
+                                            <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m6 10 1 10h10l1-10"/><path d="M10 14v3"/><path d="M14 14v3"/></svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <tr data-filter-empty {{ resumen ? 'hidden' : '' }}><td colspan="7">Todavia no hay horarios registrados.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}

@@ -43,7 +43,7 @@ final readonly class RecordLogEntry
 
             $entry = new LogEntry();
             $entry->userId = $userId;
-            $entry->userLabel = $userLabel ?? '(anónimo)';
+            $entry->userLabel = $userLabel ?? ($userId !== null ? sprintf('Usuario #%d', $userId) : '(anonimo)');
             $entry->action = $action;
             $entry->module = $module;
             $entry->description = trim($description);
@@ -51,7 +51,7 @@ final readonly class RecordLogEntry
             $entry->metadata = $metadata;
             $entry->ip = $request !== null ? $this->resolveClientIp($request) : null;
             $entry->userAgent = $request?->headers->get('User-Agent');
-            $entry->createdAt = new \DateTimeImmutable();
+            $entry->createdAt = new \DateTimeImmutable('now', new \DateTimeZone('America/La_Paz'));
 
             $this->repository->save($entry);
         } catch (\Throwable $e) {

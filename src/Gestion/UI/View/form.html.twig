@@ -1,0 +1,234 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}{{ gestion ? 'Editar gestion' : 'Nueva gestion' }}{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=4">
+{% endblock %}
+
+{% block javascripts %}
+    <script src="/assets/gestion/js/gestion-wizard.js?v=4" defer></script>
+    <script src="/assets/gestion/js/gestion-periods.js?v=4" defer></script>
+    <script src="/assets/gestion/js/gestion-careers.js?v=4" defer></script>
+{% endblock %}
+
+{% block app_content %}
+    {% set defaultPeriods = [
+        {actividad: 'Inscripcion', inicio: '2026-06-01', fin: '2026-06-30'},
+        {actividad: 'Validacion documental', inicio: '2026-07-01', fin: '2026-07-05'},
+        {actividad: 'Asignacion de grupos', inicio: '2026-07-06', fin: '2026-07-08'},
+        {actividad: 'Clases', inicio: '2026-07-09', fin: '2026-09-30'},
+        {actividad: 'Examen parcial 1', inicio: '2026-08-01', fin: '2026-08-03'},
+        {actividad: 'Examen parcial 2', inicio: '2026-09-01', fin: '2026-09-03'},
+        {actividad: 'Examen parcial 3', inicio: '2026-10-01', fin: '2026-10-03'},
+        {actividad: 'Publicacion de resultados', inicio: '2026-10-11', fin: '2026-10-15'}
+    ] %}
+    {% set periodsForForm = gestion ? gestion.periodos : defaultPeriods %}
+
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Configuracion academica</p>
+            <h1 class="app-content__title">{{ gestion ? 'Editar gestion' : 'Nueva gestion CUP' }}</h1>
+        </div>
+        <a href="{{ path('gestion_index') }}" class="gestion-button">Volver</a>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    <form method="post" class="gestion-form" data-gestion-wizard>
+        <div class="gestion-wizard">
+            <ol class="gestion-wizard__steps" aria-label="Pasos de configuracion">
+                <li class="gestion-wizard__step" data-wizard-step><span>1</span> Datos</li>
+                <li class="gestion-wizard__step" data-wizard-step><span>2</span> Parametros</li>
+                <li class="gestion-wizard__step" data-wizard-step><span>3</span> Cronograma</li>
+                <li class="gestion-wizard__step" data-wizard-step><span>4</span> Carreras</li>
+            </ol>
+
+        <section class="gestion-panel" data-wizard-panel>
+            <h2>Datos generales</h2>
+            <div class="gestion-grid">
+                <label>
+                    Codigo
+                    <input name="codigo" value="{{ gestion ? gestion.codigo : 'CUP 1-2026' }}" required>
+                </label>
+                <label>
+                    Nombre
+                    <input name="nombre" value="{{ gestion ? gestion.nombre : 'Curso Preuniversitario CUP 1-2026' }}" required>
+                </label>
+            </div>
+            <label>
+                Descripcion
+                <textarea name="descripcion" rows="3">{{ gestion ? gestion.descripcion : 'Convocatoria CUP correspondiente a la gestion CUP 1-2026.' }}</textarea>
+            </label>
+        </section>
+
+        <section class="gestion-panel" data-wizard-panel hidden>
+            <h2>Parametros academicos</h2>
+            <div class="gestion-grid gestion-grid--four">
+                <label>
+                    Cupo total
+                    <input type="number" name="cupoTotal" value="{{ gestion and gestion.configuracion ? gestion.configuracion.cupoTotal : 1000 }}" min="1" required>
+                </label>
+                <label>
+                    Max. estudiantes por grupo
+                    <input type="number" name="maxEstudiantesPorGrupo" value="{{ gestion and gestion.configuracion ? gestion.configuracion.maxEstudiantesPorGrupo : 70 }}" min="1" required>
+                </label>
+                <label>
+                    Max. grupos por docente
+                    <input type="number" name="maxGruposPorDocente" value="{{ gestion and gestion.configuracion ? gestion.configuracion.maxGruposPorDocente : 4 }}" min="1" max="4" required>
+                </label>
+                <label>
+                    Nota minima
+                    <input type="number" name="notaMinimaAprobacion" value="{{ gestion and gestion.configuracion ? gestion.configuracion.notaMinimaAprobacion : 60 }}" min="0" max="100" required>
+                </label>
+                <label>
+                    Examenes por materia
+                    <input type="number" name="cantidadExamenes" value="{{ gestion and gestion.configuracion ? gestion.configuracion.cantidadExamenes : 3 }}" min="3" max="3" required>
+                </label>
+            </div>
+            <div class="gestion-checks gestion-checks--cards">
+                <label><input type="checkbox" name="permiteReinscripcion" {{ gestion and gestion.configuracion and gestion.configuracion.permiteReinscripcion ? 'checked' : '' }}> <span>Permite reinscripcion</span></label>
+                <label><input type="checkbox" name="permiteCambioGrupo" {{ gestion and gestion.configuracion and gestion.configuracion.permiteCambioGrupo ? 'checked' : '' }}> <span>Permite cambio de grupo</span></label>
+                <label><input type="checkbox" name="generarBitacora" {{ not gestion or not gestion.configuracion or gestion.configuracion.generarBitacora ? 'checked' : '' }}> <span>Generar bitacora</span></label>
+            </div>
+        </section>
+
+        <section class="gestion-panel" data-wizard-panel hidden>
+            <h2>Cronograma academico</h2>
+            <div class="gestion-period-builder" data-periods-builder>
+                <div class="gestion-periods" data-periods-list>
+                    {% for periodo in periodsForForm %}
+                        {% set actividad = gestion ? periodo.tipoPeriodo : periodo.actividad %}
+                        {% set inicio = gestion ? periodo.fechaInicio|date('Y-m-d') : periodo.inicio %}
+                        {% set fin = gestion ? periodo.fechaFin|date('Y-m-d') : periodo.fin %}
+                        <div class="gestion-period-row" data-period-row>
+                            <label>
+                                Actividad
+                                <input name="periodos[{{ loop.index0 }}][actividad]" value="{{ actividad }}" placeholder="Examen parcial 1" required>
+                            </label>
+                            <label>
+                                Inicio
+                                <input type="date" name="periodos[{{ loop.index0 }}][inicio]" value="{{ inicio }}" required>
+                            </label>
+                            <label>
+                                Fin
+                                <input type="date" name="periodos[{{ loop.index0 }}][fin]" value="{{ fin }}" required>
+                            </label>
+                            <button class="gestion-icon-button" type="button" data-period-remove aria-label="Quitar actividad">
+                                <svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            </button>
+                        </div>
+                    {% else %}
+                        <div class="gestion-period-row" data-period-row>
+                            <label>
+                                Actividad
+                                <input name="periodos[0][actividad]" value="Inscripcion" required>
+                            </label>
+                            <label>
+                                Inicio
+                                <input type="date" name="periodos[0][inicio]" required>
+                            </label>
+                            <label>
+                                Fin
+                                <input type="date" name="periodos[0][fin]" required>
+                            </label>
+                            <button class="gestion-icon-button" type="button" data-period-remove aria-label="Quitar actividad">
+                                <svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="gestion-actions">
+                    <button class="gestion-button" type="button" data-period-add>Adicionar actividad</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="gestion-panel" data-wizard-panel hidden>
+            <h2>Carreras habilitadas</h2>
+            {% if catalogCareers|length > 0 %}
+                <div class="gestion-career-builder" data-careers-builder>
+                    <div class="gestion-careers" data-careers-list>
+                        {% if gestion and gestion.carreras|length > 0 %}
+                            {% for carreraGestion in gestion.carreras %}
+                                <div class="gestion-career-row" data-career-row>
+                                    <input type="hidden" name="carreras[{{ loop.index0 }}][habilitada]" value="1">
+                                    <label>
+                                        Carrera
+                                        <select name="carreras[{{ loop.index0 }}][id]" required>
+                                            <option value="">Seleccione una carrera</option>
+                                            {% for carrera in catalogCareers %}
+                                                <option value="{{ carrera.id }}" {{ carreraGestion.carrera.id == carrera.id ? 'selected' : '' }}>{{ carrera.codigo }} - {{ carrera.nombre }} / {{ carrera.modalidad ?? 'Sin modalidad' }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </label>
+                                    <label>
+                                        Cupo
+                                        <input type="number" name="carreras[{{ loop.index0 }}][cupo]" value="{{ carreraGestion.cupoCarrera }}" min="1" required>
+                                    </label>
+                                    <button class="gestion-icon-button" type="button" data-career-remove aria-label="Quitar carrera">
+                                        <svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                    </button>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="gestion-career-row" data-career-row>
+                                <input type="hidden" name="carreras[0][habilitada]" value="1">
+                                <label>
+                                    Carrera
+                                    <select name="carreras[0][id]" required>
+                                        <option value="">Seleccione una carrera</option>
+                                        {% for carrera in catalogCareers %}
+                                            <option value="{{ carrera.id }}">{{ carrera.codigo }} - {{ carrera.nombre }} / {{ carrera.modalidad ?? 'Sin modalidad' }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </label>
+                                <label>
+                                    Cupo
+                                    <input type="number" name="carreras[0][cupo]" min="1" required>
+                                </label>
+                                <button class="gestion-icon-button" type="button" data-career-remove aria-label="Quitar carrera">
+                                    <svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="gestion-actions">
+                        <button class="gestion-button" type="button" data-career-add>Adicionar carrera</button>
+                    </div>
+                    <template data-career-template>
+                        <div class="gestion-career-row" data-career-row>
+                            <input type="hidden" name="carreras[__index__][habilitada]" value="1">
+                            <label>
+                                Carrera
+                                <select name="carreras[__index__][id]" required>
+                                    <option value="">Seleccione una carrera</option>
+                                    {% for carrera in catalogCareers %}
+                                        <option value="{{ carrera.id }}">{{ carrera.codigo }} - {{ carrera.nombre }} / {{ carrera.modalidad ?? 'Sin modalidad' }}</option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                            <label>
+                                Cupo
+                                <input type="number" name="carreras[__index__][cupo]" min="1" required>
+                            </label>
+                            <button class="gestion-icon-button" type="button" data-career-remove aria-label="Quitar carrera">
+                                <svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            {% else %}
+                <p>No hay carreras activas. Registre carreras antes de configurar una gestion CUP.</p>
+            {% endif %}
+        </section>
+
+        <div class="gestion-wizard__footer">
+            <button class="gestion-button" type="button" data-wizard-prev>Anterior</button>
+            <button class="gestion-button gestion-button--primary" type="button" data-wizard-next>Siguiente</button>
+            <button class="gestion-button gestion-button--primary" type="submit" data-wizard-submit>Guardar gestion</button>
+            <a href="{{ path('gestion_index') }}" class="gestion-button">Cancelar</a>
+        </div>
+        </div>
+    </form>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Carreras{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=13">
+{% endblock %}
+
+{% block javascripts %}<script src="/assets/gestion/js/gestion-filters.js?v=9" defer></script>{% endblock %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Administracion academica</p>
+            <h1 class="app-content__title">Carreras</h1>
+        </div>
+        <a href="{{ path('carrera_new') }}" class="gestion-button gestion-button--primary">Nueva carrera</a>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    <section class="gestion-panel">
+        <form class="gestion-filters" data-gestion-filters data-filter-target="carreras">
+            <div class="gestion-filters__field">
+                <label>Buscar</label>
+                <input data-filter-field="texto" placeholder="Codigo, nombre o facultad">
+            </div>
+            <div class="gestion-filters__field">
+                <label>Modalidad</label>
+                <select data-filter-field="modalidad">
+                    <option value="">Todas</option>
+                    <option value="Presencial">Presencial</option>
+                    <option value="Virtual">Virtual</option>
+                    <option value="Semipresencial">Semipresencial</option>
+                </select>
+            </div>
+            <div class="gestion-filters__field">
+                <label>Estado</label>
+                <select data-filter-field="estado">
+                    <option value="">Todos</option>
+                    <option value="ACTIVA">Activa</option>
+                    <option value="INACTIVA">Inactiva</option>
+                </select>
+            </div>
+            <div class="gestion-filters__field gestion-filters__field--clear">
+                <label aria-hidden="true">Limpiar</label>
+                <button class="gestion-filters__clear" type="button" data-filter-clear aria-label="Limpiar filtros">
+                    <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m6 10 1 10h10l1-10"/><path d="M10 14v3"/><path d="M14 14v3"/></svg>
+                </button>
+            </div>
+        </form>
+        <div class="gestion-table-wrap">
+            <table class="gestion-table" data-gestion-filter-table="carreras">
+                <thead>
+                    <tr>
+                        <th>Codigo</th>
+                        <th>Nombre</th>
+                        <th>Facultad</th>
+                        <th>Modalidad</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for carrera in carreras %}
+                        <tr data-filter-row data-filter-texto="{{ carrera.codigo }} {{ carrera.nombre }} {{ carrera.facultad }}" data-filter-modalidad="{{ carrera.modalidad }}" data-filter-estado="{{ carrera.estado }}">
+                            <td>{{ carrera.codigo }}</td>
+                            <td>{{ carrera.nombre }}</td>
+                            <td>{{ carrera.facultad ?? '-' }}</td>
+                            <td>{{ carrera.modalidad ?? '-' }}</td>
+                            <td><span class="gestion-badge gestion-badge--{{ carrera.estado|lower }}">{{ carrera.estado|lower|capitalize }}</span></td>
+                            <td class="gestion-table__actions">
+                                <a class="gestion-action-button gestion-action-button--edit" href="{{ path('carrera_edit', {id: carrera.id}) }}" aria-label="Editar carrera" title="Editar">
+                                    <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                                </a>
+                                {% if carrera.active %}
+                                    <form method="post" action="{{ path('carrera_deactivate', {id: carrera.id}) }}">
+                                        <button class="gestion-link-button gestion-link-button--danger" type="submit" aria-label="Desactivar carrera" title="Desactivar">
+                                            <svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <form method="post" action="{{ path('carrera_activate', {id: carrera.id}) }}">
+                                        <button class="gestion-link-button gestion-link-button--toggle" type="submit" aria-label="Activar carrera" title="Activar">
+                                            <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <tr data-filter-empty {{ carreras ? 'hidden' : '' }}><td colspan="6">Todavia no hay carreras registradas.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}

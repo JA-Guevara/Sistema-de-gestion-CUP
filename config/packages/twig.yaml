@@ -1,10 +1,19 @@
 twig:
     default_path: '%kernel.project_dir%/templates'
     file_name_pattern: '*.twig'
+    date:
+        timezone: 'America/La_Paz'
     paths:
         '%kernel.project_dir%/src/Auth/UI/View': auth
         '%kernel.project_dir%/src/Home/UI/View': home
         '%kernel.project_dir%/src/Bitacora/UI/View': bitacora
+        '%kernel.project_dir%/src/Gestion/UI/View': gestion
+        '%kernel.project_dir%/src/Academico/Carrera/UI/View': carrera
+        '%kernel.project_dir%/src/Academico/Materia/UI/View': materia
+        '%kernel.project_dir%/src/Academico/Aula/UI/View': aula
+        '%kernel.project_dir%/src/Academico/Grupo/UI/View': grupo
+        '%kernel.project_dir%/src/Academico/Horario/UI/View': horario
+        '%kernel.project_dir%/src/Perfil/UI/View': perfil
 
 when@test:
     twig:

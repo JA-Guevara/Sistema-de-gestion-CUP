@@ -26,7 +26,7 @@
                 </div>
 
                 <h2 class="auth-hero__tagline">
-                    Tu camino a la <span class="auth-hero__accent">universidad</span> empieza aqui.
+                    Tu camino a la universidad empieza aqui.
                 </h2>
 
                 <div class="auth-hero__program">
@@ -72,15 +72,20 @@
 
                     <div class="auth-form__field">
                         <label for="login-password" class="sr-only">Contrasena</label>
-                        <input
-                            id="login-password"
-                            class="auth-form__input"
-                            type="password"
-                            name="password"
-                            placeholder="Contrasena"
-                            autocomplete="current-password"
-                            required
-                        >
+                        <div class="auth-password-field">
+                            <input
+                                id="login-password"
+                                class="auth-form__input auth-password-field__input"
+                                type="password"
+                                name="password"
+                                placeholder="Contrasena"
+                                autocomplete="current-password"
+                                required
+                            >
+                            <button class="auth-password-field__toggle" type="button" data-password-toggle aria-label="Mostrar contrasena" title="Mostrar contrasena">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
                     </div>
 
                     <button type="submit" class="auth-form__submit">Iniciar sesion</button>
@@ -114,5 +119,5 @@
 {% endblock %}
 
 {% block javascripts %}
-    <script src="/assets/auth/js/auth.js" defer></script>
+    <script src="/assets/auth/js/auth.js?v=2" defer></script>
 {% endblock %}

@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    const MIN_PASSWORD_LENGTH = 6;
+    const MIN_PASSWORD_LENGTH = 8;
 
     function bindAuthForm(form) {
         if (!form) {
@@ -26,26 +26,70 @@
 
     function collectErrors(form) {
         const errors = [];
+        const requiredFields = Array.prototype.slice.call(form.querySelectorAll('[required]'));
         const emailField = form.querySelector('input[name="email"]');
-        const nameField = form.querySelector('input[name="name"]');
         const passwordField = form.querySelector('input[name="password"]');
+        const confirmationField = form.querySelector('input[name="passwordConfirmation"]');
 
-        if (emailField && !isValidEmail(emailField.value)) {
-            errors.push({ field: emailField, message: 'Ingresá un correo válido.' });
+        requiredFields.forEach(function (field) {
+            if (String(field.value || '').trim() === '') {
+                errors.push({ field: field, message: 'Este campo es obligatorio.' });
+            }
+        });
+
+        if (emailField && emailField.value.trim() !== '' && !isValidEmail(emailField.value)) {
+            errors.push({ field: emailField, message: 'Ingresa un correo valido.' });
         }
 
-        if (nameField && nameField.value.trim() === '') {
-            errors.push({ field: nameField, message: 'El nombre es obligatorio.' });
+        if (passwordField && passwordField.hasAttribute('data-strong-password') && passwordField.value.trim() !== '') {
+            const passwordError = passwordStrengthError(passwordField.value);
+            if (passwordError !== null) {
+                errors.push({ field: passwordField, message: passwordError });
+            }
         }
 
-        if (passwordField && passwordField.value.length < MIN_PASSWORD_LENGTH) {
-            errors.push({
-                field: passwordField,
-                message: 'La contraseña debe tener al menos ' + MIN_PASSWORD_LENGTH + ' caracteres.',
-            });
+        if (passwordField && confirmationField && confirmationField.value !== '' && passwordField.value !== confirmationField.value) {
+            errors.push({ field: confirmationField, message: 'Las contrasenas no coinciden.' });
         }
 
-        return errors;
+        return dedupeErrors(errors);
+    }
+
+    function passwordStrengthError(value) {
+        if (value.length < MIN_PASSWORD_LENGTH) {
+            return 'La contrasena debe tener al menos ' + MIN_PASSWORD_LENGTH + ' caracteres.';
+        }
+
+        if (!/[a-z]/.test(value)) {
+            return 'La contrasena debe incluir una letra minuscula.';
+        }
+
+        if (!/[A-Z]/.test(value)) {
+            return 'La contrasena debe incluir una letra mayuscula.';
+        }
+
+        if (!/\d/.test(value)) {
+            return 'La contrasena debe incluir un numero.';
+        }
+
+        if (!/[^A-Za-z0-9]/.test(value)) {
+            return 'La contrasena debe incluir un simbolo.';
+        }
+
+        return null;
+    }
+
+    function dedupeErrors(errors) {
+        const seen = new Set();
+
+        return errors.filter(function (error) {
+            if (seen.has(error.field)) {
+                return false;
+            }
+
+            seen.add(error.field);
+            return true;
+        });
     }
 
     function isValidEmail(value) {
@@ -53,15 +97,12 @@
             return false;
         }
 
-        // Pragmatic regex: matches the vast majority of real-world emails
-        // without trying to be RFC-perfect. Server validates definitively.
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
     }
 
     function renderFieldError(field, message) {
         const hint = document.createElement('p');
         hint.className = 'auth-form__hint auth-form__hint--error';
-        hint.style.color = 'var(--color-error-text)';
         hint.textContent = message;
         hint.dataset.authError = 'true';
 
@@ -77,7 +118,24 @@
         });
     }
 
+    function bindPasswordToggle(button) {
+        const field = button.closest('.auth-password-field');
+        const input = field ? field.querySelector('input[type="password"], input[type="text"]') : null;
+
+        if (!input) {
+            return;
+        }
+
+        button.addEventListener('click', function () {
+            const shouldShow = input.type === 'password';
+            input.type = shouldShow ? 'text' : 'password';
+            button.setAttribute('aria-label', shouldShow ? 'Ocultar contrasena' : 'Mostrar contrasena');
+            button.setAttribute('title', shouldShow ? 'Ocultar contrasena' : 'Mostrar contrasena');
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('form[data-auth-form]').forEach(bindAuthForm);
+        document.querySelectorAll('[data-password-toggle]').forEach(bindPasswordToggle);
     });
-})();
+}());

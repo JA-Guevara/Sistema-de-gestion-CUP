@@ -1,0 +1,54 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}{{ aula ? 'Editar aula' : 'Nueva aula' }}{% endblock %}
+
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=4">{% endblock %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Administracion academica</p>
+            <h1 class="app-content__title">{{ aula ? 'Editar aula' : 'Nueva aula' }}</h1>
+        </div>
+        <a href="{{ path('aula_index') }}" class="gestion-button">Volver</a>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    <form method="post" class="gestion-form">
+        <section class="gestion-panel">
+            <h2>Datos de aula</h2>
+            <div class="gestion-grid">
+                <label>Codigo <input name="codigo" value="{{ aula ? aula.codigo : '' }}" placeholder="A-101" required></label>
+                <label>Nombre <input name="nombre" value="{{ aula ? aula.nombre : '' }}" placeholder="Aula 101" required></label>
+                <label>Piso <input type="number" name="piso" value="{{ aula ? aula.piso : 0 }}" min="0" required></label>
+                <label>Capacidad <input type="number" name="capacidad" value="{{ aula ? aula.capacidad : 70 }}" min="1" required></label>
+                <label>Ubicacion <input name="ubicacion" value="{{ aula ? aula.ubicacion : '' }}" placeholder="Modulo 1"></label>
+            </div>
+        </section>
+        <div class="gestion-actions">
+            <button class="gestion-button gestion-button--primary" type="submit">Guardar aula</button>
+            <a href="{{ path('aula_index') }}" class="gestion-button">Cancelar</a>
+        </div>
+    </form>
+
+    {% if not aula %}
+        <form method="post" action="{{ path('aula_generate') }}" class="gestion-form">
+            <section class="gestion-panel">
+                <h2>Crear aulas por rango</h2>
+                <div class="gestion-grid gestion-grid--three">
+                    <label>Prefijo de codigo <input name="prefijoCodigo" value="A" placeholder="A" required></label>
+                    <label>Piso <input type="number" name="piso" value="1" min="0" required></label>
+                    <label>Capacidad <input type="number" name="capacidad" value="70" min="1" required></label>
+                    <label>Desde <input type="number" name="numeroInicio" value="101" min="1" required></label>
+                    <label>Hasta <input type="number" name="numeroFin" value="110" min="1" required></label>
+                    <label>Ubicacion <input name="ubicacion" value="Modulo 1" placeholder="Modulo 1"></label>
+                </div>
+                <p class="gestion-help">Ejemplo: prefijo A, desde 101 hasta 110 crea A-101, A-102 ... A-110 para el piso seleccionado.</p>
+            </section>
+            <div class="gestion-actions">
+                <button class="gestion-button gestion-button--primary" type="submit">Generar aulas</button>
+            </div>
+        </form>
+    {% endif %}
+{% endblock %}

@@ -6,6 +6,7 @@ namespace App\Auth\Application\UseCase;
 
 use App\Auth\Domain\Exception\EmailAlreadyRegistered;
 use App\Auth\Domain\Exception\InvalidRegistrationData;
+use App\Auth\Domain\Security\PasswordPolicy;
 use App\Auth\Entity\User;
 use App\Auth\Infrastructure\Persistence\UserRepository;
 use App\Auth\UI\Request\RegisterRequest;
@@ -15,10 +16,10 @@ use App\Auth\UI\Request\RegisterRequest;
  */
 final readonly class RegisterUser
 {
-    private const MIN_PASSWORD_LENGTH = 6;
-
-    public function __construct(private UserRepository $users)
-    {
+    public function __construct(
+        private UserRepository $users,
+        private PasswordPolicy $passwordPolicy,
+    ) {
     }
 
     /**
@@ -32,7 +33,7 @@ final readonly class RegisterUser
         $lastName = trim($input->lastName);
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidRegistrationData('El correo no es válido.');
+            throw new InvalidRegistrationData('El correo no es valido.');
         }
 
         if ($firstName === '') {
@@ -43,11 +44,7 @@ final readonly class RegisterUser
             throw new InvalidRegistrationData('El apellido es obligatorio.');
         }
 
-        if (strlen($input->password) < self::MIN_PASSWORD_LENGTH) {
-            throw new InvalidRegistrationData(
-                sprintf('La contraseña debe tener al menos %d caracteres.', self::MIN_PASSWORD_LENGTH)
-            );
-        }
+        $this->passwordPolicy->validate($input->password);
 
         if ($this->users->findByEmail($email) !== null) {
             throw new EmailAlreadyRegistered('Ya existe un usuario con ese correo.');

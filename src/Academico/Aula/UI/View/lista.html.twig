@@ -1,0 +1,112 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Aulas{% endblock %}
+
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=14">{% endblock %}
+
+{% block javascripts %}
+    <script src="/assets/gestion/js/gestion-filters.js?v=9" defer></script>
+    <script src="/assets/gestion/js/gestion-bulk-actions.js?v=9" defer></script>
+{% endblock %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Administracion academica</p>
+            <h1 class="app-content__title">Aulas</h1>
+        </div>
+        <a href="{{ path('aula_new') }}" class="gestion-button gestion-button--primary">Nueva aula</a>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    <section class="gestion-panel" data-bulk-root>
+        <form class="gestion-filters" data-gestion-filters data-filter-target="aulas">
+            <div class="gestion-filters__field">
+                <label>Buscar</label>
+                <input data-filter-field="texto" placeholder="Codigo, nombre o ubicacion">
+            </div>
+            <div class="gestion-filters__field">
+                <label>Piso</label>
+                <input type="number" data-filter-field="piso" placeholder="0">
+            </div>
+            <div class="gestion-filters__field">
+                <label>Estado</label>
+                <select data-filter-field="estado">
+                    <option value="">Todos</option>
+                    <option value="ACTIVA">Activa</option>
+                    <option value="INACTIVA">Inactiva</option>
+                </select>
+            </div>
+            <div class="gestion-filters__field gestion-filters__field--clear">
+                <label aria-hidden="true">Limpiar</label>
+                <button class="gestion-filters__clear" type="button" data-filter-clear aria-label="Limpiar filtros">
+                    <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m6 10 1 10h10l1-10"/><path d="M10 14v3"/><path d="M14 14v3"/></svg>
+                </button>
+            </div>
+        </form>
+        <form id="aula-bulk-form" method="post" action="{{ path('aula_bulk_state') }}" class="gestion-bulk-actions" data-bulk-actions hidden>
+            <div class="gestion-bulk-actions__info">
+                <span class="gestion-bulk-actions__count"><strong data-bulk-count>0</strong> aulas seleccionadas</span>
+                <button type="button" class="gestion-bulk-actions__clear" data-bulk-clear>Deseleccionar</button>
+            </div>
+            <div class="gestion-bulk-actions__buttons">
+                <button type="submit" name="accion" value="ACTIVATE" class="gestion-button gestion-button--soft" data-bulk-submit disabled>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                    Activar
+                </button>
+                <button type="submit" name="accion" value="DEACTIVATE" class="gestion-button gestion-button--danger" data-bulk-submit disabled>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    Desactivar
+                </button>
+            </div>
+        </form>
+        <div class="gestion-table-wrap">
+            <table class="gestion-table gestion-table--stack" data-gestion-filter-table="aulas">
+                <thead>
+                    <tr>
+                        <th class="gestion-col--center"><input class="gestion-bulk-check" type="checkbox" data-bulk-check-all aria-label="Seleccionar aulas visibles"></th>
+                        <th class="gestion-col--text">Codigo</th>
+                        <th class="gestion-col--text">Nombre</th>
+                        <th class="gestion-col--num">Piso</th>
+                        <th class="gestion-col--num">Capacidad</th>
+                        <th class="gestion-col--text">Ubicacion</th>
+                        <th class="gestion-col--center">Estado</th>
+                        <th class="gestion-col--center"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for aula in aulas %}
+                        <tr data-filter-row data-filter-texto="{{ aula.codigo }} {{ aula.nombre }} {{ aula.ubicacion }}" data-filter-piso="{{ aula.piso }}" data-filter-estado="{{ aula.estado }}">
+                            <td class="gestion-col--center" data-label="Seleccionar"><input class="gestion-bulk-check" type="checkbox" name="ids[]" value="{{ aula.id }}" form="aula-bulk-form" data-bulk-item aria-label="Seleccionar aula {{ aula.codigo }}"></td>
+                            <td class="gestion-col--text" data-label="Codigo">{{ aula.codigo }}</td>
+                            <td class="gestion-col--text" data-label="Nombre">{{ aula.nombre }}</td>
+                            <td class="gestion-col--num" data-label="Piso">{{ aula.piso }}</td>
+                            <td class="gestion-col--num" data-label="Capacidad">{{ aula.capacidad }}</td>
+                            <td class="gestion-col--text" data-label="Ubicacion">{{ aula.ubicacion ?? '-' }}</td>
+                            <td class="gestion-col--center" data-label="Estado"><span class="gestion-badge gestion-badge--{{ aula.estado|lower }}">{{ aula.estado|lower|capitalize }}</span></td>
+                            <td class="gestion-table__actions" data-label="Acciones">
+                                <a class="gestion-action-button gestion-action-button--view" href="{{ path('aula_show', {id: aula.id}) }}" aria-label="Ver aula" title="Ver">
+                                    <svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </a>
+                                <a class="gestion-action-button gestion-action-button--edit" href="{{ path('aula_edit', {id: aula.id}) }}" aria-label="Editar aula" title="Editar">
+                                    <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                                </a>
+                                <form method="post" action="{{ path('aula_toggle', {id: aula.id}) }}">
+                                    <button class="gestion-link-button {{ aula.active ? 'gestion-link-button--danger' : 'gestion-link-button--toggle' }}" type="submit" aria-label="{{ aula.active ? 'Desactivar aula' : 'Activar aula' }}" title="{{ aula.active ? 'Desactivar' : 'Activar' }}">
+                                        {% if aula.active %}
+                                            <svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                        {% else %}
+                                            <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <tr data-filter-empty {{ aulas ? 'hidden' : '' }}><td colspan="8">Todavia no hay aulas registradas.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}
