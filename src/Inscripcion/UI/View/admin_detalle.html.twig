@@ -1,0 +1,140 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Postulante {{ inscripcion.ci }} · {{ parent() }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css">
+{% endblock %}
+
+{% block app_content %}
+    <div class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">CUP FICCT</p>
+            <h1 class="app-content__title">Postulante: {{ inscripcion.nombres }} {{ inscripcion.apellidos }}</h1>
+            <p class="gestion-help" style="margin:4px 0 0">CI: {{ inscripcion.ci }}</p>
+        </div>
+        <div class="gestion-head__actions">
+            <a class="gestion-button gestion-button--primary" href="{{ path('inscripcion_edit', {id: inscripcion.id}) }}">Editar</a>
+        </div>
+    </div>
+
+    <section class="app-profile">
+        <dl class="app-profile__dl">
+            <dt>CI</dt>
+            <dd>{{ inscripcion.ci }}</dd>
+
+            <dt>Nombres</dt>
+            <dd>{{ inscripcion.nombres }}</dd>
+
+            <dt>Apellidos</dt>
+            <dd>{{ inscripcion.apellidos }}</dd>
+
+            <dt>Fecha de nacimiento</dt>
+            <dd>{{ inscripcion.fechaNacimiento|date('d/m/Y') }}</dd>
+
+            <dt>Sexo</dt>
+            <dd>{{ inscripcion.sexo == 'M' ? 'Masculino' : 'Femenino' }}</dd>
+
+            <dt>Direccion</dt>
+            <dd>{{ inscripcion.direccion ?? '—' }}</dd>
+
+            <dt>Telefono</dt>
+            <dd>{{ inscripcion.telefono ?? '—' }}</dd>
+
+            <dt>Email</dt>
+            <dd>{{ inscripcion.email }}</dd>
+
+            <dt>Colegio de procedencia</dt>
+            <dd>{{ inscripcion.colegioProcedencia ?? '—' }}</dd>
+
+            <dt>Ciudad</dt>
+            <dd>{{ inscripcion.ciudad ?? '—' }}</dd>
+
+            <dt>Titulo bachiller</dt>
+            <dd>{{ inscripcion.tituloBachiller ? 'Si' : 'No' }}</dd>
+
+            <dt>Turno preferencia</dt>
+            <dd>{{ inscripcion.turnoPreferencia ?? 'Indiferente' }}</dd>
+
+            <dt>Otros</dt>
+            <dd>{{ inscripcion.otros ?? '—' }}</dd>
+
+            <dt>Carrera postulada</dt>
+            <dd>{{ inscripcion.carrera.nombre }} ({{ inscripcion.carrera.codigo }})</dd>
+
+            <dt>Gestion</dt>
+            <dd>{{ inscripcion.gestion.codigo }}</dd>
+
+            <dt>Estado</dt>
+            <dd>
+                <span class="gestion-badge {{ inscripcion.estado == 'COMPLETADA' ? 'gestion-badge--activa' : 'gestion-badge--borrador' }}">{{ inscripcion.estado }}</span>
+            </dd>
+
+            <dt>Fecha de inscripcion</dt>
+            <dd>{{ inscripcion.createdAt|date('d/m/Y H:i') }}</dd>
+        </dl>
+    </section>
+
+    {# Documentos #}
+    <div class="gestion-panel" style="margin-top:18px">
+        <div class="gestion-panel__header">
+            <h2>Documentos (10 requisitos)</h2>
+        </div>
+
+        {% if inscripcion.documentos is defined and inscripcion.documentos|length > 0 %}
+            <div class="gestion-table-wrap">
+                <table class="gestion-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Archivo</th>
+                            <th>Tamaño</th>
+                            <th>Subido</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doc in inscripcion.documentos %}
+                            <tr>
+                                <td>{{ doc.nombre }}</td>
+                                <td><a href="/{{ doc.archivoRuta }}" target="_blank">{{ doc.archivoRuta|split('/')|last }}</a></td>
+                                <td>{{ (doc.archivoTamanio / 1024)|round(1) }} KB</td>
+                                <td>{{ doc.createdAt|date('d/m/Y H:i') }}</td>
+                                <td class="gestion-table__actions">
+                                    <form method="post" action="{{ path('inscripcion_documento_eliminar', {documentoId: doc.id}) }}" onsubmit="return confirm('¿Eliminar este documento?')">
+                                        <button class="gestion-action-button gestion-action-button--danger" type="submit" title="Eliminar">
+                                            <svg viewBox="0 0 24 24"><polyline points="3 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p style="padding:18px;color:var(--ds-text-muted)">No se han subido documentos.</p>
+        {% endif %}
+
+        <form method="post" action="{{ path('inscripcion_documento_subir', {id: inscripcion.id}) }}" enctype="multipart/form-data" class="gestion-form" style="padding:0 18px 18px;border-top:1px solid var(--ds-border);padding-top:14px;margin-top:4px">
+            <div class="gestion-grid" style="grid-template-columns:1fr 1fr auto">
+                <label>Nombre del documento
+                    <input type="text" name="nombreDocumento" placeholder="Ej: Titulo bachiller" required>
+                </label>
+                <label>Archivo (PDF, PNG, JPG, DOC)
+                    <input type="file" name="archivo" required accept=".pdf,.png,.jpg,.jpeg,.doc,.docx">
+                </label>
+                <label>&nbsp;</label>
+                <button class="gestion-button gestion-button--primary" type="submit" style="align-self:end">Subir</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="gestion-page-actions">
+        <form method="post" action="{{ path('inscripcion_delete', {id: inscripcion.id}) }}" onsubmit="return confirm('¿Eliminar permanentemente esta inscripcion?')">
+            <button class="gestion-button gestion-button--danger" type="submit">Eliminar inscripcion</button>
+        </form>
+        <a class="gestion-button" href="{{ path('inscripcion_admin') }}">Volver al listado</a>
+    </div>
+{% endblock %}

@@ -14,6 +14,8 @@ twig:
         '%kernel.project_dir%/src/Academico/Grupo/UI/View': grupo
         '%kernel.project_dir%/src/Academico/Horario/UI/View': horario
         '%kernel.project_dir%/src/Perfil/UI/View': perfil
+        '%kernel.project_dir%/src/Inscripcion/UI/View': inscripcion
+        '%kernel.project_dir%/src/Dashboard/UI/View': dashboard
 
 when@test:
     twig:

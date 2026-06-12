@@ -1,0 +1,80 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Postulantes · {{ parent() }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css">
+{% endblock %}
+
+{% block app_content %}
+    <div class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">CUP FICCT</p>
+            <h1 class="app-content__title">Postulantes</h1>
+            {% if gestion %}
+                <p class="gestion-help" style="margin:4px 0 0">Gestion: <strong>{{ gestion.codigo }}</strong></p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="gestion-toolbar">
+        <form method="get" action="{{ path('inscripcion_buscar') }}" class="gestion-filters">
+            <div class="gestion-filters__field">
+                <label>Buscar</label>
+                <input type="text" name="q" placeholder="CI, nombres o email..." value="{{ searchTerm ?? '' }}">
+            </div>
+            <div class="gestion-filters__field">
+                <label>&nbsp;</label>
+                <button class="gestion-button gestion-button--primary" type="submit">Buscar</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="gestion-table-wrap">
+        <table class="gestion-table gestion-table--stack">
+            <thead>
+                <tr>
+                    <th>CI</th>
+                    <th>Nombres</th>
+                    <th>Apellidos</th>
+                    <th>Email</th>
+                    <th>Carrera</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inscripcion in inscripciones %}
+                    <tr>
+                        <td data-label="CI">{{ inscripcion.ci }}</td>
+                        <td data-label="Nombres">{{ inscripcion.nombres }}</td>
+                        <td data-label="Apellidos">{{ inscripcion.apellidos }}</td>
+                        <td data-label="Email">{{ inscripcion.email }}</td>
+                        <td data-label="Carrera">{{ inscripcion.carrera.nombre }}</td>
+                        <td data-label="Estado">
+                            <span class="gestion-badge {{ inscripcion.estado == 'COMPLETADA' ? 'gestion-badge--activa' : 'gestion-badge--borrador' }}">{{ inscripcion.estado }}</span>
+                        </td>
+                        <td data-label="Acciones" class="gestion-table__actions">
+                            <a class="gestion-action-button gestion-action-button--view" href="{{ path('inscripcion_admin_detalle', {id: inscripcion.id}) }}" title="Ver detalle">
+                                <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </a>
+                            <a class="gestion-action-button gestion-action-button--edit" href="{{ path('inscripcion_edit', {id: inscripcion.id}) }}" title="Editar">
+                                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </a>
+                            <form method="post" action="{{ path('inscripcion_delete', {id: inscripcion.id}) }}" style="display:inline" onsubmit="return confirm('¿Eliminar esta inscripcion?')">
+                                <button class="gestion-action-button gestion-action-button--danger" type="submit" title="Eliminar">
+                                    <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align:center;padding:32px;color:var(--ds-text-muted)">No hay postulantes registrados.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -56,4 +56,15 @@ final readonly class GrupoRepository
     {
         return $this->entityManager->getRepository(Grupo::class)->findBy([], ['createdAt' => 'DESC']);
     }
+
+    public function countByGestion(int $gestionId): int
+    {
+        return (int) $this->entityManager->createQueryBuilder()
+            ->select('COUNT(g.id)')
+            ->from(Grupo::class, 'g')
+            ->where('g.gestion = :gestionId')
+            ->setParameter('gestionId', $gestionId)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

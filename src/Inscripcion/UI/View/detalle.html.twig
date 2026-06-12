@@ -1,0 +1,70 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Mi inscripcion · {{ parent() }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css">
+{% endblock %}
+
+{% block app_content %}
+    <section class="app-content__greeting">
+        <p class="app-content__greeting-eyebrow">CUP FICCT</p>
+        <h1 class="app-content__title">Mi inscripcion CUP</h1>
+        <p class="app-content__subtitle">
+            Estado: <span class="gestion-badge {{ inscripcion.estado == 'COMPLETADA' ? 'gestion-badge--activa' : 'gestion-badge--borrador' }}">{{ inscripcion.estado }}</span>
+        </p>
+    </section>
+
+    <section class="app-profile">
+        <div class="app-profile__header">
+            <div class="app-profile__avatar" aria-hidden="true">{{ inscripcion.nombres|first }}{{ inscripcion.apellidos|first }}</div>
+            <div>
+                <h2 class="app-profile__name">{{ inscripcion.nombres }} {{ inscripcion.apellidos }}</h2>
+                <p class="app-profile__email">{{ inscripcion.email }}</p>
+            </div>
+        </div>
+
+        <dl class="app-profile__dl">
+            <dt>CI</dt>
+            <dd>{{ inscripcion.ci }}</dd>
+
+            <dt>Fecha de nacimiento</dt>
+            <dd>{{ inscripcion.fechaNacimiento|date('d/m/Y') }}</dd>
+
+            <dt>Sexo</dt>
+            <dd>{{ inscripcion.sexo == 'M' ? 'Masculino' : 'Femenino' }}</dd>
+
+            <dt>Direccion</dt>
+            <dd>{{ inscripcion.direccion ?? '—' }}</dd>
+
+            <dt>Telefono</dt>
+            <dd>{{ inscripcion.telefono ?? '—' }}</dd>
+
+            <dt>Carrera</dt>
+            <dd>{{ inscripcion.carrera.nombre }}</dd>
+
+            <dt>Turno preferencia</dt>
+            <dd>{{ inscripcion.turnoPreferencia ?? 'Indiferente' }}</dd>
+
+            <dt>Colegio de procedencia</dt>
+            <dd>{{ inscripcion.colegioProcedencia ?? '—' }}</dd>
+
+            <dt>Ciudad</dt>
+            <dd>{{ inscripcion.ciudad ?? '—' }}</dd>
+
+            <dt>Titulo bachiller</dt>
+            <dd>{{ inscripcion.tituloBachiller ? 'Si' : 'No' }}</dd>
+
+            <dt>Otros</dt>
+            <dd>{{ inscripcion.otros ?? '—' }}</dd>
+
+            <dt>Fecha de inscripcion</dt>
+            <dd>{{ inscripcion.createdAt|date('d/m/Y H:i') }}</dd>
+        </dl>
+    </section>
+
+    <div class="gestion-page-actions">
+        <a class="gestion-button" href="{{ path('home') }}">Volver al inicio</a>
+    </div>
+{% endblock %}

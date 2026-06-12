@@ -68,6 +68,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Academico/Horario/Domain/Entity'
                 prefix: 'App\Academico\Horario\Domain\Entity'
                 alias: Horario
+            Inscripcion:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Inscripcion/Domain/Entity'
+                prefix: 'App\Inscripcion\Domain\Entity'
+                alias: Inscripcion
 
 when@test:
     doctrine:

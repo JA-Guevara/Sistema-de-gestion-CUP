@@ -1,0 +1,124 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Pre-inscripcion CUP · {{ parent() }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css">
+{% endblock %}
+
+{% block app_content %}
+    <section class="app-content__greeting">
+        <p class="app-content__greeting-eyebrow">CUP FICCT</p>
+        <h1 class="app-content__title">Pre-inscripcion CUP</h1>
+        {% if gestion is null or not inscripcionAbierta %}
+            <p class="app-content__subtitle" style="color: var(--ds-danger, #b42318);">
+                Las inscripciones no estan abiertas en este momento.
+            </p>
+        {% else %}
+            <p class="app-content__subtitle">
+                Completa tus datos para postular al curso preuniversitario.
+                Gestion: <strong>{{ gestion.codigo }}</strong>
+            </p>
+        {% endif %}
+    </section>
+
+    {% if gestion is not null and inscripcionAbierta %}
+        <form method="post" class="gestion-form">
+            <div class="gestion-panel">
+                <h2>Datos personales</h2>
+
+                <div class="gestion-grid">
+                    <label>CI <span style="color:var(--ds-danger)">*</span>
+                        <input type="text" name="ci" maxlength="20" required>
+                    </label>
+                    <label>Fecha de nacimiento <span style="color:var(--ds-danger)">*</span>
+                        <input type="date" name="fechaNacimiento" required>
+                    </label>
+                </div>
+
+                <div class="gestion-grid">
+                    <label>Nombres <span style="color:var(--ds-danger)">*</span>
+                        <input type="text" name="nombres" maxlength="120" value="{{ user.firstName }}" required>
+                    </label>
+                    <label>Apellidos <span style="color:var(--ds-danger)">*</span>
+                        <input type="text" name="apellidos" maxlength="120" value="{{ user.lastName }}" required>
+                    </label>
+                </div>
+
+                <div class="gestion-grid">
+                    <label>Sexo <span style="color:var(--ds-danger)">*</span>
+                        <select name="sexo" required>
+                            <option value="">Seleccionar</option>
+                            <option value="M">Masculino</option>
+                            <option value="F">Femenino</option>
+                        </select>
+                    </label>
+                    <label>Telefono
+                        <input type="tel" name="telefono" maxlength="20">
+                    </label>
+                </div>
+
+                <label>Correo electronico <span style="color:var(--ds-danger)">*</span>
+                    <input type="email" name="email" maxlength="180" value="{{ user.email }}" required>
+                </label>
+
+                <label>Direccion
+                    <textarea name="direccion" rows="3"></textarea>
+                </label>
+            </div>
+
+            <div class="gestion-panel">
+                <h2>Procedencia</h2>
+
+                <div class="gestion-grid">
+                    <label>Colegio de procedencia
+                        <input type="text" name="colegioProcedencia" maxlength="120">
+                    </label>
+                    <label>Ciudad
+                        <input type="text" name="ciudad" maxlength="80">
+                    </label>
+                </div>
+
+                <div class="gestion-checks">
+                    <label>
+                        <input type="checkbox" name="tituloBachiller" value="1">
+                        <span>Poseo titulo de bachiller</span>
+                    </label>
+                </div>
+
+                <label>Otros (informacion adicional)
+                    <textarea name="otros" rows="3" placeholder="Cualquier otro dato relevante..."></textarea>
+                </label>
+            </div>
+
+            <div class="gestion-panel">
+                <h2>Postulacion</h2>
+
+                <div class="gestion-grid">
+                    <label>Carrera a la que postula <span style="color:var(--ds-danger)">*</span>
+                        <select name="carrera" required>
+                            <option value="">Seleccionar</option>
+                            {% for carrera in carreras %}
+                                <option value="{{ carrera.id }}">{{ carrera.nombre }} ({{ carrera.codigo }})</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label>Turno de preferencia
+                        <select name="turnoPreferencia">
+                            <option value="">Indiferente</option>
+                            <option value="MANANA">Manana</option>
+                            <option value="TARDE">Tarde</option>
+                            <option value="NOCHE">Noche</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+
+            <div class="gestion-page-actions">
+                <button class="gestion-button gestion-button--primary" type="submit">Enviar pre-inscripcion</button>
+                <a class="gestion-button" href="{{ path('home') }}">Cancelar</a>
+            </div>
+        </form>
+    {% endif %}
+{% endblock %}

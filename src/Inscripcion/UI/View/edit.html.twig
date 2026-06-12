@@ -1,0 +1,96 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Editar inscripcion · {{ parent() }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css">
+{% endblock %}
+
+{% block app_content %}
+    <div class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">CUP FICCT</p>
+            <h1 class="app-content__title">Editar inscripcion: {{ inscripcion.ci }}</h1>
+        </div>
+    </div>
+
+    <form method="post" class="gestion-form">
+        <div class="gestion-panel">
+            <h2>Datos del postulante</h2>
+
+            <div class="gestion-grid">
+                <label>Nombres <span style="color:var(--ds-danger)">*</span>
+                    <input type="text" name="nombres" maxlength="120" value="{{ inscripcion.nombres }}" required>
+                </label>
+                <label>Apellidos <span style="color:var(--ds-danger)">*</span>
+                    <input type="text" name="apellidos" maxlength="120" value="{{ inscripcion.apellidos }}" required>
+                </label>
+            </div>
+
+            <label>Correo electronico <span style="color:var(--ds-danger)">*</span>
+                <input type="email" name="email" maxlength="180" value="{{ inscripcion.email }}" required>
+            </label>
+
+            <div class="gestion-grid">
+                <label>Telefono
+                    <input type="tel" name="telefono" maxlength="20" value="{{ inscripcion.telefono ?? '' }}">
+                </label>
+                <label>Direccion
+                    <input type="text" name="direccion" value="{{ inscripcion.direccion ?? '' }}">
+                </label>
+            </div>
+        </div>
+
+        <div class="gestion-panel">
+            <h2>Procedencia</h2>
+
+            <div class="gestion-grid">
+                <label>Colegio de procedencia
+                    <input type="text" name="colegioProcedencia" maxlength="120" value="{{ inscripcion.colegioProcedencia ?? '' }}">
+                </label>
+                <label>Ciudad
+                    <input type="text" name="ciudad" maxlength="80" value="{{ inscripcion.ciudad ?? '' }}">
+                </label>
+            </div>
+
+            <div class="gestion-checks">
+                <label>
+                    <input type="checkbox" name="tituloBachiller" value="1" {{ inscripcion.tituloBachiller ? 'checked' : '' }}>
+                    <span>Poseo titulo de bachiller</span>
+                </label>
+            </div>
+
+            <label>Otros (informacion adicional)
+                <textarea name="otros" rows="3" placeholder="Cualquier otro dato relevante...">{{ inscripcion.otros ?? '' }}</textarea>
+            </label>
+        </div>
+
+        <div class="gestion-panel">
+            <h2>Postulacion</h2>
+
+            <div class="gestion-grid">
+                <label>Carrera
+                    <select name="carrera" required>
+                        {% for carrera in carreras %}
+                            <option value="{{ carrera.id }}" {{ inscripcion.carrera.id == carrera.id ? 'selected' : '' }}>{{ carrera.nombre }} ({{ carrera.codigo }})</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Turno de preferencia
+                    <select name="turnoPreferencia">
+                        <option value="">Indiferente</option>
+                        <option value="MANANA" {{ inscripcion.turnoPreferencia == 'MANANA' ? 'selected' : '' }}>Manana</option>
+                        <option value="TARDE" {{ inscripcion.turnoPreferencia == 'TARDE' ? 'selected' : '' }}>Tarde</option>
+                        <option value="NOCHE" {{ inscripcion.turnoPreferencia == 'NOCHE' ? 'selected' : '' }}>Noche</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+
+        <div class="gestion-page-actions">
+            <button class="gestion-button gestion-button--primary" type="submit">Guardar cambios</button>
+            <a class="gestion-button" href="{{ path('inscripcion_admin') }}">Cancelar</a>
+        </div>
+    </form>
+{% endblock %}
