@@ -1,113 +1,167 @@
 {% extends 'app_base.html.twig' %}
 
-{% block title %}Dashboard · {{ parent() }}{% endblock %}
+{% block title %}Dashboard · Reportes{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="/assets/gestion/css/gestion.css">
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">
+    <link rel="stylesheet" href="/assets/gestion/css/reportes.css?v=2">
+{% endblock %}
+
+{% block javascripts %}
+    <script src="/assets/vendor/chartjs/chart.umd.min.js?v=4.4.1" defer></script>
+    <script src="/assets/gestion/js/dashboard-reportes.js?v=2" defer></script>
 {% endblock %}
 
 {% block app_content %}
-    <section class="gestion-head">
+    <div class="gestion-head">
         <div>
-            <p class="gestion-eyebrow">Panel administrativo</p>
-            <h1 class="app-content__title">Dashboard</h1>
-            {% if dashboard.gestion %}
-                <p class="gestion-help" style="margin:4px 0 0">
-                    Gestion: <strong>{{ dashboard.gestion.codigo }}</strong>
-                    · Estado: <span class="gestion-badge {{ dashboard.gestion.estado|lower|replace({'_':'-'}) }}">{{ dashboard.gestion.estado }}</span>
-                </p>
-            {% else %}
-                <p class="gestion-help" style="margin:4px 0 0;color:var(--ds-danger)">No hay una gestion activa.</p>
-            {% endif %}
+            <p class="gestion-eyebrow">CUP FICCT · Analítica</p>
+            <h1 class="app-content__title">Dashboard &amp; Reportes</h1>
         </div>
-    </section>
-
-    <section class="gestion-dashboard">
-        <article class="gestion-metric">
-            <span class="gestion-metric__label">Inscripciones</span>
-            <strong>{{ dashboard.totalInscritos }}</strong>
-            <small style="display:block;color:var(--ds-text-muted);font-size:12px;margin-top:4px">
-                {{ dashboard.cupoOcupado }}/{{ dashboard.cupoTotal }} cupos
-                ({{ dashboard.porcentajeOcupacion }}%)
-            </small>
-        </article>
-        <article class="gestion-metric">
-            <span class="gestion-metric__label">Grupos habilitados</span>
-            <strong>{{ dashboard.totalGrupos }}</strong>
-            <small style="display:block;color:var(--ds-text-muted);font-size:12px;margin-top:4px">
-                Cupo restante: {{ dashboard.cupoDisponible }}
-            </small>
-        </article>
-        <article class="gestion-metric">
-            <span class="gestion-metric__label">Carreras</span>
-            <strong>{{ dashboard.carrerasHabilitadas }}</strong>
-            <small style="display:block;color:var(--ds-text-muted);font-size:12px;margin-top:4px">
-                habilitadas en esta gestion
-            </small>
-        </article>
-        <article class="gestion-metric">
-            <span class="gestion-metric__label">Aprobados</span>
-            <strong style="color:var(--ds-success)">{{ dashboard.totalAprobados }}</strong>
-            <small style="display:block;color:var(--ds-text-muted);font-size:12px;margin-top:4px">
-                pendiente de modulo examenes
-            </small>
-        </article>
-        <article class="gestion-metric">
-            <span class="gestion-metric__label">Reprobados</span>
-            <strong style="color:var(--ds-danger)">{{ dashboard.totalReprobados }}</strong>
-            <small style="display:block;color:var(--ds-text-muted);font-size:12px;margin-top:4px">
-                pendiente de modulo examenes
-            </small>
-        </article>
-        <article class="gestion-metric">
-            <span class="gestion-metric__label">Admitidos</span>
-            <strong>—</strong>
-            <small style="display:block;color:var(--ds-text-muted);font-size:12px;margin-top:4px">
-                pendiente de admision final
-            </small>
-        </article>
-    </section>
-
-    {# Accesos directos #}
-    <div class="gestion-head" style="margin-top:28px">
-        <h2 style="font-size:18px;font-weight:700;margin:0">Accesos directos</h2>
+        {% if gestiones|length > 0 %}
+            <div class="rep-toolbar">
+                <label class="rep-slicer">
+                    <span>Gestión</span>
+                    <select data-rep-gestion>
+                        {% for g in gestiones %}
+                            <option value="{{ g.id }}" {{ gestion and gestion.id == g.id ? 'selected' : '' }}>{{ g.codigo }}{{ g.isActive ? ' (activa)' : '' }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+        {% endif %}
     </div>
-    <div class="app-grid">
-        <a href="{{ path('inscripcion_admin') }}" class="app-card" style="text-decoration:none">
-            <div class="app-card__icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                </svg>
+
+    {% if gestion is null %}
+        <section class="gestion-panel">
+            <p class="gestion-panel__hint gestion-panel__block">No hay ninguna gestión activa o seleccionada. Activá o creá una gestión para ver los reportes.</p>
+        </section>
+    {% else %}
+        {# ---- Carrusel: 2 vistas ---- #}
+        <div class="rep-tabs" role="tablist">
+            <button type="button" class="rep-tab is-active" data-rep-tab="charts" role="tab" aria-selected="true">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                Reportes
+            </button>
+            <button type="button" class="rep-tab" data-rep-tab="list" role="tab" aria-selected="false">
+                <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                Detalle / Lista
+            </button>
+        </div>
+
+        {# ============ VISTA 1: REPORTES ============ #}
+        <div data-rep-panel="charts">
+            <section class="rep-filters" data-rep-form="charts">
+                <label class="rep-slicer">
+                    <span>Carrera</span>
+                    <select data-field="carrera"><option value="">Todas</option>
+                        {% for c in opciones.carreras %}<option value="{{ c.id }}" {{ filtros.carrera == c.id ? 'selected' : '' }}>{{ c.nombre }}</option>{% endfor %}
+                    </select>
+                </label>
+                <label class="rep-slicer">
+                    <span>Materia</span>
+                    <select data-field="materia"><option value="">Todas</option>
+                        {% for m in opciones.materias %}<option value="{{ m.id }}" {{ filtros.materia == m.id ? 'selected' : '' }}>{{ m.nombre }}</option>{% endfor %}
+                    </select>
+                </label>
+                <label class="rep-slicer">
+                    <span>Docente</span>
+                    <select data-field="docente"><option value="">Todos</option>
+                        {% for d in opciones.docentes %}<option value="{{ d.id }}" {{ filtros.docente == d.id ? 'selected' : '' }}>{{ d.nombre }}</option>{% endfor %}
+                    </select>
+                </label>
+                <button type="button" class="gestion-button" data-rep-clear="charts">Limpiar</button>
+            </section>
+
+            <div class="rep-kpis">
+                <div class="rep-kpi"><span class="rep-kpi__label">Inscritos</span><span class="rep-kpi__value" data-kpi="inscritos">{{ payload.kpis.inscritos }}</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">Aprobados</span><span class="rep-kpi__value rep-kpi__value--ok" data-kpi="aprobados">{{ payload.kpis.aprobados }}</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">Reprobados</span><span class="rep-kpi__value rep-kpi__value--bad" data-kpi="reprobados">{{ payload.kpis.reprobados }}</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">Incompletos</span><span class="rep-kpi__value" data-kpi="incompletos">{{ payload.kpis.incompletos }}</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">% Aprobación</span><span class="rep-kpi__value" data-kpi="pctAprobacion">{{ payload.kpis.pctAprobacion }}%</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">Promedio gral</span><span class="rep-kpi__value" data-kpi="promedioGeneral">{{ payload.kpis.promedioGeneral }}</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">Grupos habilitados</span><span class="rep-kpi__value" data-kpi="grupos">{{ payload.kpis.grupos }}</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">Docentes</span><span class="rep-kpi__value" data-kpi="docentes">{{ payload.kpis.docentes }}</span></div>
             </div>
-            <h3 class="app-card__title">Postulantes</h3>
-            <p class="app-card__subtitle">Gestionar inscripciones y documentos</p>
-        </a>
-        <a href="{{ path('grupo_index') }}" class="app-card" style="text-decoration:none">
-            <div class="app-card__icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                </svg>
+
+            <div class="rep-grid">
+                <article class="gestion-panel rep-card"><p class="rep-card__title">Estado de aprobación</p><div class="rep-chart"><canvas data-chart="estado"></canvas></div></article>
+                <article class="gestion-panel rep-card"><p class="rep-card__title">Promedio por materia <small>(mín. <span data-rep-min>{{ payload.meta.notaMinima }}</span>)</small></p><div class="rep-chart"><canvas data-chart="promedioMateria"></canvas></div></article>
+                <article class="gestion-panel rep-card"><p class="rep-card__title">Aprobados vs reprobados por materia</p><div class="rep-chart"><canvas data-chart="aprobMateria"></canvas></div></article>
+                <article class="gestion-panel rep-card"><p class="rep-card__title">Top grupos por aprobados</p><div class="rep-chart"><canvas data-chart="topGrupos"></canvas></div></article>
+                <article class="gestion-panel rep-card"><p class="rep-card__title">Inscritos por carrera</p><div class="rep-chart"><canvas data-chart="carrera"></canvas></div></article>
+                <article class="gestion-panel rep-card"><p class="rep-card__title">Carga docente (grupos por docente)</p><div class="rep-chart"><canvas data-chart="docentes"></canvas></div></article>
             </div>
-            <h3 class="app-card__title">Grupos</h3>
-            <p class="app-card__subtitle">Gestionar grupos del CUP</p>
-        </a>
-        <a href="{{ path('gestion_index') }}" class="app-card" style="text-decoration:none">
-            <div class="app-card__icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="4" y1="21" x2="4" y2="14"/>
-                    <line x1="4" y1="10" x2="4" y2="3"/>
-                    <line x1="12" y1="21" x2="12" y2="12"/>
-                    <line x1="12" y1="8" x2="12" y2="3"/>
-                    <line x1="20" y1="21" x2="20" y2="16"/>
-                    <line x1="20" y1="12" x2="20" y2="3"/>
-                </svg>
-            </div>
-            <h3 class="app-card__title">Gestion CUP</h3>
-            <p class="app-card__subtitle">Configurar gestion academica</p>
-        </a>
-    </div>
+        </div>
+
+        {# ============ VISTA 2: DETALLE / LISTA ============ #}
+        <div data-rep-panel="list" hidden>
+            <section class="rep-filters" data-rep-form="list">
+                <label class="rep-slicer">
+                    <span>Carrera</span>
+                    <select data-field="carrera"><option value="">Todas</option>
+                        {% for c in opciones.carreras %}<option value="{{ c.id }}">{{ c.nombre }}</option>{% endfor %}
+                    </select>
+                </label>
+                <label class="rep-slicer">
+                    <span>Materia</span>
+                    <select data-field="materia"><option value="">Todas</option>
+                        {% for m in opciones.materias %}<option value="{{ m.id }}">{{ m.nombre }}</option>{% endfor %}
+                    </select>
+                </label>
+                <label class="rep-slicer">
+                    <span>Docente</span>
+                    <select data-field="docente"><option value="">Todos</option>
+                        {% for d in opciones.docentes %}<option value="{{ d.id }}">{{ d.nombre }}</option>{% endfor %}
+                    </select>
+                </label>
+                <label class="rep-slicer">
+                    <span>Estado</span>
+                    <select data-field="estado">
+                        <option value="">Todos</option>
+                        <option value="APROBADO">Aprobado</option>
+                        <option value="REPROBADO">Reprobado</option>
+                        <option value="INCOMPLETO">Incompleto</option>
+                    </select>
+                </label>
+                <label class="rep-slicer rep-slicer--grow">
+                    <span>Buscar</span>
+                    <input type="search" data-field="texto" placeholder="CI o nombre">
+                </label>
+                <button type="button" class="gestion-button" data-rep-clear="list">Limpiar</button>
+                <span class="rep-spacer"></span>
+                <button type="button" class="gestion-button" data-rep-export="csv">Exportar CSV</button>
+                <button type="button" class="gestion-button" data-rep-print>Imprimir / PDF</button>
+            </section>
+
+            <section class="gestion-panel">
+                <div class="gestion-panel__header">
+                    <div>
+                        <h2>Detalle de postulantes</h2>
+                        <p class="gestion-panel__hint">Lista filtrable y exportable, independiente de los gráficos.</p>
+                    </div>
+                    <span class="gestion-badge" data-rep-count>{{ payload.detalle|length }} postulantes</span>
+                </div>
+                <div class="gestion-table-wrap">
+                    <table class="gestion-table gestion-table--stack" data-rep-table>
+                        <thead>
+                            <tr>
+                                <th>CI</th>
+                                <th>Postulante</th>
+                                <th>Carrera</th>
+                                <th class="gestion-col--num">Materias</th>
+                                <th class="gestion-col--num">Promedio</th>
+                                <th class="gestion-col--center">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody data-rep-tbody></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <script type="application/json" data-rep-payload>{{ payload|json_encode|raw }}</script>
+        <script type="application/json" data-rep-config>{{ {'dataUrl': path('dashboard_data')}|json_encode|raw }}</script>
+    {% endif %}
 {% endblock %}

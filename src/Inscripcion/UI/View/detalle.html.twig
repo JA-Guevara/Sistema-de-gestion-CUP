@@ -58,11 +58,11 @@
             </div>
             <div class="gestion-actions" style="padding:0 18px 18px">
                 <a class="gestion-button gestion-button--primary" href="{{ path('inscripcion_borrador_editar', {id: inscripcion.id}) }}">Editar</a>
-                <form method="post" action="{{ path('inscripcion_presentar', {id: inscripcion.id}) }}" onsubmit="return confirm('Presentar esta pre-inscripcion? Despues ya no podras editarla.')">
+                <form method="post" action="{{ path('inscripcion_presentar', {id: inscripcion.id}) }}" data-confirm="Presentar esta pre-inscripcion? Despues ya no podras editarla.">
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
                     <button class="gestion-button gestion-button--primary" type="submit">Presentar pre-inscripcion</button>
                 </form>
-                <form method="post" action="{{ path('inscripcion_borrador_eliminar', {id: inscripcion.id}) }}" onsubmit="return confirm('Descartar este borrador? No se puede deshacer.')">
+                <form method="post" action="{{ path('inscripcion_borrador_eliminar', {id: inscripcion.id}) }}" data-confirm="Descartar este borrador? No se puede deshacer.">
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
                     <button class="gestion-button gestion-button--danger" type="submit">Descartar</button>
                 </form>
@@ -87,7 +87,7 @@
                 </div>
             </div>
             <div class="gestion-actions" style="padding:0 18px 18px">
-                <form method="post" action="{{ path('inscripcion_anular', {id: inscripcion.id}) }}" onsubmit="return confirm('Anular esta postulacion? No se puede deshacer.')">
+                <form method="post" action="{{ path('inscripcion_anular', {id: inscripcion.id}) }}" data-confirm="Anular esta postulacion? No se puede deshacer.">
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
                     <button class="gestion-button gestion-button--danger" type="submit">Anular postulacion</button>
                 </form>
@@ -112,9 +112,9 @@
             </div>
             <div class="gestion-actions" style="padding:0 18px 18px">
                 {% if inscripcion.tipo != 'DOCENTE' %}
-                    <form method="post" action="{{ path('inscripcion_pagar', {id: inscripcion.id}) }}" onsubmit="return confirm('Confirmar el pago (simulado)? Esto confirmara tu inscripcion como estudiante.')">
+                    <form method="post" action="{{ path('inscripcion_pago_iniciar', {id: inscripcion.id}) }}" data-confirm="Seras redirigido a la pasarela de pago segura para completar el arancel de tu inscripcion.">
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
-                        <button class="gestion-button gestion-button--primary" type="submit">Pagar y confirmar inscripcion</button>
+                        <button class="gestion-button gestion-button--primary" type="submit">Pagar arancel y confirmar inscripcion</button>
                     </form>
                 {% elseif inscripcion.fechaEntrevista %}
                     <p class="gestion-panel__hint" style="padding:0">Entrevista agendada: <strong>{{ inscripcion.fechaEntrevista|date('d/m/Y H:i') }}</strong>.</p>
@@ -143,7 +143,7 @@
                 {% if inscripcion.anulacionSolicitada %}
                     <p class="gestion-panel__hint" style="padding:0">Solicitud de anulacion enviada{% if inscripcion.motivoAnulacion %} (motivo: {{ inscripcion.motivoAnulacion }}){% endif %}. La administracion la revisara.</p>
                 {% else %}
-                    <form method="post" action="{{ path('inscripcion_solicitar_anulacion', {id: inscripcion.id}) }}" onsubmit="return confirm('Enviar solicitud de anulacion?')" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                    <form method="post" action="{{ path('inscripcion_solicitar_anulacion', {id: inscripcion.id}) }}" data-confirm="Enviar solicitud de anulacion?" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
                         <input type="text" name="motivo" placeholder="Motivo (opcional)" style="min-height:40px;border:1px solid #cbd5e1;border-radius:6px;padding:8px 10px">
                         <button class="gestion-button gestion-button--danger" type="submit">Solicitar anulacion</button>
@@ -172,6 +172,33 @@
             </table>
         </div>
     </section>
+
+    {# ---- Verificacion de requisitos (acta de la cita) ---- #}
+    {% if inscripcion.estado in ['PRESENTADA', 'VALIDADA', 'CONFIRMADA'] %}
+        {% set estadoVerifLabel = {'PENDIENTE':'Pendiente','ENTREGADO':'Entregado','OBSERVADO':'Observado','FALTA':'No presento'} %}
+        <section class="gestion-panel">
+            <div class="gestion-panel__header"><div><h2>Verificacion de requisitos</h2><p class="gestion-panel__hint">Estado de los documentos que debes presentar en tu cita. Si alguno figura "Observado" o "No presento", llevalo o corrigelo el dia de la revision.</p></div></div>
+            <div class="gestion-table-wrap">
+                <table class="gestion-table gestion-table--stack">
+                    <thead>
+                        <tr><th>Requisito</th><th class="gestion-col--center">Estado</th><th>Observacion</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for req in requisitos %}
+                            {% set v = inscripcion.verificacionPorCodigo(req.codigo) %}
+                            {% set estadoActual = v ? v.estado : 'PENDIENTE' %}
+                            {% set vClass = estadoActual == 'ENTREGADO' ? 'activa' : (estadoActual == 'OBSERVADO' ? 'inactiva' : 'borrador') %}
+                            <tr>
+                                <td class="gestion-col--text" data-label="Requisito">{{ req.etiqueta }}{% if not req.obligatorio %} <span class="gestion-table__meta">opcional</span>{% endif %}</td>
+                                <td class="gestion-col--center" data-label="Estado"><span class="gestion-badge gestion-badge--{{ vClass }}">{{ estadoVerifLabel[estadoActual] }}</span></td>
+                                <td class="gestion-col--text" data-label="Observacion">{{ v and v.observacion ? v.observacion : '—' }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    {% endif %}
 
     {# ---- Mis documentos y su revision ---- #}
     <section class="gestion-panel">

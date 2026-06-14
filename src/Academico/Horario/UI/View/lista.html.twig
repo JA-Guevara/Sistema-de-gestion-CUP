@@ -80,7 +80,7 @@
                     </div>
                 </div>
                 <div class="gestion-table-wrap">
-                    <table class="gestion-table">
+                    <table class="gestion-table gestion-table--stack">
                         <thead>
                             <tr>
                                 <th>Incluir</th>
@@ -92,12 +92,12 @@
                         <tbody>
                             {% for materia in materias %}
                                 <tr data-horario-row>
-                                    <td>
+                                    <td data-label="Incluir">
                                         <input type="checkbox" name="incluir[]" value="{{ materia.id }}" checked>
                                         <input type="hidden" name="orden_{{ materia.id }}" value="{{ loop.index }}">
                                     </td>
-                                    <td>{{ materia.nombre }}</td>
-                                    <td>
+                                    <td data-label="Materia">{{ materia.nombre }}</td>
+                                    <td data-label="Aula">
                                         <select name="aula_{{ materia.id }}">
                                             <option value="">Seleccione un aula</option>
                                             {% for aula in aulas %}
@@ -105,7 +105,7 @@
                                             {% endfor %}
                                         </select>
                                     </td>
-                                    <td data-horario-slot>-</td>
+                                    <td data-label="Franja auto" data-horario-slot>-</td>
                                 </tr>
                             {% endfor %}
                             {% if materias is empty %}
@@ -206,16 +206,16 @@
                 <div>
                     <h3>Grupos y aula</h3>
                     <div class="gestion-table-wrap">
-                        <table class="gestion-table">
+                        <table class="gestion-table gestion-table--stack">
                             <thead>
                                 <tr><th>Incluir</th><th>Grupo</th><th>Aula</th></tr>
                             </thead>
                             <tbody>
                                 {% for grupo in grupos %}
                                     <tr>
-                                        <td><input type="checkbox" name="grupos[]" value="{{ grupo.id }}"></td>
-                                        <td>{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }} / {{ grupo.codigo }}</td>
-                                        <td>
+                                        <td data-label="Incluir"><input type="checkbox" name="grupos[]" value="{{ grupo.id }}"></td>
+                                        <td data-label="Grupo">{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }} / {{ grupo.codigo }}</td>
+                                        <td data-label="Aula">
                                             <select name="aula_grupo_{{ grupo.id }}">
                                                 <option value="">Seleccione un aula</option>
                                                 {% for aula in aulas %}
@@ -276,7 +276,7 @@
             </div>
         </form>
         <div class="gestion-table-wrap">
-            <table class="gestion-table" data-gestion-filter-table="horarios">
+            <table class="gestion-table gestion-table--stack" data-gestion-filter-table="horarios">
                 <thead>
                     <tr>
                         <th><input class="gestion-bulk-check" type="checkbox" data-bulk-check-all aria-label="Seleccionar horarios visibles"></th>
@@ -291,18 +291,18 @@
                 <tbody>
                     {% for fila in resumen %}
                         <tr data-filter-row data-filter-grupo="{{ fila.grupo.codigo }}">
-                            <td><input class="gestion-bulk-check" type="checkbox" name="ids[]" value="{{ fila.grupo.id }}" form="horario-bulk-form" data-bulk-item aria-label="Seleccionar horario del grupo {{ fila.grupo.codigo }}"></td>
-                            <td>
+                            <td data-label="Seleccionar"><input class="gestion-bulk-check" type="checkbox" name="ids[]" value="{{ fila.grupo.id }}" form="horario-bulk-form" data-bulk-item aria-label="Seleccionar horario del grupo {{ fila.grupo.codigo }}"></td>
+                            <td data-label="Grupo">
                                 {{ fila.grupo.codigo }}
                                 <span class="gestion-table__meta">{{ fila.grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}</span>
                             </td>
-                            <td>{{ fila.materias }}</td>
-                            <td>{{ fila.dias|join(', ')|title }}</td>
-                            <td>
+                            <td data-label="Materias">{{ fila.materias }}</td>
+                            <td data-label="Dias">{{ fila.dias|join(', ')|title }}</td>
+                            <td data-label="Rango horario">
                                 {% if fila.horaInicio %}{{ fila.horaInicio|date('H:i') }} - {{ fila.horaFin|date('H:i') }}{% else %}-{% endif %}
                             </td>
-                            <td class="gestion-col--num">{{ fila.total }}</td>
-                            <td>
+                            <td class="gestion-col--num" data-label="Franjas">{{ fila.total }}</td>
+                            <td data-label="Acciones">
                                 <div class="gestion-table__actions">
                                     <a href="{{ path('horario_grupo_show', {grupoId: fila.grupo.id}) }}" class="gestion-action-button gestion-action-button--view" title="Ver detalle del grupo" aria-label="Ver detalle del grupo">
                                         <svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>

@@ -4,7 +4,10 @@
 
 {% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">{% endblock %}
 
-{% block javascripts %}<script src="/assets/gestion/js/gestion-filters.js?v=9" defer></script>{% endblock %}
+{% block javascripts %}
+    <script src="/assets/gestion/js/gestion-filters.js?v=9" defer></script>
+    <script src="/assets/gestion/js/nota-planilla.js?v=1" defer></script>
+{% endblock %}
 
 {% block app_content %}
     <section class="gestion-head">
@@ -19,6 +22,7 @@
 
     <section class="gestion-panel">
         <p class="gestion-panel__hint">Nota minima de aprobacion: <strong>{{ notaMinima }}</strong> &middot; Examenes: <strong>{{ cantidadExamenes }}</strong> &middot; Escala 0 a 100 &middot; Estudiantes: <strong>{{ filas|length }}</strong>.</p>
+        <p class="gestion-panel__hint" data-nota-summary>Aprobados: <strong data-nota-aprobados>0</strong> &middot; Reprobados: <strong data-nota-reprobados>0</strong> &middot; Incompletos: <strong data-nota-incompletos>0</strong> <span class="gestion-table__meta">(se actualiza en vivo al escribir)</span></p>
 
         <form class="gestion-filters" data-gestion-filters data-filter-target="planilla">
             <div class="gestion-filters__field">
@@ -42,18 +46,19 @@
             </div>
         </form>
 
-        <div class="gestion-actions" style="margin-top:0;padding-bottom:12px;border-bottom:1px solid #eef0f3">
+        <div class="gestion-actions gestion-actions--flush" style="padding-bottom:12px;border-bottom:1px solid #eef0f3">
             <a class="gestion-button" href="{{ path('nota_planilla_exportar', {materiaId: materia.id, grupoId: grupo.id}) }}">Exportar CSV</a>
-            <form method="post" action="{{ path('nota_planilla_importar', {materiaId: materia.id, grupoId: grupo.id}) }}" enctype="multipart/form-data" style="display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <form method="post" action="{{ path('nota_planilla_importar', {materiaId: materia.id, grupoId: grupo.id}) }}" enctype="multipart/form-data" class="gestion-inline-form">
                 <input type="file" name="archivo" accept=".csv,text/csv" required>
                 <button class="gestion-button" type="submit">Importar CSV</button>
             </form>
         </div>
-        <p class="gestion-panel__hint" style="padding:8px 0 0">Importacion masiva: usa el CSV exportado como plantilla (columnas CI, Apellidos, Nombres, Examen 1..N). Solo se cargan estudiantes de este grupo.</p>
+        <p class="gestion-panel__hint gestion-pt-sm">Importacion masiva: usa el CSV exportado como plantilla (columnas CI, Apellidos, Nombres, Examen 1..N). Solo se cargan estudiantes de este grupo.</p>
 
         <form method="post" action="{{ path('nota_guardar', {materiaId: materia.id, grupoId: grupo.id}) }}">
             <div class="gestion-table-wrap">
-                <table class="gestion-table" data-gestion-filter-table="planilla">
+                <table class="gestion-table gestion-table--stack" data-gestion-filter-table="planilla"
+                       data-nota-table data-nota-min="{{ notaMinima }}" data-nota-examenes="{{ cantidadExamenes }}">
                     <thead>
                         <tr>
                             <th class="gestion-col--num">#</th>
@@ -72,19 +77,19 @@
                             <tr data-filter-row
                                 data-filter-texto="{{ fila.inscripcion.ci }} {{ fila.inscripcion.apellidos }} {{ fila.inscripcion.nombres }}"
                                 data-filter-estado="{{ estadoFila }}">
-                                <td class="gestion-col--num">{{ loop.index }}</td>
-                                <td>{{ fila.inscripcion.ci }}</td>
-                                <td>{{ fila.inscripcion.apellidos }} {{ fila.inscripcion.nombres }}</td>
+                                <td class="gestion-col--num" data-label="#">{{ loop.index }}</td>
+                                <td data-label="CI">{{ fila.inscripcion.ci }}</td>
+                                <td data-label="Estudiante">{{ fila.inscripcion.apellidos }} {{ fila.inscripcion.nombres }}</td>
                                 {% for examen in 1..cantidadExamenes %}
-                                    <td class="gestion-col--center">
+                                    <td class="gestion-col--center" data-label="Examen {{ examen }}">
                                         <input type="number" min="0" max="100" step="1"
                                                name="nota[{{ fila.inscripcion.id }}][{{ examen }}]"
                                                value="{{ fila.valores[examen] is not null ? fila.valores[examen] : '' }}"
                                                class="gestion-nota-input">
                                     </td>
                                 {% endfor %}
-                                <td class="gestion-col--num"><strong>{{ fila.promedio is not null ? fila.promedio : '-' }}</strong></td>
-                                <td class="gestion-col--center">
+                                <td class="gestion-col--num" data-label="Promedio"><strong data-nota-promedio>{{ fila.promedio is not null ? fila.promedio : '-' }}</strong></td>
+                                <td class="gestion-col--center" data-label="Estado" data-nota-estado>
                                     {% if fila.aprobado is null %}
                                         <span class="gestion-badge gestion-badge--borrador">Incompleto</span>
                                     {% elseif fila.aprobado %}
@@ -112,6 +117,7 @@
                 <div class="gestion-actions">
                     <button class="gestion-button gestion-button--primary" type="submit">Guardar notas</button>
                     <a href="{{ path('nota_index') }}" class="gestion-button">Cancelar</a>
+                    <span class="gestion-panel__hint" data-nota-dirty hidden style="padding:0;color:#9b1c1c">&bull; Tienes cambios sin guardar.</span>
                 </div>
             {% endif %}
         </form>

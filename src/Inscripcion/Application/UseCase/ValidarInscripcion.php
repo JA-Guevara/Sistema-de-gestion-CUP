@@ -27,8 +27,8 @@ final readonly class ValidarInscripcion
             throw new InscripcionException('Solo puedes aprobar una postulacion presentada (no un borrador ni una ya resuelta).');
         }
 
-        if (!$inscripcion->todosAprobados()) {
-            throw new InscripcionException('Aprueba todos los documentos del checklist antes de aprobar la postulacion.');
+        if (!$inscripcion->actaConforme()) {
+            throw new InscripcionException('Completa el acta de recepcion: todos los requisitos obligatorios deben estar Entregados antes de aprobar.');
         }
 
         $inscripcion->validar($actorUserId);

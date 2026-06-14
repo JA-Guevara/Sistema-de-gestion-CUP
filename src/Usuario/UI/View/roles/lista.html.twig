@@ -47,7 +47,7 @@
             </div>
         </form>
         <div class="gestion-table-wrap">
-            <table class="gestion-table" data-gestion-filter-table="roles">
+            <table class="gestion-table gestion-table--stack" data-gestion-filter-table="roles">
                 <thead>
                     <tr>
                         <th>Rol</th>
@@ -61,11 +61,11 @@
                     {% for rol in roles %}
                         {% set estado = rol.active ? 'ACTIVO' : 'INACTIVO' %}
                         <tr data-filter-row data-filter-texto="{{ rol.name }} {{ rol.description }}" data-filter-estado="{{ estado }}">
-                            <td>{{ rol.name }}</td>
-                            <td>{{ rol.description ?? '-' }}</td>
-                            <td class="gestion-col--num">{{ rol.permissions|length }}</td>
-                            <td class="gestion-col--center"><span class="gestion-badge gestion-badge--{{ rol.active ? 'activa' : 'inactiva' }}">{{ rol.active ? 'Activo' : 'Inactivo' }}</span></td>
-                            <td class="gestion-table__actions-cell">
+                            <td data-label="Rol">{{ rol.name }}</td>
+                            <td data-label="Descripcion">{{ rol.description ?? '-' }}</td>
+                            <td class="gestion-col--num" data-label="Permisos">{{ rol.permissions|length }}</td>
+                            <td class="gestion-col--center" data-label="Estado"><span class="gestion-badge gestion-badge--{{ rol.active ? 'activa' : 'inactiva' }}">{{ rol.active ? 'Activo' : 'Inactivo' }}</span></td>
+                            <td class="gestion-table__actions-cell" data-label="Acciones">
                                 <div class="gestion-table__actions">
                                     <a class="gestion-action-button gestion-action-button--view" href="{{ path('rol_show', {id: rol.id}) }}" aria-label="Ver rol" title="Ver">
                                         <svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>

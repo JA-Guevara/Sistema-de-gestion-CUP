@@ -76,7 +76,7 @@
             </div>
         </form>
         <div class="gestion-table-wrap">
-            <table class="gestion-table" data-gestion-filter-table="gestiones">
+            <table class="gestion-table gestion-table--stack" data-gestion-filter-table="gestiones">
                 <thead>
                     <tr>
                         <th>Codigo</th>
@@ -90,12 +90,12 @@
                 <tbody>
                     {% for gestion in gestiones %}
                         <tr data-filter-row data-filter-texto="{{ gestion.codigo }} {{ gestion.nombre }}" data-filter-estado="{{ gestion.estado }}" data-filter-vigente="{{ gestion.active ? 'Si' : 'No' }}">
-                            <td>{{ gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}</td>
-                            <td>{{ gestion.nombre }}</td>
-                            <td class="gestion-col--center"><span class="gestion-badge gestion-badge--{{ gestion.estado|lower|replace({'_': '-'}) }}">{{ gestion.estado|replace({'_': ' '})|lower|capitalize }}</span></td>
-                            <td class="gestion-col--center"><span class="gestion-badge gestion-badge--{{ gestion.active ? 'si' : 'no' }}">{{ gestion.active ? 'Si' : 'No' }}</span></td>
-                            <td>{{ gestion.createdAt|date('Y-m-d') }}</td>
-                            <td class="gestion-table__actions">
+                            <td data-label="Codigo">{{ gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}</td>
+                            <td data-label="Nombre">{{ gestion.nombre }}</td>
+                            <td class="gestion-col--center" data-label="Estado"><span class="gestion-badge gestion-badge--{{ gestion.estado|lower|replace({'_': '-'}) }}">{{ gestion.estado|replace({'_': ' '})|lower|capitalize }}</span></td>
+                            <td class="gestion-col--center" data-label="Vigente"><span class="gestion-badge gestion-badge--{{ gestion.active ? 'si' : 'no' }}">{{ gestion.active ? 'Si' : 'No' }}</span></td>
+                            <td data-label="Creada">{{ gestion.createdAt|date('Y-m-d') }}</td>
+                            <td class="gestion-table__actions" data-label="Acciones">
                                 <a class="gestion-action-button gestion-action-button--view" href="{{ path('gestion_show', {id: gestion.id}) }}" aria-label="Ver gestion" title="Ver">
                                     <svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="3"/></svg>
                                 </a>

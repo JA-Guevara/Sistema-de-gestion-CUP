@@ -1,0 +1,184 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Mi horario{% endblock %}
+
+{# Documento horario reutilizable: en la pagina (lista) y en el modal de impresion. #}
+{% macro horarioDoc(horario) %}
+    <header class="boleta__head">
+        <img src="/assets/auth/logos/ficct.png" alt="FICCT" class="boleta__logo">
+        <div>
+            <div class="boleta__uni">Universidad Autonoma Gabriel Rene Moreno</div>
+            <div class="boleta__fac">Facultad de Ingenieria en Ciencias de la Computacion y Telecomunicaciones</div>
+            <div class="boleta__cup">Curso Preuniversitario (CUP)</div>
+        </div>
+    </header>
+
+    <h2 class="boleta__title">Horario de clases</h2>
+
+    <dl class="boleta__data">
+        <div><dt>Estudiante</dt><dd>{{ horario.inscripcion.apellidos }} {{ horario.inscripcion.nombres }}</dd></div>
+        <div><dt>Cedula (CI)</dt><dd>{{ horario.inscripcion.ci }}</dd></div>
+        <div><dt>Carrera</dt><dd>{{ horario.inscripcion.carrera ? horario.inscripcion.carrera.nombre : '—' }}</dd></div>
+        <div><dt>Gestion</dt><dd>{{ horario.gestion.nombre }}</dd></div>
+        <div><dt>Modalidad</dt><dd>{{ horario.inscripcion.modalidad|lower|capitalize }}</dd></div>
+        <div><dt>Emitido</dt><dd>{{ "now"|date('d/m/Y H:i') }}</dd></div>
+    </dl>
+
+    <table class="boleta__table">
+        <thead>
+            <tr><th>Dia</th><th>Hora</th><th>Materia</th><th>Grupo</th><th>Aula</th></tr>
+        </thead>
+        <tbody>
+            {% for f in horario.franjas %}
+                <tr>
+                    <td>{{ f.dia|lower|capitalize }}</td>
+                    <td>{{ f.horaInicio|date('H:i') }} - {{ f.horaFin|date('H:i') }}</td>
+                    <td class="boleta__left">{{ f.materia.codigo }} - {{ f.materia.nombre }}</td>
+                    <td>{{ f.grupo.codigo }}</td>
+                    <td class="boleta__left">{{ f.aula.codigo }}{% if f.aula.nombre %} - {{ f.aula.nombre }}{% endif %}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="5">Sin horario publicado.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p class="boleta__foot">Documento informativo generado por el sistema de gestion del CUP - FICCT.</p>
+{% endmacro %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">
+    <style>
+        /* ---- Documento (boleta) ---- */
+        .boleta { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 1px 3px rgba(15,23,42,.06); padding: 36px; max-width: 880px; margin: 0 auto; color: #0f172a; }
+        .boleta__head { display: flex; align-items: center; gap: 18px; border-bottom: 2px solid #1e3a8a; padding-bottom: 16px; }
+        .boleta__logo { height: 64px; width: auto; }
+        .boleta__uni { font-weight: 800; font-size: 16px; color: #1e3a8a; line-height: 1.2; }
+        .boleta__fac { font-size: 12px; color: #334155; }
+        .boleta__cup { font-size: 12px; font-weight: 700; color: #9b1c1c; margin-top: 3px; }
+        .boleta__title { text-align: center; font-size: 17px; margin: 20px 0 16px; text-transform: uppercase; letter-spacing: 1.3px; }
+        .boleta__data { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 32px; margin: 0 0 20px; }
+        .boleta__data > div { display: flex; gap: 8px; border-bottom: 1px dotted #cbd5e1; padding: 6px 0; font-size: 13px; }
+        .boleta__data dt { font-weight: 700; color: #64748b; min-width: 96px; margin: 0; }
+        .boleta__data dd { margin: 0; }
+        .boleta__table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .boleta__table th, .boleta__table td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: center; }
+        .boleta__table th { background: #1e3a8a; color: #fff; font-weight: 700; }
+        .boleta__table td.boleta__left { text-align: left; }
+        .boleta__foot { margin-top: 22px; font-size: 11px; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 12px; }
+
+        /* ---- Datos en la vista principal ---- */
+        .boletin-datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 2px 28px; margin: 0; padding: 6px 18px 18px; }
+        .boletin-datos > div { display: flex; gap: 8px; padding: 8px 0; border-bottom: 1px dotted #e2e8f0; font-size: 14px; }
+        .boletin-datos dt { font-weight: 700; color: #64748b; min-width: 110px; margin: 0; }
+        .boletin-datos dd { margin: 0; color: #0f172a; }
+
+        /* ---- Modal (grande y centrado) ---- */
+        .boleta-modal[hidden] { display: none; }
+        .boleta-modal { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 24px; }
+        .boleta-modal__overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, .55); }
+        .boleta-modal__dialog { position: relative; background: #eef1f5; border-radius: 12px; box-shadow: 0 26px 70px rgba(0,0,0,.34); width: 100%; max-width: 1000px; margin: auto; overflow: hidden; display: flex; flex-direction: column; max-height: calc(100vh - 48px); }
+        .boleta-modal__bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; background: #fff; border-bottom: 1px solid #e2e8f0; }
+        .boleta-modal__bar strong { color: #1e3a8a; }
+        .boleta-modal__bar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .boleta-modal__scroll { overflow: auto; padding: 28px; }
+
+        @media print {
+            body * { visibility: hidden !important; }
+            .boleta-modal, .boleta-modal[hidden] { display: block !important; position: static !important; padding: 0 !important; overflow: visible !important; max-height: none !important; }
+            .boleta-modal__overlay, .boleta-modal__bar { display: none !important; }
+            .boleta-modal__dialog { position: static !important; box-shadow: none !important; max-width: none !important; max-height: none !important; background: #fff !important; }
+            .boleta-modal__scroll { position: static !important; overflow: visible !important; padding: 0 !important; }
+            #horario-doc, #horario-doc * { visibility: visible !important; }
+            #horario-doc { position: absolute; left: 0; top: 0; width: 100%; margin: 0 !important; border: 0 !important; box-shadow: none !important; max-width: none !important; }
+        }
+    </style>
+{% endblock %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Mi CUP</p>
+            <h1 class="app-content__title">Mi horario de clases</h1>
+        </div>
+        <div class="gestion-head__actions">
+            <a class="gestion-button" href="{{ path('home') }}">Volver</a>
+            {% if horario is not null %}
+                <button type="button" class="gestion-button gestion-button--primary" data-boleta-open>Ver / Imprimir horario</button>
+            {% endif %}
+        </div>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    {% if horario is null %}
+        <section class="gestion-panel">
+            <p class="gestion-panel__hint">No tienes una inscripcion confirmada en la gestion activa, o aun no se publico el horario de tus grupos.</p>
+        </section>
+    {% else %}
+        {# Vista principal: datos + lista de franjas #}
+        <section class="gestion-panel">
+            <div class="gestion-panel__header">
+                <div>
+                    <h2>{{ horario.inscripcion.apellidos }} {{ horario.inscripcion.nombres }}</h2>
+                    <p class="gestion-panel__hint">CI {{ horario.inscripcion.ci }} &middot; {{ horario.inscripcion.carrera ? horario.inscripcion.carrera.nombre : '—' }} &middot; {{ horario.gestion.nombre }}</p>
+                </div>
+            </div>
+            <div class="gestion-table-wrap">
+                <table class="gestion-table gestion-table--stack">
+                    <thead>
+                        <tr>
+                            <th>Dia</th>
+                            <th>Hora</th>
+                            <th>Materia</th>
+                            <th class="gestion-col--center">Grupo</th>
+                            <th>Aula</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for f in horario.franjas %}
+                            <tr>
+                                <td data-label="Dia">{{ f.dia|lower|capitalize }}</td>
+                                <td data-label="Hora">{{ f.horaInicio|date('H:i') }} - {{ f.horaFin|date('H:i') }}</td>
+                                <td class="gestion-col--text" data-label="Materia">{{ f.materia.codigo }} - {{ f.materia.nombre }}</td>
+                                <td class="gestion-col--center" data-label="Grupo">{{ f.grupo.codigo }}</td>
+                                <td class="gestion-col--text" data-label="Aula">{{ f.aula.codigo }}{% if f.aula.nombre %} &middot; {{ f.aula.nombre }}{% endif %}</td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="5">Aun no hay horario publicado para tus materias/grupos. La administracion lo cargara antes del inicio de clases.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        {# ==================== Ventana emergente: horario imprimible ==================== #}
+        <div class="boleta-modal" id="horarioModal" hidden>
+            <div class="boleta-modal__overlay" data-boleta-close></div>
+            <div class="boleta-modal__dialog" role="dialog" aria-modal="true" aria-label="Horario de clases">
+                <div class="boleta-modal__bar">
+                    <strong>Horario de clases &middot; CUP FICCT</strong>
+                    <div class="boleta-modal__bar-actions">
+                        <button type="button" class="gestion-button gestion-button--primary" onclick="window.print()">Imprimir</button>
+                        <button type="button" class="gestion-button" data-boleta-close>Cerrar</button>
+                    </div>
+                </div>
+                <div class="boleta-modal__scroll">
+                    <article class="boleta" id="horario-doc">{{ _self.horarioDoc(horario) }}</article>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            (function () {
+                var modal = document.getElementById('horarioModal');
+                if (!modal) { return; }
+                function open() { modal.hidden = false; document.body.style.overflow = 'hidden'; }
+                function close() { modal.hidden = true; document.body.style.overflow = ''; }
+                document.querySelectorAll('[data-boleta-open]').forEach(function (b) { b.addEventListener('click', open); });
+                modal.querySelectorAll('[data-boleta-close]').forEach(function (b) { b.addEventListener('click', close); });
+                document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !modal.hidden) { close(); } });
+            }());
+        </script>
+    {% endif %}
+{% endblock %}

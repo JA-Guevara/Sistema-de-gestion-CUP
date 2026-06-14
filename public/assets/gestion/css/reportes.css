@@ -1,0 +1,228 @@
+/* =========================================================================
+   Dashboard analítico / Reportes — tablero estilo Power BI.
+   Filtros (slicers), KPIs, grilla de gráficos y detalle. Reusa los tokens
+   del design-system y el look de .gestion-* .
+   ========================================================================= */
+
+.rep-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.rep-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+}
+
+.rep-slicer {
+    display: grid;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+.rep-slicer select {
+    min-height: 40px;
+    min-width: 180px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 8px 32px 8px 10px;
+    font: inherit;
+    color: #0f172a;
+    background-color: #ffffff;
+    appearance: none;
+    background-image:
+        linear-gradient(45deg, transparent 50%, #0f172a 50%),
+        linear-gradient(135deg, #0f172a 50%, transparent 50%);
+    background-position: calc(100% - 17px) 50%, calc(100% - 12px) 50%;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+}
+
+.rep-slicer select:focus {
+    outline: none;
+    border-color: #1e3a8a;
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, .12);
+}
+
+.rep-filters .gestion-button {
+    min-height: 40px;
+}
+
+.rep-spacer {
+    flex: 1 1 auto;
+}
+
+/* ---- Carrusel / pestañas (2 vistas) ---- */
+.rep-tabs {
+    display: inline-flex;
+    gap: 4px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 16px;
+}
+
+.rep-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    background: transparent;
+    color: #64748b;
+    font: inherit;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 9px 18px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease, box-shadow .15s ease;
+}
+
+.rep-tab svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.rep-tab:hover {
+    color: #0f172a;
+}
+
+.rep-tab.is-active {
+    background: #ffffff;
+    color: #1e3a8a;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .10);
+}
+
+[data-rep-panel][hidden] {
+    display: none;
+}
+
+/* Campo de búsqueda que crece dentro de la barra de filtros */
+.rep-slicer--grow {
+    flex: 1 1 220px;
+}
+
+.rep-slicer--grow input {
+    width: 100%;
+    min-height: 40px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font: inherit;
+    color: #0f172a;
+    background: #ffffff;
+}
+
+.rep-slicer--grow input:focus {
+    outline: none;
+    border-color: #1e3a8a;
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, .12);
+}
+
+/* ---- KPIs ---- */
+.rep-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.rep-kpi {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .04);
+}
+
+.rep-kpi__label {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: 6px;
+}
+
+.rep-kpi__value {
+    font-size: 26px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
+}
+
+.rep-kpi__value--ok { color: #166534; }
+.rep-kpi__value--bad { color: #9b1c1c; }
+
+/* ---- Grilla de gráficos ---- */
+.rep-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.rep-card {
+    padding: 16px;
+}
+
+.rep-card__title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 12px;
+}
+
+.rep-card__title small {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.rep-chart {
+    position: relative;
+    height: 260px;
+}
+
+/* ---- Impresión / PDF ---- */
+@media print {
+    .app-topbar,
+    .app-sidebar,
+    .rep-toolbar,
+    .rep-filters,
+    [data-rep-print],
+    [data-rep-export] {
+        display: none !important;
+    }
+
+    .app-shell__main {
+        padding: 0 !important;
+    }
+
+    .rep-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .rep-card,
+    .gestion-panel {
+        break-inside: avoid;
+    }
+}

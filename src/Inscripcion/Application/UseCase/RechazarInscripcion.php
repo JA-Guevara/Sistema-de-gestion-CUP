@@ -12,6 +12,7 @@ final readonly class RechazarInscripcion
 {
     public function __construct(
         private InscripcionRepository $inscripciones,
+        private LiberarCupoRevision $liberarCupoRevision,
         private InscripcionEvents $events,
     ) {
     }
@@ -22,6 +23,9 @@ final readonly class RechazarInscripcion
         if ($inscripcion === null) {
             throw new InscripcionException('La postulacion no existe.');
         }
+
+        // Libera el cupo del dia de revision que tenia asignado (si lo tenia).
+        $this->liberarCupoRevision->execute($inscripcion);
 
         $inscripcion->rechazar($motivo, $actorUserId);
         $this->inscripciones->save($inscripcion);

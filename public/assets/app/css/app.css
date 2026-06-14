@@ -208,11 +208,11 @@ a {
     letter-spacing: 1.8px;
     text-transform: uppercase;
     padding: 0 12px;
-    margin: 0 0 14px;
+    margin: 0 0 8px;
 }
 
 .app-sidebar__section-title:not(:first-child) {
-    margin-top: 28px;
+    margin-top: 16px;
 }
 
 .app-sidebar__nav {
@@ -487,25 +487,39 @@ a {
 /* ---------- RESPONSIVE ---------- */
 
 @media (max-width: 768px) {
-    :root {
-        --sidebar-width: 72px;
+    /* En movil el menu se apila ARRIBA del contenido y muestra TODO con sus
+       etiquetas (no se pierde informacion): los items se acomodan en una grilla
+       compacta y los titulos de seccion ocupan toda la fila. */
+    .app-shell__body {
+        flex-direction: column;
     }
 
     .app-sidebar {
-        padding: 24px 10px;
+        width: 100%;
+        position: static;
+        max-height: none;
+        overflow: visible;
+        border-right: 0;
+        border-bottom: 1px solid var(--color-border);
+        padding: 14px 16px;
+    }
+
+    .app-sidebar__nav {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 6px;
     }
 
     .app-sidebar__section-title {
-        display: none;
+        grid-column: 1 / -1;
+        margin: 12px 0 2px;
     }
 
     .app-sidebar__item {
-        justify-content: center;
-        padding: 12px 8px;
+        padding: 10px 12px;
     }
 
-    .app-sidebar__label,
-    .app-sidebar__lock {
+    .app-sidebar__item--active::before {
         display: none;
     }
 

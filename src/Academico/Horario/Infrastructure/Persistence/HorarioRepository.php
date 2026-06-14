@@ -81,6 +81,22 @@ final readonly class HorarioRepository
             ->getResult();
     }
 
+    /** @return list<Horario> Franjas de una materia dentro de un grupo (para el horario del estudiante). */
+    public function listByGrupoAndMateria(int $grupoId, int $materiaId): array
+    {
+        return $this->entityManager->createQueryBuilder()
+            ->select('h')
+            ->from(Horario::class, 'h')
+            ->where('IDENTITY(h.grupo) = :grupoId')
+            ->andWhere('IDENTITY(h.materia) = :materiaId')
+            ->setParameter('grupoId', $grupoId)
+            ->setParameter('materiaId', $materiaId)
+            ->orderBy('h.dia', 'ASC')
+            ->addOrderBy('h.horaInicio', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     /**
      * Elimina todos los horarios de un grupo. Usado por la generacion masiva
      * en modo "reemplazar". Devuelve la cantidad de filas borradas.

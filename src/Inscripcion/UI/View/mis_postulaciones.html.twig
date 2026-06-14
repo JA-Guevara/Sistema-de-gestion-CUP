@@ -55,7 +55,7 @@
                                     <a class="gestion-button" href="{{ path('inscripcion_ver', {id: p.id}) }}">{{ p.estado == 'BORRADOR' ? 'Continuar' : 'Ver' }}</a>
                                     {% if p.estado == 'BORRADOR' %}
                                         <a class="gestion-button" href="{{ path('inscripcion_borrador_editar', {id: p.id}) }}">Editar</a>
-                                        <form method="post" action="{{ path('inscripcion_presentar', {id: p.id}) }}" onsubmit="return confirm('Presentar esta pre-inscripcion?')" style="display:inline">
+                                        <form method="post" action="{{ path('inscripcion_presentar', {id: p.id}) }}" data-confirm="Presentar esta pre-inscripcion?" style="display:inline">
                                             <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
                                             <button class="gestion-button gestion-button--primary" type="submit">Presentar</button>
                                         </form>

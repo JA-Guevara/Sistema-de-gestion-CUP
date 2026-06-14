@@ -63,10 +63,11 @@ final readonly class RecordLogEntry
     }
 
     /**
-     * Resuelve un nombre legible para la bitácora a partir del id de usuario.
-     * Si el módulo no proporcionó un userLabel explícito, buscamos el usuario
-     * y mostramos su nombre completo (o su email). Así la bitácora identifica
-     * correctamente al actor en todos los módulos sin tener que pasar el nombre.
+     * Resuelve la etiqueta del actor para la bitácora a partir del id de usuario.
+     * Identidad unificada en TODOS los módulos: el correo del usuario (es único
+     * y estable, a diferencia del nombre). Si el módulo no pasó un userLabel
+     * explícito, buscamos el usuario por id y usamos su correo. Fallbacks:
+     * "Usuario #id" si el id ya no existe, "(anonimo)" si no hay actor.
      */
     private function resolveUserLabel(?int $userId): string
     {
@@ -79,9 +80,7 @@ final readonly class RecordLogEntry
             return sprintf('Usuario #%d', $userId);
         }
 
-        $nombre = trim($user->firstName . ' ' . $user->lastName);
-
-        return $nombre !== '' ? $nombre : $user->email;
+        return $user->email;
     }
 
     private function resolveClientIp(Request $request): ?string

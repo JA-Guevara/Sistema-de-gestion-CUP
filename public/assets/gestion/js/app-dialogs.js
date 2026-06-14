@@ -80,21 +80,29 @@
 
     window.appConfirm = openConfirm;
 
-    // Intercepta formularios con data-confirm.
+    // Intercepta formularios con data-confirm (en el <form> o en el boton que envia).
     document.addEventListener('submit', function (e) {
         var form = e.target;
-        if (!form || !form.getAttribute || !form.hasAttribute('data-confirm')) {
+        if (!form || !form.getAttribute) {
             return;
         }
         if (form.dataset.dsConfirmed === '1') {
             return; // ya confirmado, dejar pasar
         }
+        var submitter = e.submitter || null; // preserva el boton (p.ej. formaction de acciones masivas)
+        // El mensaje del boton tiene prioridad sobre el del form: permite
+        // confirmaciones distintas por boton en un mismo form (Aprobar/Rechazar).
+        var message = (submitter && submitter.getAttribute ? submitter.getAttribute('data-confirm') : null)
+            || (form.hasAttribute('data-confirm') ? form.getAttribute('data-confirm') : null);
+        if (!message) {
+            return;
+        }
         e.preventDefault();
         openConfirm({
-            message: form.getAttribute('data-confirm'),
+            message: message,
             onConfirm: function () {
                 form.dataset.dsConfirmed = '1';
-                if (typeof form.requestSubmit === 'function') { form.requestSubmit(); } else { form.submit(); }
+                if (typeof form.requestSubmit === 'function') { form.requestSubmit(submitter); } else { form.submit(); }
             }
         });
     }, true);

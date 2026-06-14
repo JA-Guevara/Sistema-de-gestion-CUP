@@ -7,14 +7,20 @@ namespace App\Inscripcion\UI\Controller;
 use App\Auth\Entity\User;
 use App\Auth\Infrastructure\Persistence\UserRepository;
 use App\Auth\Infrastructure\Security\CsrfManager;
+use App\Inscripcion\Infrastructure\Persistence\CalendarioRevisionRepository;
 use App\Gestion\Domain\Catalog\EstadoGestion;
 use App\Gestion\Infrastructure\Persistence\GestionRepository;
+use App\Inscripcion\Application\DTO\ActaRecepcionInput;
 use App\Inscripcion\Application\DTO\InscripcionEditInput;
 use App\Inscripcion\Application\DTO\InscripcionesBulkInput;
 use App\Inscripcion\Application\DTO\RechazarInscripcionesBulkInput;
 use App\Inscripcion\Application\UseCase\ActualizarInscripcion;
 use App\Inscripcion\Application\UseCase\AgendarEntrevista;
 use App\Inscripcion\Application\UseCase\AgendarRevision;
+use App\Inscripcion\Application\UseCase\AgregarDiaRevision;
+use App\Inscripcion\Application\UseCase\EliminarDiaRevision;
+use App\Inscripcion\Application\UseCase\GenerarDiasRevision;
+use App\Inscripcion\Application\UseCase\ToggleDiaRevision;
 use App\Inscripcion\Application\UseCase\AnularInscripcion;
 use App\Inscripcion\Application\UseCase\BuscarPostulante;
 use App\Inscripcion\Application\UseCase\EditarBorrador;
@@ -24,6 +30,7 @@ use App\Inscripcion\Application\UseCase\ConfirmarInscripcion;
 use App\Inscripcion\Application\UseCase\CrearInscripcion;
 use App\Inscripcion\Application\UseCase\EliminarDocumento;
 use App\Inscripcion\Application\UseCase\EliminarInscripcion;
+use App\Inscripcion\Application\UseCase\GuardarActaRecepcion;
 use App\Inscripcion\Application\UseCase\ListInscripciones;
 use App\Inscripcion\Application\UseCase\PagarInscripcion;
 use App\Inscripcion\Application\UseCase\PresentarInscripcion;
@@ -34,6 +41,7 @@ use App\Inscripcion\Application\UseCase\SubirDocumento;
 use App\Inscripcion\Application\UseCase\ValidarInscripcion;
 use App\Inscripcion\Application\UseCase\ValidarInscripcionesBulk;
 use App\Inscripcion\Application\UseCase\VerInscripcion;
+use App\Inscripcion\Domain\Catalog\RequisitoCatalog;
 use App\Inscripcion\Domain\Exception\DocumentoException;
 use App\Inscripcion\Domain\Exception\InscripcionException;
 use App\Inscripcion\UI\Request\InscripcionRequest;
@@ -73,6 +81,12 @@ final class InscripcionController extends AbstractController
         private readonly SolicitarAnulacion $solicitarAnulacion,
         private readonly RechazarSolicitudAnulacion $rechazarSolicitudAnulacion,
         private readonly RevisarDocumento $revisarDocumento,
+        private readonly GuardarActaRecepcion $guardarActaRecepcion,
+        private readonly AgregarDiaRevision $agregarDiaRevision,
+        private readonly GenerarDiasRevision $generarDiasRevision,
+        private readonly EliminarDiaRevision $eliminarDiaRevision,
+        private readonly ToggleDiaRevision $toggleDiaRevision,
+        private readonly CalendarioRevisionRepository $calendarioRevision,
         private readonly UserRepository $users,
         private readonly GestionRepository $gestiones,
         private readonly CsrfManager $csrf,
@@ -119,6 +133,7 @@ final class InscripcionController extends AbstractController
 
         return $this->render('@inscripcion/detalle.html.twig', [
             'inscripcion' => $inscripcion,
+            'requisitos' => RequisitoCatalog::paraTipo($inscripcion->tipo),
             'user' => $user,
             'csrf_token' => $this->csrf->issue(self::CSRF_INTENTION),
         ]);
@@ -163,8 +178,10 @@ final class InscripcionController extends AbstractController
         }
 
         try {
-            $this->presentarInscripcion->execute($id, (int) $user->id);
-            $this->addFlash('success', 'Pre-inscripcion presentada. Te asignaremos fecha para la validacion de documentos.');
+            $cita = $this->presentarInscripcion->execute($id, (int) $user->id);
+            $this->addFlash('success', $cita !== null
+                ? sprintf('Pre-inscripcion presentada. Tu cita de revision de documentos es el %s.', $cita->format('d/m/Y H:i'))
+                : 'Pre-inscripcion presentada. Te asignaremos fecha para la revision de documentos.');
         } catch (InscripcionException $e) {
             $this->addFlash('error', $e->getMessage());
         }
@@ -615,6 +632,159 @@ final class InscripcionController extends AbstractController
         return $this->redirectToGestion($request);
     }
 
+    #[Route('/admin/calendario', name: 'inscripcion_admin_calendario', methods: ['GET'])]
+    public function calendario(Request $request): Response
+    {
+        if ($this->currentUser($request) === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        $gestiones = $this->gestiones->listAll();
+        $gestionIdParam = $request->query->getInt('gestion', 0);
+        $gestion = $gestionIdParam > 0
+            ? $this->gestiones->findById($gestionIdParam)
+            : $this->gestiones->findActive();
+
+        $dias = $gestion !== null
+            ? $this->calendarioRevision->listByGestion((int) $gestion->id)
+            : [];
+
+        return $this->render('@inscripcion/calendario.html.twig', [
+            'gestion' => $gestion,
+            'gestiones' => $gestiones,
+            'dias' => $dias,
+            'user' => $this->currentUser($request),
+            'csrf_token' => $this->csrf->issue(self::CSRF_INTENTION),
+        ]);
+    }
+
+    #[Route('/admin/calendario/agregar', name: 'inscripcion_admin_calendario_agregar', methods: ['POST'])]
+    public function calendarioAgregar(Request $request): RedirectResponse
+    {
+        if ($this->currentUser($request) === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToCalendario($request);
+        }
+
+        $gestionId = (int) $request->request->get('gestion', 0);
+        $fechaStr = trim((string) $request->request->get('fecha', ''));
+        $capacidad = (int) $request->request->get('capacidad', 0);
+
+        if ($fechaStr === '') {
+            $this->addFlash('error', 'Indica la fecha del dia de revision.');
+
+            return $this->redirectToCalendario($request);
+        }
+
+        try {
+            $this->agregarDiaRevision->execute($gestionId, new \DateTimeImmutable($fechaStr), $capacidad, $this->actorUserId($request));
+            $this->addFlash('success', 'Dia de revision agregado.');
+        } catch (InscripcionException $e) {
+            $this->addFlash('error', $e->getMessage());
+        } catch (\Exception) {
+            $this->addFlash('error', 'La fecha indicada no es valida.');
+        }
+
+        return $this->redirectToCalendario($request);
+    }
+
+    #[Route('/admin/calendario/generar', name: 'inscripcion_admin_calendario_generar', methods: ['POST'])]
+    public function calendarioGenerar(Request $request): RedirectResponse
+    {
+        if ($this->currentUser($request) === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToCalendario($request);
+        }
+
+        $gestionId = (int) $request->request->get('gestion', 0);
+        $desdeStr = trim((string) $request->request->get('desde', ''));
+        $hastaStr = trim((string) $request->request->get('hasta', ''));
+        $capacidad = (int) $request->request->get('capacidad', 0);
+        $soloLaborables = $request->request->has('soloLaborables');
+
+        if ($desdeStr === '' || $hastaStr === '') {
+            $this->addFlash('error', 'Indica la fecha inicial y final del rango.');
+
+            return $this->redirectToCalendario($request);
+        }
+
+        try {
+            $creados = $this->generarDiasRevision->execute(
+                $gestionId,
+                new \DateTimeImmutable($desdeStr),
+                new \DateTimeImmutable($hastaStr),
+                $capacidad,
+                $soloLaborables,
+                $this->actorUserId($request),
+            );
+            $this->addFlash($creados > 0 ? 'success' : 'error', $creados > 0
+                ? sprintf('%d dia(s) de revision generado(s).', $creados)
+                : 'No se generaron dias (ya existian o el rango no tiene dias validos).');
+        } catch (InscripcionException $e) {
+            $this->addFlash('error', $e->getMessage());
+        } catch (\Exception) {
+            $this->addFlash('error', 'Las fechas indicadas no son validas.');
+        }
+
+        return $this->redirectToCalendario($request);
+    }
+
+    #[Route('/admin/calendario/{id}/eliminar', name: 'inscripcion_admin_calendario_eliminar', methods: ['POST'])]
+    public function calendarioEliminar(Request $request, int $id): RedirectResponse
+    {
+        if ($this->currentUser($request) === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToCalendario($request);
+        }
+
+        try {
+            $this->eliminarDiaRevision->execute($id, $this->actorUserId($request));
+            $this->addFlash('success', 'Dia de revision eliminado.');
+        } catch (InscripcionException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToCalendario($request);
+    }
+
+    #[Route('/admin/calendario/{id}/toggle', name: 'inscripcion_admin_calendario_toggle', methods: ['POST'])]
+    public function calendarioToggle(Request $request, int $id): RedirectResponse
+    {
+        if ($this->currentUser($request) === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToCalendario($request);
+        }
+
+        try {
+            $this->toggleDiaRevision->execute($id, $this->actorUserId($request));
+            $this->addFlash('success', 'Dia de revision actualizado.');
+        } catch (InscripcionException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToCalendario($request);
+    }
+
     #[Route('/admin/{id}', name: 'inscripcion_admin_detalle', methods: ['GET'])]
     public function adminDetalle(Request $request, int $id): Response
     {
@@ -627,6 +797,7 @@ final class InscripcionController extends AbstractController
 
             return $this->render('@inscripcion/admin_detalle.html.twig', [
                 'inscripcion' => $inscripcion,
+                'requisitos' => RequisitoCatalog::paraTipo($inscripcion->tipo),
                 'user' => $this->currentUser($request),
                 'csrf_token' => $this->csrf->issue(self::CSRF_INTENTION),
             ]);
@@ -818,6 +989,34 @@ final class InscripcionController extends AbstractController
         return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $id]);
     }
 
+    #[Route('/admin/{id}/acta', name: 'inscripcion_admin_acta', methods: ['POST'])]
+    public function guardarActa(Request $request, int $id): RedirectResponse
+    {
+        if ($this->currentUser($request) === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $id]);
+        }
+
+        /** @var array<string,string> $estados */
+        $estados = array_map(static fn ($v): string => (string) $v, (array) $request->request->all('estado'));
+        /** @var array<string,?string> $observaciones */
+        $observaciones = array_map([self::class, 'nullableString'], (array) $request->request->all('observacion'));
+
+        try {
+            $this->guardarActaRecepcion->execute(new ActaRecepcionInput($id, $estados, $observaciones, $this->actorUserId($request)));
+            $this->addFlash('success', 'Acta de recepcion guardada.');
+        } catch (InscripcionException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $id]);
+    }
+
     #[Route('/admin/documentos/{documentoId}/revisar', name: 'inscripcion_admin_documento_revisar', methods: ['POST'])]
     public function revisarDocumento(Request $request, int $documentoId): RedirectResponse
     {
@@ -882,6 +1081,15 @@ final class InscripcionController extends AbstractController
         return $gestionId > 0
             ? $this->redirectToRoute('inscripcion_admin', ['gestion' => $gestionId])
             : $this->redirectToRoute('inscripcion_admin');
+    }
+
+    private function redirectToCalendario(Request $request): RedirectResponse
+    {
+        $gestionId = (int) $request->request->get('gestion', 0);
+
+        return $gestionId > 0
+            ? $this->redirectToRoute('inscripcion_admin_calendario', ['gestion' => $gestionId])
+            : $this->redirectToRoute('inscripcion_admin_calendario');
     }
 
     private static function nullableString(mixed $value): ?string

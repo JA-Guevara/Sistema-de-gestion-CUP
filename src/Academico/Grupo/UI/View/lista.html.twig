@@ -136,7 +136,7 @@
             </div>
         </form>
         <div class="gestion-table-wrap gestion-table-wrap--grupos">
-            <table class="gestion-table gestion-table--grupos" data-gestion-filter-table="grupos">
+            <table class="gestion-table gestion-table--grupos gestion-table--stack" data-gestion-filter-table="grupos">
                 <thead>
                     <tr>
                         <th><input class="gestion-bulk-check" type="checkbox" data-bulk-check-all aria-label="Seleccionar grupos visibles"></th>
@@ -151,16 +151,16 @@
                 <tbody>
                     {% for grupo in grupos %}
                         <tr data-filter-row data-filter-gestion="{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}" data-filter-texto="{{ grupo.codigo }} {{ grupo.nombre }}" data-filter-estado="{{ grupo.estado }}">
-                            <td><input class="gestion-bulk-check" type="checkbox" name="ids[]" value="{{ grupo.id }}" form="grupo-bulk-form" data-bulk-item aria-label="Seleccionar grupo {{ grupo.codigo }}"></td>
-                            <td>
+                            <td data-label="Seleccionar"><input class="gestion-bulk-check" type="checkbox" name="ids[]" value="{{ grupo.id }}" form="grupo-bulk-form" data-bulk-item aria-label="Seleccionar grupo {{ grupo.codigo }}"></td>
+                            <td data-label="Grupo">
                                 {{ grupo.codigo }}
                                 <span class="gestion-table__meta">{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}</span>
                             </td>
-                            <td>{{ grupo.nombre }}</td>
-                            <td class="gestion-col--num">{{ grupo.cupo }}</td>
-                            <td class="gestion-col--num">{{ grupo.inscritosEstimados }}</td>
-                            <td class="gestion-col--center"><span class="gestion-badge gestion-badge--{{ grupo.estado|lower }}">{{ grupo.estado|lower|capitalize }}</span></td>
-                            <td class="gestion-table__actions-cell">
+                            <td data-label="Nombre">{{ grupo.nombre }}</td>
+                            <td class="gestion-col--num" data-label="Cupo">{{ grupo.cupo }}</td>
+                            <td class="gestion-col--num" data-label="Estimados">{{ grupo.inscritosEstimados }}</td>
+                            <td class="gestion-col--center" data-label="Estado"><span class="gestion-badge gestion-badge--{{ grupo.estado|lower }}">{{ grupo.estado|lower|capitalize }}</span></td>
+                            <td class="gestion-table__actions-cell" data-label="Acciones">
                                 <div class="gestion-table__actions">
                                     <a class="gestion-action-button gestion-action-button--view" href="{{ path('grupo_show', {id: grupo.id}) }}" aria-label="Ver grupo" title="Ver">
                                         <svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>

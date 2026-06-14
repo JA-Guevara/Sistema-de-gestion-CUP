@@ -57,7 +57,7 @@
     <section class="gestion-panel">
         <h2>Cronograma academico</h2>
         <div class="gestion-table-wrap">
-            <table class="gestion-table">
+            <table class="gestion-table gestion-table--stack">
                 <thead>
                     <tr>
                         <th>Periodo</th>
@@ -68,9 +68,9 @@
                 <tbody>
                     {% for periodo in gestion.periodos %}
                         <tr>
-                            <td>{{ periodo.tipoPeriodo }}</td>
-                            <td>{{ periodo.fechaInicio|date('Y-m-d') }}</td>
-                            <td>{{ periodo.fechaFin|date('Y-m-d') }}</td>
+                            <td data-label="Periodo">{{ periodo.tipoPeriodo }}</td>
+                            <td data-label="Inicio">{{ periodo.fechaInicio|date('Y-m-d') }}</td>
+                            <td data-label="Fin">{{ periodo.fechaFin|date('Y-m-d') }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -81,7 +81,7 @@
     <section class="gestion-panel">
         <h2>Carreras habilitadas</h2>
         <div class="gestion-table-wrap">
-            <table class="gestion-table">
+            <table class="gestion-table gestion-table--stack">
                 <thead>
                     <tr>
                         <th>Carrera</th>
@@ -92,9 +92,9 @@
                 <tbody>
                     {% for carrera in gestion.carreras %}
                         <tr>
-                            <td>{{ carrera.carrera.codigo }} - {{ carrera.carrera.nombre }}</td>
-                            <td>{{ carrera.cupoCarrera }}</td>
-                            <td><span class="gestion-badge gestion-badge--{{ carrera.habilitada ? 'si' : 'no' }}">{{ carrera.habilitada ? 'Habilitada' : 'Inactiva' }}</span></td>
+                            <td data-label="Carrera">{{ carrera.carrera.codigo }} - {{ carrera.carrera.nombre }}</td>
+                            <td data-label="Cupo">{{ carrera.cupoCarrera }}</td>
+                            <td data-label="Estado"><span class="gestion-badge gestion-badge--{{ carrera.habilitada ? 'si' : 'no' }}">{{ carrera.habilitada ? 'Habilitada' : 'Inactiva' }}</span></td>
                         </tr>
                     {% else %}
                         <tr>
@@ -109,7 +109,7 @@
     <section class="gestion-panel">
         <h2>Historial</h2>
         <div class="gestion-table-wrap">
-            <table class="gestion-table">
+            <table class="gestion-table gestion-table--stack">
                 <thead>
                     <tr>
                         <th>Fecha</th>
@@ -120,9 +120,9 @@
                 <tbody>
                     {% for item in gestion.historial %}
                         <tr>
-                            <td>{{ item.fecha|date('Y-m-d H:i') }}</td>
-                            <td>{{ item.accion }}</td>
-                            <td>{{ item.descripcion }}</td>
+                            <td data-label="Fecha">{{ item.fecha|date('Y-m-d H:i') }}</td>
+                            <td data-label="Accion">{{ item.accion }}</td>
+                            <td data-label="Descripcion">{{ item.descripcion }}</td>
                         </tr>
                     {% else %}
                         <tr>

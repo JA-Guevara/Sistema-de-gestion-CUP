@@ -25,6 +25,7 @@ final readonly class CrearInscripcion
         private InscripcionRepository $inscripciones,
         private GestionRepository $gestiones,
         private CarreraRepository $carreras,
+        private AgendarRevisionAutomatica $agendarRevisionAutomatica,
         private InscripcionEvents $events,
     ) {
     }
@@ -56,6 +57,12 @@ final readonly class CrearInscripcion
 
         if ($input->tipo === TipoPostulacion::ESTUDIANTE && $esPresentar) {
             $this->updateCupo($gestion);
+        }
+
+        // Al presentar directamente desde el formulario, agenda la cita de
+        // revision automaticamente (mismo flush) si hay dias con cupo.
+        if ($esPresentar) {
+            $this->agendarRevisionAutomatica->execute($inscripcion);
         }
 
         $this->inscripciones->save($inscripcion);

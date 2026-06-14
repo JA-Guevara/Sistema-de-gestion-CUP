@@ -91,7 +91,7 @@
                                 <td class="gestion-col--text" data-label="Docente">{{ asignacion.docente.firstName }} {{ asignacion.docente.lastName }}</td>
                                 <td class="gestion-table__actions" data-label="Acciones">
                                     <a class="gestion-button" href="{{ path('nota_planilla', {materiaId: asignacion.materia.id, grupoId: asignacion.grupo.id}) }}">Cargar notas</a>
-                                    <form method="post" action="{{ path('nota_asignacion_delete', {id: asignacion.id}) }}" onsubmit="return confirm('Quitar esta asignacion?');">
+                                    <form method="post" action="{{ path('nota_asignacion_delete', {id: asignacion.id}) }}" data-confirm="Quitar esta asignacion?">
                                         <button class="gestion-link-button gestion-link-button--danger" type="submit" title="Quitar">
                                             <svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                                         </button>

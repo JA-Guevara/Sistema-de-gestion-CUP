@@ -25,6 +25,7 @@ use App\Notas\Application\UseCase\ImportarNotas;
 use App\Notas\Application\UseCase\ListAsignaciones;
 use App\Notas\Application\UseCase\ListMateriasDocente;
 use App\Notas\Application\UseCase\VerBoletin;
+use App\Notas\Application\UseCase\VerHorarioEstudiante;
 use App\Notas\Application\UseCase\VerPlanilla;
 use App\Notas\Domain\Exception\NotaException;
 use App\Notas\Infrastructure\Persistence\AsignacionGrupoRepository;
@@ -51,6 +52,7 @@ final class NotaController extends AbstractController
         private readonly GuardarNotas $guardarNotas,
         private readonly ImportarNotas $importarNotas,
         private readonly VerBoletin $verBoletin,
+        private readonly VerHorarioEstudiante $verHorarioEstudiante,
         private readonly AsignacionDocenteRepository $asignacionesDocente,
         private readonly AsignacionGrupoRepository $asignacionesGrupo,
         private readonly MateriaRepository $materias,
@@ -400,6 +402,20 @@ final class NotaController extends AbstractController
         return $this->render('@notas/boletin.html.twig', [
             'user' => $user,
             'boletin' => $this->verBoletin->execute((int) $user->id),
+        ]);
+    }
+
+    #[Route('/mi-horario', name: 'nota_horario', methods: ['GET'])]
+    public function miHorario(Request $request): Response
+    {
+        $user = $this->currentUser($request);
+        if ($user === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        return $this->render('@notas/horario.html.twig', [
+            'user' => $user,
+            'horario' => $this->verHorarioEstudiante->execute((int) $user->id),
         ]);
     }
 

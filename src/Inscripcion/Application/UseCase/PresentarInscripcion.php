@@ -16,11 +16,16 @@ final readonly class PresentarInscripcion
 {
     public function __construct(
         private InscripcionRepository $inscripciones,
+        private AgendarRevisionAutomatica $agendarRevisionAutomatica,
         private InscripcionEvents $events,
     ) {
     }
 
-    public function execute(int $inscripcionId, int $actorUserId): void
+    /**
+     * Presenta el borrador y, si la gestion tiene dias de revision con cupo,
+     * agenda automaticamente la cita. Devuelve la fecha asignada (o null).
+     */
+    public function execute(int $inscripcionId, int $actorUserId): ?\DateTimeImmutable
     {
         $inscripcion = $this->inscripciones->findById($inscripcionId);
         if ($inscripcion === null) {
@@ -44,8 +49,14 @@ final readonly class PresentarInscripcion
         }
 
         $inscripcion->presentar();
+        $cita = $this->agendarRevisionAutomatica->execute($inscripcion);
         $this->inscripciones->flush();
 
         $this->events->presentada($inscripcion->ci, $actorUserId);
+        if ($cita !== null) {
+            $this->events->revisionAgendada($inscripcion->ci, $cita, $actorUserId);
+        }
+
+        return $cita;
     }
 }

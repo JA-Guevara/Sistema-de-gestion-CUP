@@ -50,7 +50,7 @@
             </div>
         </form>
         <div class="gestion-table-wrap">
-            <table class="gestion-table" data-gestion-filter-table="carreras">
+            <table class="gestion-table gestion-table--stack" data-gestion-filter-table="carreras">
                 <thead>
                     <tr>
                         <th>Codigo</th>
@@ -64,12 +64,12 @@
                 <tbody>
                     {% for carrera in carreras %}
                         <tr data-filter-row data-filter-texto="{{ carrera.codigo }} {{ carrera.nombre }} {{ carrera.facultad }}" data-filter-modalidad="{{ carrera.modalidad }}" data-filter-estado="{{ carrera.estado }}">
-                            <td>{{ carrera.codigo }}</td>
-                            <td>{{ carrera.nombre }}</td>
-                            <td>{{ carrera.facultad ?? '-' }}</td>
-                            <td>{{ carrera.modalidad ?? '-' }}</td>
-                            <td class="gestion-col--center"><span class="gestion-badge gestion-badge--{{ carrera.estado|lower }}">{{ carrera.estado|lower|capitalize }}</span></td>
-                            <td class="gestion-table__actions">
+                            <td data-label="Codigo">{{ carrera.codigo }}</td>
+                            <td data-label="Nombre">{{ carrera.nombre }}</td>
+                            <td data-label="Facultad">{{ carrera.facultad ?? '-' }}</td>
+                            <td data-label="Modalidad">{{ carrera.modalidad ?? '-' }}</td>
+                            <td class="gestion-col--center" data-label="Estado"><span class="gestion-badge gestion-badge--{{ carrera.estado|lower }}">{{ carrera.estado|lower|capitalize }}</span></td>
+                            <td class="gestion-table__actions" data-label="Acciones">
                                 <a class="gestion-action-button gestion-action-button--edit" href="{{ path('carrera_edit', {id: carrera.id}) }}" aria-label="Editar carrera" title="Editar">
                                     <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                                 </a>

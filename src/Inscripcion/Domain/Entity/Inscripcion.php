@@ -8,7 +8,9 @@ use App\Academico\Carrera\Domain\Entity\Carrera;
 use App\Auth\Entity\User;
 use App\Gestion\Domain\Entity\Gestion;
 use App\Inscripcion\Domain\Catalog\EstadoInscripcion;
+use App\Inscripcion\Domain\Catalog\EstadoVerificacion;
 use App\Inscripcion\Domain\Catalog\ModalidadPostulacion;
+use App\Inscripcion\Domain\Catalog\RequisitoCatalog;
 use App\Inscripcion\Domain\Catalog\TipoPostulacion;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -111,6 +113,14 @@ class Inscripcion
     #[ORM\OneToMany(mappedBy: 'inscripcion', targetEntity: Documento::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     public \Doctrine\Common\Collections\Collection $documentos;
 
+    /**
+     * Acta de control de recepcion: estado de cada requisito el dia de la cita.
+     *
+     * @var \Doctrine\Common\Collections\Collection<int, \App\Inscripcion\Domain\Entity\VerificacionDocumento>
+     */
+    #[ORM\OneToMany(mappedBy: 'inscripcion', targetEntity: VerificacionDocumento::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    public \Doctrine\Common\Collections\Collection $verificaciones;
+
     #[ORM\Column(length: 20)]
     public string $estado = EstadoInscripcion::BORRADOR;
 
@@ -147,6 +157,7 @@ class Inscripcion
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->documentos = new ArrayCollection();
+        $this->verificaciones = new ArrayCollection();
     }
 
     public function presentar(): void
@@ -308,5 +319,70 @@ class Inscripcion
         }
 
         return true;
+    }
+
+    /**
+     * Verificacion del acta de recepcion para un requisito (null si aun no se
+     * registro). Sirve para precargar el formulario del acta.
+     */
+    public function verificacionPorCodigo(string $codigo): ?VerificacionDocumento
+    {
+        foreach ($this->verificaciones as $verificacion) {
+            if ($verificacion->requisitoCodigo === $codigo) {
+                return $verificacion;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Resumen del acta de control de recepcion segun los requisitos del tipo.
+     *
+     * @return array{obligatorios:int, conformes:int, observados:int, pendientes:int}
+     */
+    public function resumenActa(): array
+    {
+        $estados = [];
+        foreach ($this->verificaciones as $verificacion) {
+            $estados[$verificacion->requisitoCodigo] = $verificacion->estado;
+        }
+
+        $obligatorios = 0;
+        $conformes = 0;
+        $observados = 0;
+        $pendientes = 0;
+        foreach (RequisitoCatalog::paraTipo($this->tipo) as $requisito) {
+            $estado = $estados[$requisito['codigo']] ?? EstadoVerificacion::PENDIENTE;
+            if ($estado === EstadoVerificacion::OBSERVADO) {
+                $observados++;
+            }
+            if ($requisito['obligatorio']) {
+                $obligatorios++;
+                if ($estado === EstadoVerificacion::ENTREGADO) {
+                    $conformes++;
+                } else {
+                    $pendientes++;
+                }
+            }
+        }
+
+        return [
+            'obligatorios' => $obligatorios,
+            'conformes' => $conformes,
+            'observados' => $observados,
+            'pendientes' => $pendientes,
+        ];
+    }
+
+    /**
+     * El acta esta conforme (gate de aprobacion) cuando TODOS los requisitos
+     * obligatorios estan Entregados. Los opcionales no bloquean.
+     */
+    public function actaConforme(): bool
+    {
+        $resumen = $this->resumenActa();
+
+        return $resumen['obligatorios'] > 0 && $resumen['conformes'] === $resumen['obligatorios'];
     }
 }

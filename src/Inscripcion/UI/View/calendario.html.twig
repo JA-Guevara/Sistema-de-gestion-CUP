@@ -1,0 +1,157 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Calendario de revision · {{ parent() }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">
+{% endblock %}
+
+{% block app_content %}
+    <div class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">CUP FICCT · Admisiones</p>
+            <h1 class="app-content__title">Calendario de revision de documentos</h1>
+            <p class="gestion-help" style="margin:4px 0 0">Define los dias habiles y su capacidad. Al presentar, el sistema asigna la cita automaticamente al primer dia con cupo.</p>
+        </div>
+        {% if gestiones is defined and gestiones|length > 0 %}
+            <form method="get" action="{{ path('inscripcion_admin_calendario') }}" class="gestion-head__actions">
+                <label class="gestion-bulk-actions__select">
+                    Gestion
+                    <select name="gestion" onchange="this.form.submit()">
+                        {% for g in gestiones %}
+                            <option value="{{ g.id }}" {{ gestion and gestion.id == g.id ? 'selected' : '' }}>{{ g.codigo }}{{ g.isActive ? ' (activa)' : '' }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <noscript><button class="gestion-button" type="submit">Ver</button></noscript>
+            </form>
+        {% endif %}
+    </div>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    {% if gestion is null %}
+        <section class="gestion-panel">
+            <p class="gestion-panel__hint">No hay ninguna gestion seleccionada o activa. Crea o activa una gestion para configurar su calendario.</p>
+        </section>
+    {% else %}
+        {# ---- Generar rango de dias ---- #}
+        <section class="gestion-panel">
+            <div class="gestion-panel__header">
+                <div>
+                    <h2>Generar dias habiles</h2>
+                    <p class="gestion-panel__hint">Crea varios dias de una vez en un rango, con la misma capacidad. Puedes excluir fines de semana.</p>
+                </div>
+            </div>
+            <form method="post" action="{{ path('inscripcion_admin_calendario_generar') }}" class="gestion-form">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
+                <input type="hidden" name="gestion" value="{{ gestion.id }}">
+                <div class="gestion-grid" style="grid-template-columns:repeat(4, 1fr) auto;align-items:end;gap:12px">
+                    <label>Desde
+                        <input type="date" name="desde" required>
+                    </label>
+                    <label>Hasta
+                        <input type="date" name="hasta" required>
+                    </label>
+                    <label>Capacidad por dia
+                        <input type="number" name="capacidad" min="1" value="20" required>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:8px;align-self:center">
+                        <input type="checkbox" name="soloLaborables" checked style="width:auto"> Solo L-V
+                    </label>
+                    <button class="gestion-button gestion-button--primary" type="submit" style="align-self:end">Generar</button>
+                </div>
+            </form>
+        </section>
+
+        {# ---- Agregar un dia puntual ---- #}
+        <section class="gestion-panel">
+            <div class="gestion-panel__header">
+                <div>
+                    <h2>Agregar un dia</h2>
+                    <p class="gestion-panel__hint">Agrega una fecha puntual (util para dias extra o reprogramaciones).</p>
+                </div>
+            </div>
+            <form method="post" action="{{ path('inscripcion_admin_calendario_agregar') }}" class="gestion-form">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
+                <input type="hidden" name="gestion" value="{{ gestion.id }}">
+                <div class="gestion-grid" style="grid-template-columns:1fr 1fr auto;align-items:end;gap:12px">
+                    <label>Fecha
+                        <input type="date" name="fecha" required>
+                    </label>
+                    <label>Capacidad
+                        <input type="number" name="capacidad" min="1" value="20" required>
+                    </label>
+                    <button class="gestion-button gestion-button--primary" type="submit" style="align-self:end">Agregar dia</button>
+                </div>
+            </form>
+        </section>
+
+        {# ---- Dias configurados ---- #}
+        <section class="gestion-panel">
+            <div class="gestion-panel__header">
+                <div>
+                    <h2>Dias configurados</h2>
+                    <p class="gestion-panel__hint">{{ dias|length }} dia(s). "Agendados" es cuanta gente ya tiene cita ese dia.</p>
+                </div>
+            </div>
+            {% if dias|length > 0 %}
+                <div class="gestion-table-wrap">
+                    <table class="gestion-table gestion-table--stack">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th class="gestion-col--num">Capacidad</th>
+                                <th class="gestion-col--num">Agendados</th>
+                                <th class="gestion-col--num">Disponibles</th>
+                                <th class="gestion-col--center">Estado</th>
+                                <th class="gestion-table__actions-cell">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dia in dias %}
+                                {% set lleno = dia.agendados >= dia.capacidad %}
+                                <tr>
+                                    <td class="gestion-col--text" data-label="Fecha">{{ dia.fecha|date('d/m/Y') }} <span class="gestion-table__meta">{{ dia.fecha|date('l')|capitalize }}</span></td>
+                                    <td class="gestion-col--num" data-label="Capacidad">{{ dia.capacidad }}</td>
+                                    <td class="gestion-col--num" data-label="Agendados">{{ dia.agendados }}</td>
+                                    <td class="gestion-col--num" data-label="Disponibles">{{ dia.disponibles }}</td>
+                                    <td class="gestion-col--center" data-label="Estado">
+                                        {% if not dia.habilitado %}
+                                            <span class="gestion-badge gestion-badge--inactiva">Deshabilitado</span>
+                                        {% elseif lleno %}
+                                            <span class="gestion-badge gestion-badge--borrador">Lleno</span>
+                                        {% else %}
+                                            <span class="gestion-badge gestion-badge--activa">Disponible</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="gestion-table__actions" data-label="Acciones" style="display:flex;gap:6px;align-items:center">
+                                        <form method="post" action="{{ path('inscripcion_admin_calendario_toggle', {id: dia.id}) }}">
+                                            <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
+                                            <input type="hidden" name="gestion" value="{{ gestion.id }}">
+                                            <button class="gestion-button" type="submit">{{ dia.habilitado ? 'Deshabilitar' : 'Habilitar' }}</button>
+                                        </form>
+                                        <form method="post" action="{{ path('inscripcion_admin_calendario_eliminar', {id: dia.id}) }}" data-confirm="Eliminar este dia de revision?">
+                                            <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
+                                            <input type="hidden" name="gestion" value="{{ gestion.id }}">
+                                            <button class="gestion-action-button gestion-action-button--danger" type="submit" title="Eliminar" {{ dia.agendados > 0 ? 'disabled title=No se puede: tiene citas agendadas' : '' }}>
+                                                <svg viewBox="0 0 24 24"><polyline points="3 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="gestion-panel__hint">Aun no hay dias configurados. Genera un rango o agrega un dia para habilitar el agendamiento automatico.</p>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    <div class="gestion-page-actions">
+        <a class="gestion-button" href="{{ path('inscripcion_admin') }}">Volver a Admisiones</a>
+    </div>
+{% endblock %}

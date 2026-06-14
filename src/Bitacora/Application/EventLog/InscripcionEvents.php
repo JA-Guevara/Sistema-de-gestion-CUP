@@ -43,6 +43,17 @@ final readonly class InscripcionEvents
         $this->audit->deleted(ModuleCatalog::INSCRIPCIONES, sprintf('Inscripcion CI %s', $ci), sprintf('Elimino documento "%s" de inscripcion CI %s.', $nombreDocumento, $ci), $actorUserId, $userLabel);
     }
 
+    public function calendarioRevisionActualizado(string $gestionCodigo, string $detalle, ?int $actorUserId): void
+    {
+        $this->audit->log(
+            ModuleCatalog::INSCRIPCIONES,
+            ActionCatalog::UPDATE,
+            sprintf('%s (gestion %s).', $detalle, $gestionCodigo),
+            entity: sprintf('Calendario de revision %s', $gestionCodigo),
+            userId: $actorUserId,
+        );
+    }
+
     public function revisionAgendada(string $ci, \DateTimeImmutable $fecha, ?int $actorUserId): void
     {
         $this->audit->log(
@@ -82,6 +93,26 @@ final readonly class InscripcionEvents
             ModuleCatalog::INSCRIPCIONES,
             ActionCatalog::UPDATE,
             sprintf('Reviso el documento "%s" de CI %s: %s.', $nombreDocumento, $ci, $estado),
+            entity: sprintf('Inscripcion CI %s', $ci),
+            userId: $actorUserId,
+        );
+    }
+
+    /**
+     * @param array{obligatorios:int, conformes:int, observados:int, pendientes:int} $resumen
+     */
+    public function actaRegistrada(string $ci, array $resumen, ?int $actorUserId): void
+    {
+        $this->audit->log(
+            ModuleCatalog::INSCRIPCIONES,
+            ActionCatalog::UPDATE,
+            sprintf(
+                'Registro el acta de recepcion de documentos de CI %s: %d/%d requisitos obligatorios conformes%s.',
+                $ci,
+                $resumen['conformes'],
+                $resumen['obligatorios'],
+                $resumen['observados'] > 0 ? sprintf(', %d observado(s)', $resumen['observados']) : '',
+            ),
             entity: sprintf('Inscripcion CI %s', $ci),
             userId: $actorUserId,
         );

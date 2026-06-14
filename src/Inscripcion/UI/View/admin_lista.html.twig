@@ -22,6 +22,7 @@
             {% if gestion %}
                 <p class="gestion-help" style="margin:4px 0 0">Gestion: <strong>{{ gestion.codigo }}</strong></p>
             {% endif %}
+            <p style="margin:10px 0 0"><a class="gestion-button" href="{{ path('inscripcion_admin_calendario') }}{{ gestion ? '?gestion=' ~ gestion.id : '' }}">Calendario de revision</a></p>
         </div>
         {% if gestiones is defined and gestiones|length > 0 %}
             <form method="get" action="{{ path('inscripcion_admin') }}" class="gestion-head__actions">
@@ -101,12 +102,12 @@
                     <input type="text" name="motivo" placeholder="Opcional">
                 </label>
                 <button type="submit" class="gestion-button gestion-button--primary" formaction="{{ path('inscripcion_admin_validar_bulk') }}" data-bulk-submit disabled
-                        onclick="return confirm('Aprobar las postulaciones seleccionadas? Solo se aprueban las que tienen todos sus documentos aprobados.')">
+                        data-confirm="Aprobar las postulaciones seleccionadas? Solo se aprueban las que tienen todos sus documentos aprobados.">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
                     Aprobar
                 </button>
                 <button type="submit" class="gestion-button gestion-button--danger" formaction="{{ path('inscripcion_admin_rechazar_bulk') }}" data-bulk-submit disabled
-                        onclick="return confirm('Rechazar las postulaciones seleccionadas?')">
+                        data-confirm="Rechazar las postulaciones seleccionadas?">
                     Rechazar
                 </button>
             </div>
@@ -122,13 +123,13 @@
                         <th>Tipo</th>
                         <th>Carrera / Area</th>
                         <th class="gestion-col--center">Estado</th>
-                        <th class="gestion-col--center">Documentos</th>
+                        <th class="gestion-col--center">Acta</th>
                         <th class="gestion-table__actions-cell">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for inscripcion in inscripciones %}
-                        {% set resumen = inscripcion.resumenDocumentos %}
+                        {% set acta = inscripcion.resumenActa %}
                         <tr data-filter-row
                             data-filter-texto="{{ inscripcion.ci }} {{ inscripcion.nombres }} {{ inscripcion.apellidos }} {{ inscripcion.email }}"
                             data-filter-tipo="{{ inscripcion.tipo }}"
@@ -149,11 +150,11 @@
                                     <span class="gestion-badge gestion-badge--inactiva" title="El postulante solicito anular">Anulacion solicitada</span>
                                 {% endif %}
                             </td>
-                            <td class="gestion-col--center" data-label="Documentos">
-                                {% if resumen.total == 0 %}
-                                    <span class="gestion-table__meta">Sin documentos</span>
+                            <td class="gestion-col--center" data-label="Acta">
+                                {% if inscripcion.estado in ['PRESENTADA','VALIDADA','CONFIRMADA'] %}
+                                    <span class="gestion-badge gestion-badge--{{ acta.conformes == acta.obligatorios ? 'activa' : (acta.observados > 0 ? 'inactiva' : 'borrador') }}" title="Requisitos obligatorios conformes">{{ acta.conformes }}/{{ acta.obligatorios }}</span>
                                 {% else %}
-                                    <span class="gestion-badge gestion-badge--{{ resumen.aprobados == resumen.total ? 'activa' : (resumen.observados > 0 ? 'inactiva' : 'borrador') }}">{{ resumen.aprobados }}/{{ resumen.total }} ok</span>
+                                    <span class="gestion-table__meta">—</span>
                                 {% endif %}
                             </td>
                             <td data-label="Acciones" class="gestion-table__actions">

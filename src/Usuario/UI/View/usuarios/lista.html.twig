@@ -56,7 +56,7 @@
             </div>
         </form>
         <div class="gestion-table-wrap">
-            <table class="gestion-table" data-gestion-filter-table="usuarios">
+            <table class="gestion-table gestion-table--stack" data-gestion-filter-table="usuarios">
                 <thead>
                     <tr>
                         <th>Usuario</th>
@@ -71,15 +71,15 @@
                     {% for usuario in usuarios %}
                         {% set estado = usuario.active ? 'ACTIVO' : 'INACTIVO' %}
                         <tr data-filter-row data-filter-texto="{{ usuario.firstName }} {{ usuario.lastName }} {{ usuario.email }}" data-filter-rol="{{ usuario.roleNames() }}" data-filter-estado="{{ estado }}">
-                            <td>
+                            <td data-label="Usuario">
                                 {{ usuario.firstName }} {{ usuario.lastName }}
                                 <span class="gestion-table__meta">#{{ usuario.id }}</span>
                             </td>
-                            <td>{{ usuario.email }}</td>
-                            <td>{{ usuario.roleNames() }}</td>
-                            <td class="gestion-col--center"><span class="gestion-badge gestion-badge--{{ usuario.active ? 'activa' : 'inactiva' }}">{{ usuario.active ? 'Activo' : 'Inactivo' }}</span></td>
-                            <td>{{ usuario.lastLoginAt ? usuario.lastLoginAt|date('Y-m-d H:i') : 'Sin acceso' }}</td>
-                            <td class="gestion-table__actions-cell">
+                            <td data-label="Correo">{{ usuario.email }}</td>
+                            <td data-label="Roles">{{ usuario.roleNames() }}</td>
+                            <td class="gestion-col--center" data-label="Estado"><span class="gestion-badge gestion-badge--{{ usuario.active ? 'activa' : 'inactiva' }}">{{ usuario.active ? 'Activo' : 'Inactivo' }}</span></td>
+                            <td data-label="Ultimo acceso">{{ usuario.lastLoginAt ? usuario.lastLoginAt|date('Y-m-d H:i') : 'Sin acceso' }}</td>
+                            <td class="gestion-table__actions-cell" data-label="Acciones">
                                 <div class="gestion-table__actions">
                                     <a class="gestion-action-button gestion-action-button--view" href="{{ path('usuario_show', {id: usuario.id}) }}" aria-label="Ver usuario" title="Ver">
                                         <svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>

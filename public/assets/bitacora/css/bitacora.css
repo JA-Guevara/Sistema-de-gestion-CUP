@@ -286,7 +286,7 @@ select.bitacora-filters__input {
 
 .bitacora-table th {
     padding: 12px 14px;
-    text-align: center;
+    text-align: left;
     font-size: 11px;
     font-weight: 700;
     color: var(--color-text-muted);
@@ -300,6 +300,11 @@ select.bitacora-filters__input {
     padding: 12px 14px;
     border-bottom: 1px solid #eef0f3;
     vertical-align: middle;
+    text-align: left;
+}
+
+/* Columnas de badge/chip (Accion, Modulo): centradas */
+.bitacora-table__center {
     text-align: center;
 }
 
@@ -320,10 +325,12 @@ select.bitacora-filters__input {
     color: var(--color-text-muted);
     font-variant-numeric: tabular-nums;
     width: 50px;
+    text-align: right;
 }
 
 .bitacora-table__col-num {
     width: 50px;
+    text-align: right;
 }
 
 .bitacora-table__user {
@@ -335,7 +342,7 @@ select.bitacora-filters__input {
     text-overflow: ellipsis;
     white-space: nowrap;
     word-break: normal;
-    text-align: center;
+    text-align: left;
 }
 
 .bitacora-table__module {
@@ -357,7 +364,7 @@ select.bitacora-filters__input {
     min-width: 260px;
     max-width: 380px;
     line-height: 1.4;
-    text-align: center;
+    text-align: left;
     overflow-wrap: anywhere;
 }
 
@@ -611,13 +618,78 @@ select.bitacora-filters__input {
         justify-self: center;
     }
 
-    .bitacora-table th,
-    .bitacora-table td {
-        padding: 11px 12px;
+    .bitacora-table__wrap {
+        max-height: none;
+        overflow-x: visible;
     }
 
     .bitacora-table {
-        min-width: 900px;
+        min-width: 0;
+    }
+
+    .bitacora-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .bitacora-table tbody tr {
+        display: block;
+        margin: 12px;
+        padding: 4px 14px;
+        border: 1px solid var(--color-border);
+        border-radius: 10px;
+        background: #ffffff;
+    }
+
+    .bitacora-table td {
+        align-items: center;
+        border-bottom: 1px solid #eef0f3;
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+        max-width: none;
+        min-width: 0;
+        overflow: visible;
+        padding: 9px 0;
+        text-align: right;
+        white-space: normal;
+        width: 100%;
+    }
+
+    .bitacora-table td::before {
+        content: attr(data-label);
+        color: var(--color-text-muted);
+        flex: 0 0 auto;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .5px;
+        text-align: left;
+        text-transform: uppercase;
+    }
+
+    .bitacora-table td:last-child {
+        border-bottom: 0;
+    }
+
+    .bitacora-table__desc {
+        overflow-wrap: anywhere;
+        text-align: right;
+    }
+
+    .bitacora-table__empty {
+        display: block;
+        text-align: center;
+    }
+
+    .bitacora-table__empty::before {
+        content: "";
     }
 }
 

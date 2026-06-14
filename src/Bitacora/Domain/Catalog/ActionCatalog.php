@@ -43,6 +43,7 @@ final class ActionCatalog
     public const APPROVE = 'APPROVE';
     public const REJECT = 'REJECT';
     public const EXPORT = 'EXPORT';
+    public const PAYMENT = 'PAYMENT';
     public const ERROR = 'ERROR';
 
     // ---------- Niveles de severidad ----------
@@ -78,6 +79,7 @@ final class ActionCatalog
         self::APPROVE => self::LEVEL_INFO,
         self::REJECT => self::LEVEL_ALERTA,
         self::EXPORT => self::LEVEL_INFO,
+        self::PAYMENT => self::LEVEL_INFO,
         self::ERROR => self::LEVEL_CRITICO,
     ];
 
@@ -108,6 +110,7 @@ final class ActionCatalog
         self::APPROVE => 'APROBAR',
         self::REJECT => 'RECHAZAR',
         self::EXPORT => 'EXPORTAR',
+        self::PAYMENT => 'PAGO',
         self::ERROR => 'ERROR',
     ];
 

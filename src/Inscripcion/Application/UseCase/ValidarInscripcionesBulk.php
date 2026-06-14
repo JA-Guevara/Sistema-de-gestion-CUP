@@ -12,9 +12,9 @@ use App\Inscripcion\Infrastructure\Persistence\InscripcionRepository;
 
 /**
  * Aprobacion masiva: valida (PRESENTADA -> VALIDADA) las postulaciones
- * seleccionadas que tengan TODA su documentacion aprobada. Las que no cumplen
- * el gate (borrador, ya resueltas o con documentos pendientes) se omiten y se
- * reportan aparte; no abortan el lote completo.
+ * seleccionadas cuyo acta de recepcion este conforme (todos los requisitos
+ * obligatorios Entregados). Las que no cumplen el gate (borrador, ya resueltas
+ * o con acta incompleta) se omiten y se reportan aparte; no abortan el lote.
  */
 final readonly class ValidarInscripcionesBulk
 {
@@ -38,7 +38,7 @@ final readonly class ValidarInscripcionesBulk
         $validadas = [];
         $omitidas = 0;
         foreach ($seleccionadas as $inscripcion) {
-            if (!$inscripcion->isPresentada() || !$inscripcion->todosAprobados()) {
+            if (!$inscripcion->isPresentada() || !$inscripcion->actaConforme()) {
                 $omitidas++;
                 continue;
             }

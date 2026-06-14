@@ -8,7 +8,7 @@
     <link rel="alternate icon" type="image/png" href="/favicon.png">
     <link rel="shortcut icon" href="/favicon.svg">
 
-    <link rel="stylesheet" href="/assets/app/css/app.css?v=4">
+    <link rel="stylesheet" href="/assets/app/css/app.css?v=5">
     {% block stylesheets %}{% endblock %}
     {# Design System global: tokens + mejoras. Va al final para ganar en cascada y que todo modulo lo herede. #}
     <link rel="stylesheet" href="/assets/gestion/css/design-system.css?v=9">
@@ -55,6 +55,7 @@
                     {% set puedeRoles = user is defined and user and user.hasPermission('roles.ver') %}
                     {% set puedeBitacora = user is defined and user and user.hasPermission('bitacora.ver') %}
                     {% set puedeNotas = user is defined and user and user.hasPermission('notas.ver') %}
+                    {% set esEstudiante = user is defined and user and user.hasRole('Estudiante') %}
 
                     {# Inicio (activo cuando estás en / ) #}
                     <a href="{{ path('home') }}" class="app-sidebar__item {{ current == 'home' ? 'app-sidebar__item--active' : '' }}">
@@ -159,10 +160,20 @@
                         </span>
                         <span class="app-sidebar__label">Grupos</span>
                     </a>
+
+                    <a href="{{ path('horario_index') }}" class="app-sidebar__item {{ current starts with 'horario_' ? 'app-sidebar__item--active' : '' }}">
+                        <span class="app-sidebar__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                        </span>
+                        <span class="app-sidebar__label">Horarios</span>
+                    </a>
                     {% endif %}
 
                     {% if puedeAdmisiones %}
-                    <a href="{{ path('inscripcion_admin') }}" class="app-sidebar__item {{ current starts with 'inscripcion_admin' or current starts with 'inscripcion_buscar' or current starts with 'inscripcion_edit' ? 'app-sidebar__item--active' : '' }}">
+                    <a href="{{ path('inscripcion_admin') }}" class="app-sidebar__item {{ (current starts with 'inscripcion_admin' or current starts with 'inscripcion_buscar' or current starts with 'inscripcion_edit') and not (current starts with 'inscripcion_admin_pagos') ? 'app-sidebar__item--active' : '' }}">
                         <span class="app-sidebar__icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M22 12h-6l-2 3h-4l-2-3H2"/>
@@ -172,10 +183,20 @@
                         </span>
                         <span class="app-sidebar__label">Admisiones</span>
                     </a>
+
+                    <a href="{{ path('inscripcion_admin_pagos') }}" class="app-sidebar__item {{ current starts with 'inscripcion_admin_pagos' ? 'app-sidebar__item--active' : '' }}">
+                        <span class="app-sidebar__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                                <line x1="2" y1="10" x2="22" y2="10"/>
+                            </svg>
+                        </span>
+                        <span class="app-sidebar__label">Pagos</span>
+                    </a>
                     {% endif %}
 
                     {% if puedeAsignaciones %}
-                    <a href="{{ path('asignacion_index') }}" class="app-sidebar__item {{ current starts with 'asignacion_' or current starts with 'nota_asignacion' or current starts with 'nota_grupo' or current starts with 'horario_' ? 'app-sidebar__item--active' : '' }}">
+                    <a href="{{ path('asignacion_index') }}" class="app-sidebar__item {{ current starts with 'asignacion_' or current starts with 'nota_asignacion' or current starts with 'nota_grupo' ? 'app-sidebar__item--active' : '' }}">
                         <span class="app-sidebar__icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
@@ -246,7 +267,7 @@
                     {% if puedeNotas %}
                     <p class="app-sidebar__section-title">Evaluación</p>
 
-                    <a href="{{ path('nota_index') }}" class="app-sidebar__item {{ current starts with 'nota_' and not (current starts with 'nota_asignacion') and not (current starts with 'nota_grupo') ? 'app-sidebar__item--active' : '' }}">
+                    <a href="{{ path('nota_index') }}" class="app-sidebar__item {{ current starts with 'nota_' and not (current starts with 'nota_asignacion') and not (current starts with 'nota_grupo') and not (current starts with 'nota_horario') ? 'app-sidebar__item--active' : '' }}">
                         <span class="app-sidebar__icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="18" y1="20" x2="18" y2="10"/>
@@ -256,6 +277,17 @@
                         </span>
                         <span class="app-sidebar__label">Notas</span>
                     </a>
+                    {% if esEstudiante %}
+                    <a href="{{ path('nota_horario') }}" class="app-sidebar__item {{ current starts with 'nota_horario' ? 'app-sidebar__item--active' : '' }}">
+                        <span class="app-sidebar__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                        </span>
+                        <span class="app-sidebar__label">Mi horario</span>
+                    </a>
+                    {% endif %}
                     {% endif %}
 
                     {% block app_nav_extra %}{% endblock %}
@@ -271,7 +303,7 @@
         </div>
     </div>
 
-    <script src="/assets/gestion/js/app-dialogs.js" defer></script>
+    <script src="/assets/gestion/js/app-dialogs.js?v=2" defer></script>
     {% block javascripts %}{% endblock %}
 </body>
 </html>

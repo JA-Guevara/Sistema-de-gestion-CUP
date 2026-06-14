@@ -39,7 +39,7 @@
             </div>
         </form>
         <div class="gestion-table-wrap">
-            <table class="gestion-table" data-gestion-filter-table="materias">
+            <table class="gestion-table gestion-table--stack" data-gestion-filter-table="materias">
                 <thead>
                     <tr>
                         <th>Codigo</th>
@@ -52,11 +52,11 @@
                 <tbody>
                     {% for materia in materias %}
                         <tr data-filter-row data-filter-texto="{{ materia.codigo }} {{ materia.nombre }} {{ materia.descripcion }}" data-filter-estado="{{ materia.estado }}">
-                            <td>{{ materia.codigo }}</td>
-                            <td>{{ materia.nombre }}</td>
-                            <td>{{ materia.descripcion ?? '-' }}</td>
-                            <td class="gestion-col--center"><span class="gestion-badge gestion-badge--{{ materia.estado|lower }}">{{ materia.estado|lower|capitalize }}</span></td>
-                            <td class="gestion-table__actions">
+                            <td data-label="Codigo">{{ materia.codigo }}</td>
+                            <td data-label="Nombre">{{ materia.nombre }}</td>
+                            <td data-label="Descripcion">{{ materia.descripcion ?? '-' }}</td>
+                            <td class="gestion-col--center" data-label="Estado"><span class="gestion-badge gestion-badge--{{ materia.estado|lower }}">{{ materia.estado|lower|capitalize }}</span></td>
+                            <td class="gestion-table__actions" data-label="Acciones">
                                 <a class="gestion-action-button gestion-action-button--edit" href="{{ path('materia_edit', {id: materia.id}) }}" aria-label="Editar materia" title="Editar">
                                     <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                                 </a>

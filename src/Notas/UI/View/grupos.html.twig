@@ -107,16 +107,16 @@
                     </div>
                 </div>
                 <div class="gestion-table-wrap">
-                    <table class="gestion-table">
+                    <table class="gestion-table gestion-table--stack">
                         <thead>
                             <tr><th>CI</th><th>Estudiante</th><th></th></tr>
                         </thead>
                         <tbody>
                             {% for asignacion in asignados %}
                                 <tr>
-                                    <td>{{ asignacion.inscripcion.ci }}</td>
-                                    <td>{{ asignacion.inscripcion.apellidos }} {{ asignacion.inscripcion.nombres }}</td>
-                                    <td class="gestion-table__actions">
+                                    <td data-label="CI">{{ asignacion.inscripcion.ci }}</td>
+                                    <td data-label="Estudiante">{{ asignacion.inscripcion.apellidos }} {{ asignacion.inscripcion.nombres }}</td>
+                                    <td class="gestion-table__actions" data-label="Acciones">
                                         <form method="post" action="{{ path('nota_grupo_delete', {id: asignacion.id}) }}">
                                             <input type="hidden" name="materia" value="{{ materiaSel }}">
                                             <input type="hidden" name="grupo" value="{{ grupoSel }}">
@@ -159,17 +159,17 @@
                     <input type="hidden" name="materia" value="{{ materiaSel }}">
                     <input type="hidden" name="grupo" value="{{ grupoSel }}">
                     <div class="gestion-table-wrap">
-                        <table class="gestion-table" data-gestion-filter-table="disponibles">
+                        <table class="gestion-table gestion-table--stack" data-gestion-filter-table="disponibles">
                             <thead>
                                 <tr><th></th><th>CI</th><th>Estudiante</th><th>Grupo actual</th></tr>
                             </thead>
                             <tbody>
                                 {% for item in disponibles %}
                                     <tr data-filter-row data-filter-texto="{{ item.inscripcion.ci }} {{ item.inscripcion.apellidos }} {{ item.inscripcion.nombres }}">
-                                        <td><input type="checkbox" name="inscritos[]" value="{{ item.inscripcion.id }}"></td>
-                                        <td>{{ item.inscripcion.ci }}</td>
-                                        <td>{{ item.inscripcion.apellidos }} {{ item.inscripcion.nombres }}</td>
-                                        <td>{{ item.grupoActual ?? '-' }}</td>
+                                        <td data-label="Seleccionar"><input type="checkbox" name="inscritos[]" value="{{ item.inscripcion.id }}"></td>
+                                        <td data-label="CI">{{ item.inscripcion.ci }}</td>
+                                        <td data-label="Estudiante">{{ item.inscripcion.apellidos }} {{ item.inscripcion.nombres }}</td>
+                                        <td data-label="Grupo actual">{{ item.grupoActual ?? '-' }}</td>
                                     </tr>
                                 {% endfor %}
                                 <tr data-filter-empty {{ disponibles is empty ? '' : 'hidden' }}>

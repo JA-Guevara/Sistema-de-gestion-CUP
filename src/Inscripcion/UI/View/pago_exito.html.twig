@@ -1,0 +1,46 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Pago de inscripcion · {{ parent() }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">
+{% endblock %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">CUP FICCT · Pago</p>
+            <h1 class="app-content__title">{{ pagado ? 'Pago confirmado' : 'Pago en proceso' }}</h1>
+        </div>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    <section class="gestion-panel">
+        <div class="gestion-panel__header">
+            <div>
+                {% if pagado %}
+                    <h2>&#10003; ¡Listo! Tu inscripcion fue confirmada</h2>
+                    <p class="gestion-panel__hint">
+                        Recibimos tu pago{% if pago %} de <strong>{{ pago.montoDecimal|number_format(2, '.', ',') }} {{ pago.currency }}</strong>{% endif %}.
+                        Ya eres estudiante del CUP: tus modulos quedaron habilitados en el menu.
+                    </p>
+                {% else %}
+                    <h2>Estamos confirmando tu pago</h2>
+                    <p class="gestion-panel__hint">
+                        Si completaste el pago, la confirmacion puede tardar unos segundos. Vuelve a
+                        <strong>Mis postulaciones</strong> en un momento; si pagaste, veras tu inscripcion confirmada.
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <div class="gestion-page-actions">
+        <a class="gestion-button gestion-button--primary" href="{{ path('inscripcion_index') }}">Ir a mis postulaciones</a>
+        {% if pago and pago.inscripcion.id %}
+            <a class="gestion-button" href="{{ path('inscripcion_ver', {id: pago.inscripcion.id}) }}">Ver mi inscripcion</a>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -2,7 +2,157 @@
 
 {% block title %}Mi boletin{% endblock %}
 
-{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">{% endblock %}
+{# Documento boleta reutilizable: se usa tal cual en la pagina y en el modal de impresion. #}
+{% macro boletaInner(boletin) %}
+    <header class="boleta__head">
+        <img src="/assets/auth/logos/ficct.png" alt="FICCT" class="boleta__logo">
+        <div>
+            <div class="boleta__uni">Universidad Autonoma Gabriel Rene Moreno</div>
+            <div class="boleta__fac">Facultad de Ingenieria en Ciencias de la Computacion y Telecomunicaciones</div>
+            <div class="boleta__cup">Curso Preuniversitario (CUP)</div>
+        </div>
+    </header>
+
+    <h2 class="boleta__title">Boleta de inscripcion y notas</h2>
+
+    <dl class="boleta__data">
+        <div><dt>Estudiante</dt><dd>{{ boletin.inscripcion.apellidos }} {{ boletin.inscripcion.nombres }}</dd></div>
+        <div><dt>Cedula (CI)</dt><dd>{{ boletin.inscripcion.ci }}</dd></div>
+        <div><dt>Carrera</dt><dd>{{ boletin.inscripcion.carrera ? boletin.inscripcion.carrera.nombre : '—' }}</dd></div>
+        <div><dt>Gestion</dt><dd>{{ boletin.gestion.nombre }}</dd></div>
+        <div><dt>Modalidad</dt><dd>{{ boletin.inscripcion.modalidad|lower|capitalize }}</dd></div>
+        <div><dt>Emitido</dt><dd>{{ "now"|date('d/m/Y H:i') }}</dd></div>
+    </dl>
+
+    <table class="boleta__table">
+        <thead>
+            <tr>
+                <th>Materia</th>
+                <th>Grupo</th>
+                {% for examen in 1..boletin.cantidadExamenes %}
+                    <th>Examen {{ examen }}</th>
+                {% endfor %}
+                <th>Promedio</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fila in boletin.materias %}
+                <tr>
+                    <td class="boleta__left">{{ fila.materia.codigo }} - {{ fila.materia.nombre }}</td>
+                    <td>{{ fila.grupo.codigo }}</td>
+                    {% for examen in 1..boletin.cantidadExamenes %}
+                        <td>{{ fila.valores[examen] is not null ? fila.valores[examen] : '-' }}</td>
+                    {% endfor %}
+                    <td><strong>{{ fila.promedio is not null ? fila.promedio : '-' }}</strong></td>
+                    <td>
+                        {% if fila.aprobado is null %}
+                            <span class="boleta__estado--incompleto">Incompleto</span>
+                        {% elseif fila.aprobado %}
+                            <span class="boleta__estado--aprobado">Aprobado</span>
+                        {% else %}
+                            <span class="boleta__estado--reprobado">Reprobado</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="{{ 4 + boletin.cantidadExamenes }}">Sin materias asignadas.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p class="boleta__foot">
+        Nota minima de aprobacion: {{ boletin.notaMinima }} &middot; Escala 0 a 100.<br>
+        Documento informativo generado por el sistema de gestion del CUP - FICCT.
+    </p>
+{% endmacro %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">
+    <style>
+        /* ---- Documento boleta (se usa en la pagina y en el modal) ---- */
+        .boleta { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 1px 3px rgba(15,23,42,.06); padding: 36px; max-width: 880px; margin: 0 auto; color: #0f172a; }
+        .boleta__head { display: flex; align-items: center; gap: 18px; border-bottom: 2px solid #1e3a8a; padding-bottom: 16px; }
+        .boleta__logo { height: 64px; width: auto; }
+        .boleta__uni { font-weight: 800; font-size: 16px; color: #1e3a8a; line-height: 1.2; }
+        .boleta__fac { font-size: 12px; color: #334155; }
+        .boleta__cup { font-size: 12px; font-weight: 700; color: #9b1c1c; margin-top: 3px; }
+        .boleta__title { text-align: center; font-size: 17px; margin: 20px 0 16px; text-transform: uppercase; letter-spacing: 1.3px; }
+        .boleta__data { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 32px; margin: 0 0 20px; }
+        .boleta__data > div { display: flex; gap: 8px; border-bottom: 1px dotted #cbd5e1; padding: 6px 0; font-size: 13px; }
+        .boleta__data dt { font-weight: 700; color: #64748b; min-width: 96px; margin: 0; }
+        .boleta__data dd { margin: 0; }
+        .boleta__table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .boleta__table th, .boleta__table td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: center; }
+        .boleta__table th { background: #1e3a8a; color: #fff; font-weight: 700; }
+        .boleta__table td.boleta__left { text-align: left; }
+        .boleta__estado--aprobado { color: #166534; font-weight: 700; }
+        .boleta__estado--reprobado { color: #9b1c1c; font-weight: 700; }
+        .boleta__estado--incompleto { color: #64748b; }
+        .boleta__foot { margin-top: 22px; font-size: 11px; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 12px; }
+
+        /* ---- Datos del estudiante en la vista principal (estilo consulta) ---- */
+        .boletin-datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 2px 28px; margin: 0; padding: 6px 18px 18px; }
+        .boletin-datos > div { display: flex; gap: 8px; padding: 8px 0; border-bottom: 1px dotted #e2e8f0; font-size: 14px; }
+        .boletin-datos dt { font-weight: 700; color: #64748b; min-width: 110px; margin: 0; }
+        .boletin-datos dd { margin: 0; color: #0f172a; }
+
+        /* ---- Modal: mas grande y centrado ---- */
+        .boleta-modal[hidden] { display: none; }
+        .boleta-modal {
+            position: fixed; inset: 0; z-index: 60;
+            display: flex; align-items: center; justify-content: center;
+            padding: 24px;
+        }
+        .boleta-modal__overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, .55); }
+        .boleta-modal__dialog {
+            position: relative; background: #eef1f5; border-radius: 12px;
+            box-shadow: 0 26px 70px rgba(0, 0, 0, .34);
+            width: 100%; max-width: 1000px; margin: auto; overflow: hidden;
+            display: flex; flex-direction: column; max-height: calc(100vh - 48px);
+        }
+        .boleta-modal__bar {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            padding: 14px 18px; background: #ffffff; border-bottom: 1px solid #e2e8f0;
+        }
+        .boleta-modal__bar strong { color: #1e3a8a; }
+        .boleta-modal__bar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .boleta-modal__scroll { overflow: auto; padding: 28px; }
+
+        @media (max-width: 720px) {
+            .boleta { padding: 22px; }
+            .boleta__head { align-items: flex-start; }
+            .boleta__logo { height: 52px; }
+            .boleta__data { grid-template-columns: 1fr; gap: 2px; }
+            .boleta__data > div,
+            .boletin-datos > div { flex-direction: column; gap: 2px; }
+            .boleta__data dt,
+            .boletin-datos dt { min-width: 0; }
+            .boleta-modal { padding: 12px; }
+            .boleta-modal__scroll { padding: 14px; }
+            .boleta__table { min-width: 680px; }
+        }
+
+        @media (max-width: 520px) {
+            .boleta { padding: 16px; border-radius: 8px; }
+            .boleta__head { gap: 12px; }
+            .boleta__uni { font-size: 14px; }
+            .boleta-modal__bar { align-items: stretch; flex-direction: column; }
+            .boleta-modal__bar-actions .gestion-button { flex: 1 1 120px; }
+        }
+
+        /* ---- Impresion: solo la boleta del modal ---- */
+        @media print {
+            body * { visibility: hidden !important; }
+            .boleta-modal, .boleta-modal[hidden] { display: block !important; position: static !important; padding: 0 !important; overflow: visible !important; max-height: none !important; }
+            .boleta-modal__overlay, .boleta-modal__bar { display: none !important; }
+            .boleta-modal__dialog { position: static !important; box-shadow: none !important; max-width: none !important; max-height: none !important; background: #fff !important; }
+            .boleta-modal__scroll { position: static !important; overflow: visible !important; padding: 0 !important; }
+            #boleta-doc, #boleta-doc * { visibility: visible !important; }
+            #boleta-doc { position: absolute; left: 0; top: 0; width: 100%; margin: 0 !important; border: 0 !important; box-shadow: none !important; max-width: none !important; }
+        }
+    </style>
+{% endblock %}
 
 {% block app_content %}
     <section class="gestion-head">
@@ -10,23 +160,47 @@
             <p class="gestion-eyebrow">Evaluacion academica</p>
             <h1 class="app-content__title">Mi boletin de notas</h1>
         </div>
+        <div class="gestion-head__actions">
+            <a class="gestion-button" href="{{ path('home') }}">Volver</a>
+            {% if boletin is not null %}
+                <button type="button" class="gestion-button gestion-button--primary" data-boleta-open>Ver / Imprimir boleta</button>
+            {% endif %}
+        </div>
     </section>
 
     {% include '@gestion/partials/_flash.html.twig' %}
 
     {% if boletin is null %}
         <section class="gestion-panel">
-            <p class="gestion-panel__hint">No tienes una inscripcion registrada en la gestion activa, o aun no estas asignado a ningun grupo.</p>
+            <p class="gestion-panel__hint">No tienes una inscripcion confirmada en la gestion activa, o aun no estas asignado a ningun grupo.</p>
         </section>
     {% else %}
+        {# ---- Vista principal: datos del estudiante (detallado) ---- #}
         <section class="gestion-panel">
             <div class="gestion-panel__header">
                 <div>
                     <h2>{{ boletin.inscripcion.apellidos }} {{ boletin.inscripcion.nombres }}</h2>
-                    <p class="gestion-panel__hint">
-                        CI {{ boletin.inscripcion.ci }} &middot; {{ boletin.inscripcion.carrera.nombre }} &middot; {{ boletin.gestion.nombre }}
-                        &middot; Nota minima: <strong>{{ boletin.notaMinima }}</strong>
-                    </p>
+                    <p class="gestion-panel__hint">Datos del estudiante &mdash; gestion {{ boletin.gestion.nombre }}.</p>
+                </div>
+            </div>
+            <dl class="boletin-datos">
+                <div><dt>Cedula (CI)</dt><dd>{{ boletin.inscripcion.ci }}</dd></div>
+                <div><dt>Carrera</dt><dd>{{ boletin.inscripcion.carrera ? boletin.inscripcion.carrera.nombre : '—' }}</dd></div>
+                <div><dt>Gestion</dt><dd>{{ boletin.gestion.nombre }}</dd></div>
+                <div><dt>Modalidad</dt><dd>{{ boletin.inscripcion.modalidad|lower|capitalize }}</dd></div>
+                <div><dt>Correo</dt><dd>{{ boletin.inscripcion.email }}</dd></div>
+                <div><dt>Telefono</dt><dd>{{ boletin.inscripcion.telefono ?? '—' }}</dd></div>
+                <div><dt>Nota minima</dt><dd>{{ boletin.notaMinima }}</dd></div>
+                <div><dt>Examenes</dt><dd>{{ boletin.cantidadExamenes }}</dd></div>
+            </dl>
+        </section>
+
+        {# ---- Vista principal: detalle de notas (lista) ---- #}
+        <section class="gestion-panel">
+            <div class="gestion-panel__header">
+                <div>
+                    <h2>Detalle de notas</h2>
+                    <p class="gestion-panel__hint">Materias asignadas, calificaciones por examen, promedio y estado.</p>
                 </div>
             </div>
             <div class="gestion-table-wrap">
@@ -68,5 +242,34 @@
                 </table>
             </div>
         </section>
+
+        {# ==================== Ventana emergente: boleta imprimible ==================== #}
+        <div class="boleta-modal" id="boletaModal" hidden>
+            <div class="boleta-modal__overlay" data-boleta-close></div>
+            <div class="boleta-modal__dialog" role="dialog" aria-modal="true" aria-label="Boleta de inscripcion">
+                <div class="boleta-modal__bar">
+                    <strong>Boleta de inscripcion &middot; CUP FICCT</strong>
+                    <div class="boleta-modal__bar-actions">
+                        <button type="button" class="gestion-button gestion-button--primary" onclick="window.print()">Imprimir</button>
+                        <button type="button" class="gestion-button" data-boleta-close>Cerrar</button>
+                    </div>
+                </div>
+                <div class="boleta-modal__scroll">
+                    <article class="boleta" id="boleta-doc">{{ _self.boletaInner(boletin) }}</article>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            (function () {
+                var modal = document.getElementById('boletaModal');
+                if (!modal) { return; }
+                function open() { modal.hidden = false; document.body.style.overflow = 'hidden'; }
+                function close() { modal.hidden = true; document.body.style.overflow = ''; }
+                document.querySelectorAll('[data-boleta-open]').forEach(function (b) { b.addEventListener('click', open); });
+                modal.querySelectorAll('[data-boleta-close]').forEach(function (b) { b.addEventListener('click', close); });
+                document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !modal.hidden) { close(); } });
+            }());
+        </script>
     {% endif %}
 {% endblock %}

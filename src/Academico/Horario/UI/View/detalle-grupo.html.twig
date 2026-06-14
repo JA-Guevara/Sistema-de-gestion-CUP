@@ -56,7 +56,7 @@
         <div data-tab-panel="detalle">
             <h3>Detalle por materia</h3>
             <div class="gestion-table-wrap">
-                <table class="gestion-table">
+                <table class="gestion-table gestion-table--stack">
                     <thead>
                         <tr>
                             <th>Sigla</th>
@@ -69,10 +69,10 @@
                     <tbody>
                         {% for materia in porMateria %}
                             <tr>
-                                <td>{{ materia.sigla }}</td>
-                                <td>{{ materia.nombre }}</td>
-                                <td>{{ grupo.codigo }}</td>
-                                <td>
+                                <td data-label="Sigla">{{ materia.sigla }}</td>
+                                <td data-label="Materia">{{ materia.nombre }}</td>
+                                <td data-label="Grupo">{{ grupo.codigo }}</td>
+                                <td data-label="Horario">
                                     {% for linea in materia.lineas %}
                                         <div class="horario-linea">
                                             <span>{{ linea.dia|capitalize }} {{ linea.horaInicio }}-{{ linea.horaFin }} · {{ linea.aula }}</span>
@@ -92,7 +92,7 @@
                                         </div>
                                     {% endfor %}
                                 </td>
-                                <td>
+                                <td data-label="Acciones">
                                     <form method="post" action="{{ path('horario_grupo_materia_delete', {grupoId: grupo.id, materiaId: materia.materiaId}) }}" data-confirm="¿Eliminar toda la materia {{ materia.nombre }} del horario del grupo?">
                                         <button class="gestion-button gestion-button--danger" type="submit">Quitar materia</button>
                                     </form>

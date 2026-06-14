@@ -36,7 +36,10 @@ final class PerfilController extends AbstractController
     #[Route('', name: 'perfil_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        $user = $this->requireUser($request);
+        $user = $this->loadAuthenticatedUser($request);
+        if ($user === null) {
+            return $this->redirectToRoute('auth_login');
+        }
 
         return $this->render('@perfil/perfil.html.twig', [
             'user' => $user,
@@ -47,7 +50,10 @@ final class PerfilController extends AbstractController
     #[Route('', name: 'perfil_update', methods: ['POST'])]
     public function update(Request $request): Response
     {
-        $user = $this->requireUser($request);
+        $user = $this->loadAuthenticatedUser($request);
+        if ($user === null) {
+            return $this->redirectToRoute('auth_login');
+        }
 
         try {
             $this->updatePerfil->execute(new PerfilInput(
@@ -66,7 +72,10 @@ final class PerfilController extends AbstractController
     #[Route('/password', name: 'perfil_password', methods: ['POST'])]
     public function password(Request $request): Response
     {
-        $user = $this->requireUser($request);
+        $user = $this->loadAuthenticatedUser($request);
+        if ($user === null) {
+            return $this->redirectToRoute('auth_login');
+        }
 
         try {
             $this->changePassword->execute(new PasswordChangeInput(
@@ -86,7 +95,10 @@ final class PerfilController extends AbstractController
     #[Route('/foto', name: 'perfil_foto', methods: ['POST'])]
     public function foto(Request $request): Response
     {
-        $user = $this->requireUser($request);
+        $user = $this->loadAuthenticatedUser($request);
+        if ($user === null) {
+            return $this->redirectToRoute('auth_login');
+        }
 
         try {
             $this->guardarFoto($user, $request->files->get('foto'));
@@ -165,14 +177,10 @@ final class PerfilController extends AbstractController
         return null;
     }
 
-    private function requireUser(Request $request): User
+    private function loadAuthenticatedUser(Request $request): ?User
     {
         $userId = $request->getSession()->get(self::SESSION_USER_KEY);
-        $user = is_int($userId) ? $this->users->findById($userId) : null;
-        if ($user === null) {
-            throw $this->createAccessDeniedException();
-        }
 
-        return $user;
+        return is_int($userId) ? $this->users->findById($userId) : null;
     }
 }

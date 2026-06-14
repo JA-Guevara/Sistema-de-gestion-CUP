@@ -24,6 +24,7 @@ final readonly class AnularInscripcion
 
     public function __construct(
         private InscripcionRepository $inscripciones,
+        private LiberarCupoRevision $liberarCupoRevision,
         private InscripcionEvents $events,
     ) {
     }
@@ -41,6 +42,9 @@ final readonly class AnularInscripcion
 
         $eraConfirmada = $inscripcion->isConfirmada();
         $tipo = $inscripcion->tipo;
+
+        // Libera el cupo del dia de revision que tenia asignado (si lo tenia).
+        $this->liberarCupoRevision->execute($inscripcion);
 
         $inscripcion->anular();
 
