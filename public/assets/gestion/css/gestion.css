@@ -315,10 +315,71 @@
     width: 16px;
 }
 
+.gestion-bulk-actions__select {
+    align-items: center;
+    color: #334155;
+    display: inline-flex;
+    font-size: 12px;
+    font-weight: 800;
+    gap: 8px;
+    text-transform: uppercase;
+}
+
+.gestion-bulk-actions__select select {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    color: #0f172a;
+    font: inherit;
+    min-height: 38px;
+    min-width: 180px;
+    padding: 8px 32px 8px 10px;
+}
+
 .gestion-bulk-check {
     accent-color: #1e3a8a;
     height: 16px;
     width: 16px;
+}
+
+.gestion-bulk-actions__select input[type="text"] {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    color: #0f172a;
+    font: inherit;
+    min-height: 38px;
+    min-width: 180px;
+    padding: 8px 10px;
+}
+
+.gestion-tabs {
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 18px 18px 0;
+}
+
+.gestion-tab {
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: #64748b;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    margin-bottom: -1px;
+    padding: 10px 14px;
+}
+
+.gestion-tab:hover {
+    color: #0f172a;
+}
+
+.gestion-tab.is-active {
+    border-bottom-color: #1e3a8a;
+    color: #1e3a8a;
 }
 
 .gestion-metric,
@@ -922,6 +983,93 @@
     margin: -4px 18px 18px;
 }
 
+.gestion-form .auth-form__hint {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 4px 0 0;
+}
+
+.gestion-form .auth-form__hint--error {
+    color: #9b1c1c;
+}
+
+.gestion-password-field {
+    position: relative;
+}
+
+.gestion-password-field input {
+    padding-right: 48px;
+}
+
+.gestion-password-field .auth-password-field__toggle {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    color: #64748b;
+    cursor: pointer;
+    display: inline-flex;
+    height: 34px;
+    justify-content: center;
+    padding: 0;
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 34px;
+}
+
+.gestion-password-field .auth-password-field__toggle:hover {
+    background: rgba(30, 58, 138, .08);
+    color: #1e3a8a;
+}
+
+.gestion-password-field .auth-password-field__toggle svg {
+    fill: none;
+    height: 18px;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+    width: 18px;
+}
+
+.usuario-permission-groups {
+    display: grid;
+    gap: 14px;
+    padding: 0 18px 18px;
+}
+
+.usuario-permission-group {
+    background: #fafafb;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.usuario-permission-group h3 {
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: .6px;
+    margin: 0;
+    padding: 14px 14px 0;
+    text-transform: uppercase;
+}
+
+.usuario-permission-group .gestion-checks {
+    padding: 14px;
+}
+
+.gestion-checks--cards small {
+    color: #64748b;
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 3px;
+}
+
 .gestion-toast-stack {
     display: grid;
     gap: 10px;
@@ -1217,12 +1365,16 @@
     }
 
     /* Celda de acciones: etiqueta en su propia linea y botones debajo a la derecha */
-    .gestion-table.gestion-table--stack tbody td.gestion-table__actions {
+    .gestion-table.gestion-table--stack tbody td.gestion-table__actions,
+    .gestion-table.gestion-table--stack tbody td.gestion-table__actions-cell {
         flex-wrap: wrap;
         justify-content: flex-end;
+        min-width: 0;
+        position: static;
     }
 
-    .gestion-table.gestion-table--stack tbody td.gestion-table__actions::before {
+    .gestion-table.gestion-table--stack tbody td.gestion-table__actions::before,
+    .gestion-table.gestion-table--stack tbody td.gestion-table__actions-cell::before {
         flex: 1 1 100%;
         margin-bottom: 4px;
     }
@@ -1246,4 +1398,17 @@
    ========================================================================= */
 .gestion-filters__field--clear {
     justify-items: center;
+}
+
+/* =========================================================================
+   Hint introductorio como hijo directo de un panel
+   Le da los mismos margenes internos que el resto del contenido del panel,
+   para que no quede pegado al borde (simetria del contenido).
+   ========================================================================= */
+.gestion-panel > .gestion-panel__hint {
+    padding: 0 18px 14px;
+}
+
+.gestion-panel > .gestion-panel__hint:first-child {
+    padding-top: 18px;
 }

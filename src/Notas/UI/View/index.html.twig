@@ -1,0 +1,60 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Notas y evaluaciones{% endblock %}
+
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=15">{% endblock %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Evaluacion academica</p>
+            <h1 class="app-content__title">Notas y evaluaciones</h1>
+        </div>
+        <div class="gestion-head__actions">
+            <a href="{{ path('nota_boletin') }}" class="gestion-button">Mi boletin</a>
+        </div>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    {% if gestion is null %}
+        <section class="gestion-panel">
+            <p class="gestion-panel__hint">No hay una gestion CUP activa en este momento. Activa una gestion para registrar notas.</p>
+        </section>
+    {% else %}
+        <section class="gestion-panel">
+            <div class="gestion-panel__header">
+                <div>
+                    <h2>Docentes por materia y grupo &mdash; {{ gestion.nombre }}</h2>
+                    <p class="gestion-panel__hint">Cada fila es una materia dictada por un docente a un grupo. Abre la planilla para registrar notas.</p>
+                </div>
+            </div>
+            <div class="gestion-table-wrap">
+                <table class="gestion-table gestion-table--stack">
+                    <thead>
+                        <tr>
+                            <th>Materia</th>
+                            <th>Grupo</th>
+                            <th>Docente</th>
+                            <th class="gestion-table__actions-cell">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for asignacion in asignaciones %}
+                            <tr>
+                                <td class="gestion-col--text" data-label="Materia">{{ asignacion.materia.codigo }} - {{ asignacion.materia.nombre }}</td>
+                                <td data-label="Grupo">{{ asignacion.grupo.codigo }}</td>
+                                <td class="gestion-col--text" data-label="Docente">{{ asignacion.docente.firstName }} {{ asignacion.docente.lastName }}</td>
+                                <td class="gestion-table__actions" data-label="Acciones">
+                                    <a class="gestion-button gestion-button--primary" href="{{ path('nota_planilla', {materiaId: asignacion.materia.id, grupoId: asignacion.grupo.id}) }}">Cargar notas</a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="4">Aun no hay asignaciones. Empieza por "Asignar docentes".</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    {% endif %}
+{% endblock %}

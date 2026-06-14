@@ -1,0 +1,119 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Planilla de notas{% endblock %}
+
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=14">{% endblock %}
+
+{% block javascripts %}<script src="/assets/gestion/js/gestion-filters.js?v=9" defer></script>{% endblock %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Planilla &mdash; {{ gestion.nombre }} &middot; Grupo {{ grupo.codigo }}</p>
+            <h1 class="app-content__title">{{ materia.codigo }} - {{ materia.nombre }}</h1>
+        </div>
+        <a href="{{ path('nota_index') }}" class="gestion-button">Volver</a>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    <section class="gestion-panel">
+        <p class="gestion-panel__hint">Nota minima de aprobacion: <strong>{{ notaMinima }}</strong> &middot; Examenes: <strong>{{ cantidadExamenes }}</strong> &middot; Escala 0 a 100 &middot; Estudiantes: <strong>{{ filas|length }}</strong>.</p>
+
+        <form class="gestion-filters" data-gestion-filters data-filter-target="planilla">
+            <div class="gestion-filters__field">
+                <label>Buscar estudiante</label>
+                <input type="search" data-filter-field="texto" placeholder="CI, nombre o apellido">
+            </div>
+            <div class="gestion-filters__field">
+                <label>Estado</label>
+                <select data-filter-field="estado">
+                    <option value="">Todos</option>
+                    <option value="aprobado">Aprobado</option>
+                    <option value="reprobado">Reprobado</option>
+                    <option value="incompleto">Incompleto</option>
+                </select>
+            </div>
+            <div class="gestion-filters__field gestion-filters__field--clear">
+                <label aria-hidden="true">Limpiar</label>
+                <button class="gestion-filters__clear" type="button" data-filter-clear aria-label="Limpiar filtros">
+                    <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m6 10 1 10h10l1-10"/><path d="M10 14v3"/><path d="M14 14v3"/></svg>
+                </button>
+            </div>
+        </form>
+
+        <div class="gestion-actions" style="margin-top:0;padding-bottom:12px;border-bottom:1px solid #eef0f3">
+            <a class="gestion-button" href="{{ path('nota_planilla_exportar', {materiaId: materia.id, grupoId: grupo.id}) }}">Exportar CSV</a>
+            <form method="post" action="{{ path('nota_planilla_importar', {materiaId: materia.id, grupoId: grupo.id}) }}" enctype="multipart/form-data" style="display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <input type="file" name="archivo" accept=".csv,text/csv" required>
+                <button class="gestion-button" type="submit">Importar CSV</button>
+            </form>
+        </div>
+        <p class="gestion-panel__hint" style="padding:8px 0 0">Importacion masiva: usa el CSV exportado como plantilla (columnas CI, Apellidos, Nombres, Examen 1..N). Solo se cargan estudiantes de este grupo.</p>
+
+        <form method="post" action="{{ path('nota_guardar', {materiaId: materia.id, grupoId: grupo.id}) }}">
+            <div class="gestion-table-wrap">
+                <table class="gestion-table" data-gestion-filter-table="planilla">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>CI</th>
+                            <th>Estudiante</th>
+                            {% for examen in 1..cantidadExamenes %}
+                                <th>Examen {{ examen }}</th>
+                            {% endfor %}
+                            <th>Promedio</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fila in filas %}
+                            {% set estadoFila = fila.aprobado is null ? 'incompleto' : (fila.aprobado ? 'aprobado' : 'reprobado') %}
+                            <tr data-filter-row
+                                data-filter-texto="{{ fila.inscripcion.ci }} {{ fila.inscripcion.apellidos }} {{ fila.inscripcion.nombres }}"
+                                data-filter-estado="{{ estadoFila }}">
+                                <td>{{ loop.index }}</td>
+                                <td>{{ fila.inscripcion.ci }}</td>
+                                <td>{{ fila.inscripcion.apellidos }} {{ fila.inscripcion.nombres }}</td>
+                                {% for examen in 1..cantidadExamenes %}
+                                    <td>
+                                        <input type="number" min="0" max="100" step="1"
+                                               name="nota[{{ fila.inscripcion.id }}][{{ examen }}]"
+                                               value="{{ fila.valores[examen] is not null ? fila.valores[examen] : '' }}"
+                                               style="width:5rem">
+                                    </td>
+                                {% endfor %}
+                                <td><strong>{{ fila.promedio is not null ? fila.promedio : '-' }}</strong></td>
+                                <td>
+                                    {% if fila.aprobado is null %}
+                                        <span class="gestion-badge gestion-badge--borrador">Incompleto</span>
+                                    {% elseif fila.aprobado %}
+                                        <span class="gestion-badge gestion-badge--activa">Aprobado</span>
+                                    {% else %}
+                                        <span class="gestion-badge gestion-badge--inactiva">Reprobado</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        <tr data-filter-empty {{ filas is empty ? '' : 'hidden' }}>
+                            <td colspan="{{ 5 + cantidadExamenes }}">
+                                {% if filas is empty %}
+                                    No hay estudiantes asignados a este grupo en esta materia. Asignalos en Asignaciones &rarr; Grupos.
+                                {% else %}
+                                    No se encontraron estudiantes con ese criterio.
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            {% if filas is not empty %}
+                <div class="gestion-actions">
+                    <button class="gestion-button gestion-button--primary" type="submit">Guardar notas</button>
+                    <a href="{{ path('nota_index') }}" class="gestion-button">Cancelar</a>
+                </div>
+            {% endif %}
+        </form>
+    </section>
+{% endblock %}

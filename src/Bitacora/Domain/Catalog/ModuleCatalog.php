@@ -8,6 +8,7 @@ final class ModuleCatalog
 {
     public const AUTH = 'Autenticacion';
     public const USUARIOS = 'Usuarios';
+    public const ROLES = 'Roles y Permisos';
     public const POSTULANTES = 'Postulantes';
     public const INSCRIPCIONES = 'Inscripciones';
     public const EXAMENES = 'Examenes';
@@ -22,6 +23,8 @@ final class ModuleCatalog
     public const MATERIAS = 'Materias';
     public const AULAS = 'Aulas';
     public const HORARIOS = 'Horarios';
+    public const NOTAS = 'Notas';
+    public const ASIGNACIONES = 'Asignaciones';
     public const BITACORA = 'Bitacora';
 
     /** @return list<string> */
@@ -30,6 +33,7 @@ final class ModuleCatalog
         return [
             self::AUTH,
             self::USUARIOS,
+            self::ROLES,
             self::POSTULANTES,
             self::INSCRIPCIONES,
             self::EXAMENES,
@@ -44,6 +48,8 @@ final class ModuleCatalog
             self::MATERIAS,
             self::AULAS,
             self::HORARIOS,
+            self::NOTAS,
+            self::ASIGNACIONES,
             self::BITACORA,
         ];
     }

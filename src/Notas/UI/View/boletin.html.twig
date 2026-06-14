@@ -1,0 +1,72 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Mi boletin{% endblock %}
+
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=15">{% endblock %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Evaluacion academica</p>
+            <h1 class="app-content__title">Mi boletin de notas</h1>
+        </div>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    {% if boletin is null %}
+        <section class="gestion-panel">
+            <p class="gestion-panel__hint">No tienes una inscripcion registrada en la gestion activa, o aun no estas asignado a ningun grupo.</p>
+        </section>
+    {% else %}
+        <section class="gestion-panel">
+            <div class="gestion-panel__header">
+                <div>
+                    <h2>{{ boletin.inscripcion.apellidos }} {{ boletin.inscripcion.nombres }}</h2>
+                    <p class="gestion-panel__hint">
+                        CI {{ boletin.inscripcion.ci }} &middot; {{ boletin.inscripcion.carrera.nombre }} &middot; {{ boletin.gestion.nombre }}
+                        &middot; Nota minima: <strong>{{ boletin.notaMinima }}</strong>
+                    </p>
+                </div>
+            </div>
+            <div class="gestion-table-wrap">
+                <table class="gestion-table gestion-table--stack">
+                    <thead>
+                        <tr>
+                            <th>Materia</th>
+                            <th>Grupo</th>
+                            {% for examen in 1..boletin.cantidadExamenes %}
+                                <th>Examen {{ examen }}</th>
+                            {% endfor %}
+                            <th>Promedio</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fila in boletin.materias %}
+                            <tr>
+                                <td class="gestion-col--text" data-label="Materia">{{ fila.materia.codigo }} - {{ fila.materia.nombre }}</td>
+                                <td data-label="Grupo">{{ fila.grupo.codigo }}</td>
+                                {% for examen in 1..boletin.cantidadExamenes %}
+                                    <td class="gestion-col--num" data-label="Examen {{ examen }}">{{ fila.valores[examen] is not null ? fila.valores[examen] : '-' }}</td>
+                                {% endfor %}
+                                <td class="gestion-col--num" data-label="Promedio"><strong>{{ fila.promedio is not null ? fila.promedio : '-' }}</strong></td>
+                                <td data-label="Estado">
+                                    {% if fila.aprobado is null %}
+                                        <span class="gestion-badge gestion-badge--borrador">Incompleto</span>
+                                    {% elseif fila.aprobado %}
+                                        <span class="gestion-badge gestion-badge--activa">Aprobado</span>
+                                    {% else %}
+                                        <span class="gestion-badge gestion-badge--inactiva">Reprobado</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="{{ 4 + boletin.cantidadExamenes }}">Todavia no estas asignado a ninguna materia.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}{{ rol ? 'Editar rol' : 'Nuevo rol' }}{% endblock %}
+
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=14">{% endblock %}
+
+{% block app_content %}
+    {% set selectedPermissionIds = rol ? rol.permissionIds : [] %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Administracion</p>
+            <h1 class="app-content__title">{{ rol ? 'Editar rol' : 'Nuevo rol' }}</h1>
+        </div>
+        <a href="{{ rol ? path('rol_show', {id: rol.id}) : path('rol_index') }}" class="gestion-button">Volver</a>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    <form method="post" class="gestion-form">
+        <section class="gestion-panel">
+            <h2>Datos del rol</h2>
+            <div class="gestion-grid">
+                <label>
+                    Nombre
+                    <input name="name" value="{{ rol ? rol.name : '' }}" placeholder="Administrador" required>
+                </label>
+                <label>
+                    Estado
+                    <select name="active">
+                        <option value="1" {{ rol is null or rol.active ? 'selected' : '' }}>Activo</option>
+                        <option value="0" {{ rol and not rol.active ? 'selected' : '' }}>Inactivo</option>
+                    </select>
+                </label>
+            </div>
+            <label>
+                Descripcion
+                <textarea name="description" rows="3" placeholder="Alcance y responsabilidad del rol">{{ rol ? rol.description : '' }}</textarea>
+            </label>
+        </section>
+
+        <section class="gestion-panel">
+            <div class="gestion-panel__header">
+                <div>
+                    <h2>Permisos</h2>
+                    <p class="gestion-panel__hint">Marca solo las acciones que este rol podra ejecutar. Los permisos estan agrupados por modulo.</p>
+                </div>
+            </div>
+            <div class="usuario-permission-groups">
+                {% for module, permissions in permissionsGrouped %}
+                    <article class="usuario-permission-group">
+                        <h3>{{ module }}</h3>
+                        <div class="gestion-checks gestion-checks--cards">
+                            {% for permission in permissions %}
+                                <label>
+                                    <input type="checkbox" name="permissions[]" value="{{ permission.id }}" {{ permission.id in selectedPermissionIds ? 'checked' : '' }}>
+                                    <span>{{ permission.action }}<small>{{ permission.description }}</small></span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </article>
+                {% else %}
+                    <p class="gestion-help">Todavia no hay permisos cargados. Ejecuta las migraciones para instalar el catalogo inicial.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <div class="gestion-actions">
+            <button class="gestion-button gestion-button--primary" type="submit">Guardar rol</button>
+            <a href="{{ rol ? path('rol_show', {id: rol.id}) : path('rol_index') }}" class="gestion-button">Cancelar</a>
+        </div>
+    </form>
+{% endblock %}

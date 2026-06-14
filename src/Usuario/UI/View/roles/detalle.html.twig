@@ -1,0 +1,63 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Rol {{ rol.name }}{% endblock %}
+
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=14">{% endblock %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Administracion</p>
+            <h1 class="app-content__title">{{ rol.name }}</h1>
+        </div>
+        <div class="gestion-head__actions">
+            <a href="{{ path('rol_edit', {id: rol.id}) }}" class="gestion-button gestion-button--primary">Editar</a>
+            <a href="{{ path('rol_index') }}" class="gestion-button">Volver</a>
+        </div>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    <section class="gestion-dashboard">
+        <div class="gestion-metric">
+            <span class="gestion-metric__label">Nombre</span>
+            <strong>{{ rol.name }}</strong>
+        </div>
+        <div class="gestion-metric">
+            <span class="gestion-metric__label">Estado</span>
+            <strong><span class="gestion-badge gestion-badge--{{ rol.active ? 'activa' : 'inactiva' }}">{{ rol.active ? 'Activo' : 'Inactivo' }}</span></strong>
+        </div>
+        <div class="gestion-metric">
+            <span class="gestion-metric__label">Permisos</span>
+            <strong>{{ rol.permissions|length }}</strong>
+        </div>
+    </section>
+
+    <section class="gestion-panel">
+        <div class="gestion-panel__header">
+            <div>
+                <h2>Permisos asignados</h2>
+                <p class="gestion-panel__hint">{{ rol.description ?? 'Sin descripcion registrada.' }}</p>
+            </div>
+        </div>
+        <div class="gestion-checks gestion-checks--cards">
+            {% for permission in rol.permissions %}
+                <label>
+                    <input type="checkbox" checked disabled>
+                    <span>{{ permission.module }} - {{ permission.action }}<small>{{ permission.description }}</small></span>
+                </label>
+            {% else %}
+                <p class="gestion-help">Este rol todavia no tiene permisos asignados.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="gestion-page-actions">
+        <form method="post" action="{{ path('rol_toggle', {id: rol.id}) }}">
+            <button class="gestion-button {{ rol.active ? 'gestion-button--danger' : 'gestion-button--soft' }}" type="submit">
+                {{ rol.active ? 'Desactivar rol' : 'Activar rol' }}
+            </button>
+        </form>
+        <a href="{{ path('rol_edit', {id: rol.id}) }}" class="gestion-button gestion-button--primary">Editar rol</a>
+    </section>
+{% endblock %}

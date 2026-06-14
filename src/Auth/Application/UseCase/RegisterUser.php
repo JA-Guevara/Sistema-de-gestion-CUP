@@ -10,6 +10,7 @@ use App\Auth\Domain\Security\PasswordPolicy;
 use App\Auth\Entity\User;
 use App\Auth\Infrastructure\Persistence\UserRepository;
 use App\Auth\UI\Request\RegisterRequest;
+use App\Usuario\Infrastructure\Persistence\RoleRepository;
 
 /**
  * Caso de uso: registrar un nuevo usuario.
@@ -19,6 +20,7 @@ final readonly class RegisterUser
     public function __construct(
         private UserRepository $users,
         private PasswordPolicy $passwordPolicy,
+        private RoleRepository $roles,
     ) {
     }
 
@@ -55,6 +57,12 @@ final readonly class RegisterUser
         $user->firstName = $firstName;
         $user->lastName = $lastName;
         $user->passwordHash = password_hash($input->password, PASSWORD_DEFAULT);
+
+        // Todo auto-registro entra como Postulante (rol base de acceso a inscripción/perfil).
+        $postulante = $this->roles->findByName('Postulante');
+        if ($postulante !== null) {
+            $user->syncRoles([$postulante]);
+        }
 
         $this->users->save($user);
 

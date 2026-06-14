@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Inscripcion\UI\Request;
 
 use App\Inscripcion\Application\DTO\InscripcionInput;
+use App\Inscripcion\Domain\Catalog\ModalidadPostulacion;
+use App\Inscripcion\Domain\Catalog\TipoPostulacion;
 use Symfony\Component\HttpFoundation\Request;
 
 final class InscripcionRequest
@@ -17,7 +19,13 @@ final class InscripcionRequest
             $fechaNacimiento = new \DateTimeImmutable(trim($fechaStr));
         }
 
+        $tipo = strtoupper(trim((string) $request->request->get('tipo', TipoPostulacion::ESTUDIANTE)));
+        $modalidad = strtoupper(trim((string) $request->request->get('modalidad', ModalidadPostulacion::PRESENCIAL)));
+        $accion = strtoupper(trim((string) $request->request->get('accion', InscripcionInput::ACCION_GUARDAR)));
+
         return new InscripcionInput(
+            tipo: TipoPostulacion::isValid($tipo) ? $tipo : TipoPostulacion::ESTUDIANTE,
+            modalidad: ModalidadPostulacion::isValid($modalidad) ? $modalidad : ModalidadPostulacion::PRESENCIAL,
             ci: trim((string) $request->request->get('ci', '')),
             nombres: trim((string) $request->request->get('nombres', '')),
             apellidos: trim((string) $request->request->get('apellidos', '')),
@@ -30,8 +38,14 @@ final class InscripcionRequest
             ciudad: self::nullableString($request->request->get('ciudad')),
             tituloBachiller: $request->request->has('tituloBachiller'),
             turnoPreferencia: self::nullableString($request->request->get('turnoPreferencia')),
-            otros: self::nullableString($request->request->get('otros')),
             carreraId: (int) $request->request->get('carrera', 0),
+            carreraSegundaId: (int) $request->request->get('carreraSegunda', 0),
+            docenteProfesion: self::nullableString($request->request->get('docenteProfesion')),
+            docenteMaestria: $request->request->has('docenteMaestria'),
+            docenteDiplomado: $request->request->has('docenteDiplomado'),
+            docenteExperiencia: self::nullableString($request->request->get('docenteExperiencia')),
+            otros: self::nullableString($request->request->get('otros')),
+            accion: $accion === InscripcionInput::ACCION_PRESENTAR ? InscripcionInput::ACCION_PRESENTAR : InscripcionInput::ACCION_GUARDAR,
             actorUserId: self::actorUserId($request),
         );
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Bitacora\Application\UseCase;
 
+use App\Auth\Infrastructure\Persistence\UserRepository;
 use App\Bitacora\Domain\Catalog\ActionCatalog;
 use App\Bitacora\Domain\Entity\LogEntry;
 use App\Bitacora\Infrastructure\Persistence\LogEntryRepository;
@@ -27,6 +28,7 @@ final readonly class RecordLogEntry
     public function __construct(
         private LogEntryRepository $repository,
         private RequestStack $requestStack,
+        private UserRepository $users,
     ) {
     }
 
@@ -43,7 +45,7 @@ final readonly class RecordLogEntry
 
             $entry = new LogEntry();
             $entry->userId = $userId;
-            $entry->userLabel = $userLabel ?? ($userId !== null ? sprintf('Usuario #%d', $userId) : '(anonimo)');
+            $entry->userLabel = $userLabel ?? $this->resolveUserLabel($userId);
             $entry->action = $action;
             $entry->module = $module;
             $entry->description = trim($description);
@@ -58,6 +60,28 @@ final readonly class RecordLogEntry
             // Auditoría no debe romper el flujo principal.
             // En producción esto se podría enviar a un error tracker.
         }
+    }
+
+    /**
+     * Resuelve un nombre legible para la bitácora a partir del id de usuario.
+     * Si el módulo no proporcionó un userLabel explícito, buscamos el usuario
+     * y mostramos su nombre completo (o su email). Así la bitácora identifica
+     * correctamente al actor en todos los módulos sin tener que pasar el nombre.
+     */
+    private function resolveUserLabel(?int $userId): string
+    {
+        if ($userId === null) {
+            return '(anonimo)';
+        }
+
+        $user = $this->users->findById($userId);
+        if ($user === null) {
+            return sprintf('Usuario #%d', $userId);
+        }
+
+        $nombre = trim($user->firstName . ' ' . $user->lastName);
+
+        return $nombre !== '' ? $nombre : $user->email;
     }
 
     private function resolveClientIp(Request $request): ?string

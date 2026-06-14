@@ -6,7 +6,12 @@ namespace App\Inscripcion\Application\DTO;
 
 final readonly class InscripcionInput
 {
+    public const ACCION_GUARDAR = 'GUARDAR';
+    public const ACCION_PRESENTAR = 'PRESENTAR';
+
     public function __construct(
+        public string $tipo,
+        public string $modalidad,
         public string $ci,
         public string $nombres,
         public string $apellidos,
@@ -19,9 +24,20 @@ final readonly class InscripcionInput
         public ?string $ciudad,
         public bool $tituloBachiller,
         public ?string $turnoPreferencia,
-        public ?string $otros,
         public int $carreraId,
+        public int $carreraSegundaId,
+        public ?string $docenteProfesion,
+        public bool $docenteMaestria,
+        public bool $docenteDiplomado,
+        public ?string $docenteExperiencia,
+        public ?string $otros,
+        public string $accion,
         public ?int $actorUserId,
     ) {
+    }
+
+    public function esPresentar(): bool
+    {
+        return $this->accion === self::ACCION_PRESENTAR;
     }
 }

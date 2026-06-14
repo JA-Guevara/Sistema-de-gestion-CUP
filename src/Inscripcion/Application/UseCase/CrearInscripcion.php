@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Inscripcion\Application\UseCase;
 
+use App\Academico\Carrera\Domain\Entity\Carrera;
 use App\Academico\Carrera\Infrastructure\Persistence\CarreraRepository;
 use App\Auth\Entity\User;
 use App\Bitacora\Application\EventLog\InscripcionEvents;
 use App\Gestion\Domain\Catalog\EstadoGestion;
 use App\Gestion\Domain\Entity\CupoGestion;
+use App\Gestion\Domain\Entity\Gestion;
 use App\Gestion\Infrastructure\Persistence\GestionRepository;
 use App\Inscripcion\Application\DTO\InscripcionInput;
+use App\Inscripcion\Domain\Catalog\EstadoInscripcion;
+use App\Inscripcion\Domain\Catalog\TipoPostulacion;
 use App\Inscripcion\Domain\Entity\Inscripcion;
 use App\Inscripcion\Domain\Exception\InscripcionException;
 use App\Inscripcion\Infrastructure\Persistence\InscripcionRepository;
@@ -30,52 +34,62 @@ final readonly class CrearInscripcion
         $gestion = $this->gestiones->findActive();
         $this->validateGestionActiva($gestion);
         $this->validateInscripcionAbierta($gestion);
-        $this->validateCarreraEnGestion($gestion, $input->carreraId);
-        $this->validateCupoDisponible($gestion);
-        $this->validateCiUnico($input->ci);
-        $this->validateUserNotAlreadyInscribed($user, $gestion);
-        $this->validateDatosObligatorios($input);
+        $this->validateDatosComunes($input);
 
-        $carrera = $this->carreras->findById($input->carreraId);
+        $esPresentar = $input->esPresentar();
+        $carrera = null;
+        $carreraSegunda = null;
 
-        $inscripcion = $this->createInscripcion($input, $user, $gestion, $carrera);
-        $this->updateCupo($gestion);
+        if ($input->tipo === TipoPostulacion::ESTUDIANTE) {
+            if ($esPresentar) {
+                $this->validateCarreraEnGestion($gestion, $input->carreraId);
+                $this->validateCupoDisponible($gestion);
+            }
+            $carrera = $input->carreraId > 0 ? $this->carreras->findById($input->carreraId) : null;
+            $carreraSegunda = $input->carreraSegundaId > 0 ? $this->carreras->findById($input->carreraSegundaId) : null;
+        } elseif ($esPresentar) {
+            $this->validateRequisitosDocente($input);
+        }
+
+        $inscripcion = $this->createInscripcion($input, $user, $gestion, $carrera, $carreraSegunda);
+        $inscripcion->estado = $esPresentar ? EstadoInscripcion::PRESENTADA : EstadoInscripcion::BORRADOR;
+
+        if ($input->tipo === TipoPostulacion::ESTUDIANTE && $esPresentar) {
+            $this->updateCupo($gestion);
+        }
+
         $this->inscripciones->save($inscripcion);
         $this->registerAudit($inscripcion, $input);
 
         return $inscripcion;
     }
 
-    private function validateGestionActiva(?\App\Gestion\Domain\Entity\Gestion $gestion): void
+    private function validateGestionActiva(?Gestion $gestion): void
     {
         if ($gestion === null) {
             throw new InscripcionException('No hay una gestion activa en este momento.');
         }
     }
 
-    private function validateInscripcionAbierta(\App\Gestion\Domain\Entity\Gestion $gestion): void
+    private function validateInscripcionAbierta(Gestion $gestion): void
     {
         if ($gestion->estado !== EstadoGestion::ABIERTA_INSCRIPCION) {
             throw new InscripcionException('Las inscripciones no estan abiertas en este momento.');
         }
     }
 
-    private function validateCarreraEnGestion(\App\Gestion\Domain\Entity\Gestion $gestion, int $carreraId): void
+    private function validateCarreraEnGestion(Gestion $gestion, int $carreraId): void
     {
-        $carreraEnGestion = null;
         foreach ($gestion->carreras as $cg) {
             if ($cg->carrera->id === $carreraId && $cg->habilitada) {
-                $carreraEnGestion = $cg;
-                break;
+                return;
             }
         }
 
-        if ($carreraEnGestion === null) {
-            throw new InscripcionException('La carrera seleccionada no esta disponible en esta gestion.');
-        }
+        throw new InscripcionException('La carrera seleccionada no esta disponible en esta gestion.');
     }
 
-    private function validateCupoDisponible(\App\Gestion\Domain\Entity\Gestion $gestion): void
+    private function validateCupoDisponible(Gestion $gestion): void
     {
         $cupo = $gestion->cupos->first();
         if (!$cupo instanceof CupoGestion || $cupo->disponibles <= 0) {
@@ -83,21 +97,7 @@ final readonly class CrearInscripcion
         }
     }
 
-    private function validateCiUnico(string $ci): void
-    {
-        if ($this->inscripciones->findByCi($ci) !== null) {
-            throw new InscripcionException('Ya existe una inscripcion con ese CI.');
-        }
-    }
-
-    private function validateUserNotAlreadyInscribed(User $user, \App\Gestion\Domain\Entity\Gestion $gestion): void
-    {
-        if ($this->inscripciones->findByUserAndGestion($user->id, $gestion->id) !== null) {
-            throw new InscripcionException('Ya tienes una inscripcion registrada en esta gestion.');
-        }
-    }
-
-    private function validateDatosObligatorios(InscripcionInput $input): void
+    private function validateDatosComunes(InscripcionInput $input): void
     {
         if (trim($input->ci) === '' || trim($input->nombres) === '' || trim($input->apellidos) === '') {
             throw new InscripcionException('CI, nombres y apellidos son obligatorios.');
@@ -116,12 +116,20 @@ final readonly class CrearInscripcion
         }
     }
 
-    private function createInscripcion(InscripcionInput $input, User $user, \App\Gestion\Domain\Entity\Gestion $gestion, \App\Academico\Carrera\Domain\Entity\Carrera $carrera): Inscripcion
+    private function validateRequisitosDocente(InscripcionInput $input): void
+    {
+        if ($input->docenteProfesion === null || trim($input->docenteProfesion) === '') {
+            throw new InscripcionException('Para presentar como docente debes indicar tu profesion o area.');
+        }
+    }
+
+    private function createInscripcion(InscripcionInput $input, User $user, Gestion $gestion, ?Carrera $carrera, ?Carrera $carreraSegunda): Inscripcion
     {
         $inscripcion = new Inscripcion();
         $inscripcion->user = $user;
         $inscripcion->gestion = $gestion;
-        $inscripcion->carrera = $carrera;
+        $inscripcion->tipo = $input->tipo;
+        $inscripcion->modalidad = $input->modalidad;
         $inscripcion->ci = trim($input->ci);
         $inscripcion->nombres = trim($input->nombres);
         $inscripcion->apellidos = trim($input->apellidos);
@@ -130,16 +138,22 @@ final readonly class CrearInscripcion
         $inscripcion->direccion = $input->direccion;
         $inscripcion->telefono = $input->telefono;
         $inscripcion->email = mb_strtolower(trim($input->email));
-        $inscripcion->colegioProcedencia = $input->colegioProcedencia;
         $inscripcion->ciudad = $input->ciudad;
+        $inscripcion->carrera = $carrera;
+        $inscripcion->carreraSegunda = $carreraSegunda;
+        $inscripcion->colegioProcedencia = $input->colegioProcedencia;
         $inscripcion->tituloBachiller = $input->tituloBachiller;
         $inscripcion->turnoPreferencia = $input->turnoPreferencia;
+        $inscripcion->docenteProfesion = $input->docenteProfesion;
+        $inscripcion->docenteMaestria = $input->docenteMaestria;
+        $inscripcion->docenteDiplomado = $input->docenteDiplomado;
+        $inscripcion->docenteExperiencia = $input->docenteExperiencia;
         $inscripcion->otros = $input->otros;
 
         return $inscripcion;
     }
 
-    private function updateCupo(\App\Gestion\Domain\Entity\Gestion $gestion): void
+    private function updateCupo(Gestion $gestion): void
     {
         $cupo = $gestion->cupos->first();
         if ($cupo instanceof CupoGestion) {
@@ -150,6 +164,7 @@ final readonly class CrearInscripcion
 
     private function registerAudit(Inscripcion $inscripcion, InscripcionInput $input): void
     {
-        $this->events->creada($inscripcion->ci, $inscripcion->nombres . ' ' . $inscripcion->apellidos, $input->actorUserId);
+        $nombre = $inscripcion->nombres . ' ' . $inscripcion->apellidos;
+        $this->events->creada($inscripcion->ci, sprintf('%s (%s)', $nombre, TipoPostulacion::label($inscripcion->tipo)), $input->actorUserId);
     }
 }

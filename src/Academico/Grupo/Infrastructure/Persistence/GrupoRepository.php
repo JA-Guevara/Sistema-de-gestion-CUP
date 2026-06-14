@@ -57,6 +57,12 @@ final readonly class GrupoRepository
         return $this->entityManager->getRepository(Grupo::class)->findBy([], ['createdAt' => 'DESC']);
     }
 
+    /** @return list<Grupo> */
+    public function listByGestion(int $gestionId): array
+    {
+        return $this->entityManager->getRepository(Grupo::class)->findBy(['gestion' => $gestionId], ['codigo' => 'ASC']);
+    }
+
     public function countByGestion(int $gestionId): int
     {
         return (int) $this->entityManager->createQueryBuilder()

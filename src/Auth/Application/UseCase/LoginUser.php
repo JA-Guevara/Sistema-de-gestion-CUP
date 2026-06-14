@@ -48,6 +48,10 @@ final readonly class LoginUser
             throw new AccountLocked('Tu cuenta está bloqueada. Revisá tu correo o desbloqueá desde el enlace.');
         }
 
+        if (!$user->active) {
+            throw new InvalidCredentials('Tu cuenta esta inactiva. Comunicate con administracion.');
+        }
+
         // Password mal: incrementar contador y eventualmente bloquear.
         if (!password_verify($input->password, $user->passwordHash)) {
             $user->failedLoginAttempts++;

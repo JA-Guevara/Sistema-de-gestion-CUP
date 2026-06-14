@@ -1,0 +1,70 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Usuario {{ usuario.email }}{% endblock %}
+
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=14">{% endblock %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Administracion</p>
+            <h1 class="app-content__title">{{ usuario.firstName }} {{ usuario.lastName }}</h1>
+        </div>
+        <div class="gestion-head__actions">
+            <a href="{{ path('usuario_edit', {id: usuario.id}) }}" class="gestion-button gestion-button--primary">Editar</a>
+            <a href="{{ path('usuario_index') }}" class="gestion-button">Volver</a>
+        </div>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    <section class="gestion-dashboard">
+        <div class="gestion-metric">
+            <span class="gestion-metric__label">Correo</span>
+            <strong>{{ usuario.email }}</strong>
+        </div>
+        <div class="gestion-metric">
+            <span class="gestion-metric__label">Estado</span>
+            <strong><span class="gestion-badge gestion-badge--{{ usuario.active ? 'activa' : 'inactiva' }}">{{ usuario.active ? 'Activo' : 'Inactivo' }}</span></strong>
+        </div>
+        <div class="gestion-metric">
+            <span class="gestion-metric__label">Roles</span>
+            <strong>{{ usuario.roleNames() }}</strong>
+        </div>
+        <div class="gestion-metric">
+            <span class="gestion-metric__label">Ultimo acceso</span>
+            <strong>{{ usuario.lastLoginAt ? usuario.lastLoginAt|date('Y-m-d H:i') : 'Sin acceso' }}</strong>
+        </div>
+    </section>
+
+    <section class="gestion-panel">
+        <div class="gestion-panel__header">
+            <div>
+                <h2>Permisos por rol</h2>
+                <p class="gestion-panel__hint">Los permisos efectivos salen de los roles activos asignados al usuario.</p>
+            </div>
+        </div>
+        <div class="gestion-checks gestion-checks--cards">
+            {% for rol in usuario.roles %}
+                <label>
+                    <input type="checkbox" checked disabled>
+                    <span>{{ rol.name }} - {{ rol.permissions|length }} permisos</span>
+                </label>
+            {% else %}
+                <p class="gestion-help">Este usuario todavia no tiene roles asignados.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="gestion-page-actions">
+        <form method="post" action="{{ path('usuario_reset_password', {id: usuario.id}) }}">
+            <button class="gestion-button" type="submit">Enviar reset de contrasena</button>
+        </form>
+        <form method="post" action="{{ path('usuario_toggle', {id: usuario.id}) }}">
+            <button class="gestion-button {{ usuario.active ? 'gestion-button--danger' : 'gestion-button--soft' }}" type="submit">
+                {{ usuario.active ? 'Desactivar usuario' : 'Activar usuario' }}
+            </button>
+        </form>
+        <a href="{{ path('usuario_edit', {id: usuario.id}) }}" class="gestion-button gestion-button--primary">Editar usuario</a>
+    </section>
+{% endblock %}

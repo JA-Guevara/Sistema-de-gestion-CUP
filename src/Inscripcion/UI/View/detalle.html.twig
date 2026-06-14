@@ -4,67 +4,100 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="/assets/gestion/css/gestion.css">
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=15">
 {% endblock %}
 
+{% set estadoClass = {'VALIDADA':'activa','CONFIRMADA':'activa','RECHAZADA':'inactiva','PRESENTADA':'borrador','BORRADOR':'borrador','PENDIENTE':'borrador','COMPLETADA':'activa'} %}
+
 {% block app_content %}
-    <section class="app-content__greeting">
-        <p class="app-content__greeting-eyebrow">CUP FICCT</p>
-        <h1 class="app-content__title">Mi inscripcion CUP</h1>
-        <p class="app-content__subtitle">
-            Estado: <span class="gestion-badge {{ inscripcion.estado == 'COMPLETADA' ? 'gestion-badge--activa' : 'gestion-badge--borrador' }}">{{ inscripcion.estado }}</span>
-        </p>
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">CUP FICCT · {{ inscripcion.tipo == 'DOCENTE' ? 'Docente' : 'Estudiante' }} · {{ inscripcion.modalidad|lower|capitalize }}</p>
+            <h1 class="app-content__title">Mi pre-inscripcion CUP</h1>
+        </div>
+        <span class="gestion-badge gestion-badge--{{ estadoClass[inscripcion.estado] ?? 'borrador' }}">{{ inscripcion.estado|lower|capitalize }}</span>
     </section>
 
-    <section class="app-profile">
-        <div class="app-profile__header">
-            <div class="app-profile__avatar" aria-hidden="true">{{ inscripcion.nombres|first }}{{ inscripcion.apellidos|first }}</div>
-            <div>
-                <h2 class="app-profile__name">{{ inscripcion.nombres }} {{ inscripcion.apellidos }}</h2>
-                <p class="app-profile__email">{{ inscripcion.email }}</p>
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    {% if inscripcion.estado == 'RECHAZADA' and inscripcion.motivoRechazo %}
+        <section class="gestion-panel">
+            <p class="gestion-panel__hint" style="color:#9b1c1c">Tu postulacion fue rechazada. Motivo: {{ inscripcion.motivoRechazo }}</p>
+        </section>
+    {% elseif inscripcion.fechaPresentacionDocs %}
+        <section class="gestion-panel">
+            <p class="gestion-panel__hint">Tienes una cita para revision de documentos: <strong>{{ inscripcion.fechaPresentacionDocs|date('d/m/Y H:i') }}</strong>.</p>
+        </section>
+    {% endif %}
+
+    {% if inscripcion.estado == 'VALIDADA' %}
+        <section class="gestion-panel">
+            <div class="gestion-panel__header">
+                <div>
+                    <h2>{{ inscripcion.tipo == 'DOCENTE' ? 'Entrevista habilitada' : 'Billetera de pago habilitada' }}</h2>
+                    <p class="gestion-panel__hint">
+                        {% if inscripcion.tipo == 'DOCENTE' %}
+                            &#10003; Tu documentacion fue aprobada. La coordinacion te contactara para la entrevista.
+                        {% else %}
+                            &#10003; Tu documentacion fue aprobada. Ya puedes pagar para confirmar tu inscripcion como estudiante.
+                        {% endif %}
+                    </p>
+                </div>
             </div>
+            {% if inscripcion.tipo != 'DOCENTE' %}
+                <div class="gestion-actions" style="padding:0 18px 18px">
+                    <button class="gestion-button gestion-button--primary" type="button" disabled title="Pasarela de pago — siguiente fase">Ir a la billetera de pago</button>
+                </div>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    <section class="gestion-panel">
+        <div class="gestion-panel__header"><div><h2>{{ inscripcion.nombres }} {{ inscripcion.apellidos }}</h2><p class="gestion-panel__hint">CI {{ inscripcion.ci }} &middot; {{ inscripcion.email }}</p></div></div>
+        <div class="gestion-table-wrap">
+            <table class="gestion-table gestion-table--stack">
+                <tbody>
+                    <tr><td class="gestion-col--text" data-label="Nacimiento">{{ inscripcion.fechaNacimiento|date('d/m/Y') }}</td><td class="gestion-col--text" data-label="Sexo">{{ inscripcion.sexo == 'M' ? 'Masculino' : 'Femenino' }}</td></tr>
+                    <tr><td class="gestion-col--text" data-label="Telefono">{{ inscripcion.telefono ?? '—' }}</td><td class="gestion-col--text" data-label="Ciudad">{{ inscripcion.ciudad ?? '—' }}</td></tr>
+                    {% if inscripcion.tipo == 'DOCENTE' %}
+                        <tr><td class="gestion-col--text" data-label="Profesion / area">{{ inscripcion.docenteProfesion ?? '—' }}</td></tr>
+                        <tr><td class="gestion-col--text" data-label="Maestria">{{ inscripcion.docenteMaestria ? 'Si' : 'No' }}</td><td class="gestion-col--text" data-label="Diplomado">{{ inscripcion.docenteDiplomado ? 'Si' : 'No' }}</td></tr>
+                    {% else %}
+                        <tr><td class="gestion-col--text" data-label="Carrera (1ra)">{{ inscripcion.carrera ? inscripcion.carrera.nombre : '—' }}</td><td class="gestion-col--text" data-label="Carrera (2da)">{{ inscripcion.carreraSegunda ? inscripcion.carreraSegunda.nombre : '—' }}</td></tr>
+                        <tr><td class="gestion-col--text" data-label="Colegio">{{ inscripcion.colegioProcedencia ?? '—' }}</td><td class="gestion-col--text" data-label="Titulo bachiller">{{ inscripcion.tituloBachiller ? 'Si' : 'No' }}</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
         </div>
+    </section>
 
-        <dl class="app-profile__dl">
-            <dt>CI</dt>
-            <dd>{{ inscripcion.ci }}</dd>
-
-            <dt>Fecha de nacimiento</dt>
-            <dd>{{ inscripcion.fechaNacimiento|date('d/m/Y') }}</dd>
-
-            <dt>Sexo</dt>
-            <dd>{{ inscripcion.sexo == 'M' ? 'Masculino' : 'Femenino' }}</dd>
-
-            <dt>Direccion</dt>
-            <dd>{{ inscripcion.direccion ?? '—' }}</dd>
-
-            <dt>Telefono</dt>
-            <dd>{{ inscripcion.telefono ?? '—' }}</dd>
-
-            <dt>Carrera</dt>
-            <dd>{{ inscripcion.carrera.nombre }}</dd>
-
-            <dt>Turno preferencia</dt>
-            <dd>{{ inscripcion.turnoPreferencia ?? 'Indiferente' }}</dd>
-
-            <dt>Colegio de procedencia</dt>
-            <dd>{{ inscripcion.colegioProcedencia ?? '—' }}</dd>
-
-            <dt>Ciudad</dt>
-            <dd>{{ inscripcion.ciudad ?? '—' }}</dd>
-
-            <dt>Titulo bachiller</dt>
-            <dd>{{ inscripcion.tituloBachiller ? 'Si' : 'No' }}</dd>
-
-            <dt>Otros</dt>
-            <dd>{{ inscripcion.otros ?? '—' }}</dd>
-
-            <dt>Fecha de inscripcion</dt>
-            <dd>{{ inscripcion.createdAt|date('d/m/Y H:i') }}</dd>
-        </dl>
+    {# ---- Mis documentos y su revision ---- #}
+    <section class="gestion-panel">
+        <div class="gestion-panel__header"><div><h2>Mis documentos</h2><p class="gestion-panel__hint">Revisa el estado de cada documento. Si alguno esta observado, corrigelo y vuelve a subirlo.</p></div></div>
+        {% if inscripcion.documentos is defined and inscripcion.documentos|length > 0 %}
+            <div class="gestion-table-wrap">
+                <table class="gestion-table gestion-table--stack">
+                    <thead>
+                        <tr><th>Documento</th><th>Estado</th><th>Observacion</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for doc in inscripcion.documentos %}
+                            {% set docClass = doc.estado == 'APROBADO' ? 'activa' : (doc.estado == 'OBSERVADO' ? 'inactiva' : 'borrador') %}
+                            <tr>
+                                <td class="gestion-col--text" data-label="Documento"><a href="/{{ doc.archivoRuta }}" target="_blank">{{ doc.nombre }}</a></td>
+                                <td data-label="Estado"><span class="gestion-badge gestion-badge--{{ docClass }}">{{ doc.estado|lower|capitalize }}</span></td>
+                                <td class="gestion-col--text" data-label="Observacion">{{ doc.observacion ?? '—' }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="gestion-panel__hint">Aun no has subido documentos. La administracion te indicara cuando presentarlos.</p>
+        {% endif %}
     </section>
 
     <div class="gestion-page-actions">
-        <a class="gestion-button" href="{{ path('home') }}">Volver al inicio</a>
+        <a class="gestion-button" href="{{ path('inscripcion_index') }}">Volver a mis postulaciones</a>
     </div>
 {% endblock %}

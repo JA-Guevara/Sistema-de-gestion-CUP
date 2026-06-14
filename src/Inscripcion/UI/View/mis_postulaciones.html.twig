@@ -1,0 +1,66 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Mis postulaciones · {{ parent() }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=15">
+{% endblock %}
+
+{% set estadoClass = {'VALIDADA':'activa','CONFIRMADA':'activa','RECHAZADA':'inactiva','PRESENTADA':'borrador','BORRADOR':'borrador','PENDIENTE':'borrador','COMPLETADA':'activa'} %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">CUP FICCT</p>
+            <h1 class="app-content__title">Mis postulaciones</h1>
+        </div>
+        {% if gestion and gestion.estado == 'ABIERTA_INSCRIPCION' %}
+            <div class="gestion-head__actions">
+                <a class="gestion-button gestion-button--primary" href="{{ path('inscripcion_formulario', {tipo: 'ESTUDIANTE'}) }}">Postular como estudiante</a>
+                <a class="gestion-button" href="{{ path('inscripcion_formulario', {tipo: 'DOCENTE'}) }}">Postular como docente</a>
+            </div>
+        {% endif %}
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    {% if gestion is null %}
+        <section class="gestion-panel"><p class="gestion-panel__hint">No hay una gestion CUP activa en este momento.</p></section>
+    {% else %}
+        <p class="gestion-panel__hint" style="margin:0 0 16px">
+            Gestion <strong>{{ gestion.codigo }}</strong>. Puedes postular como estudiante y/o como docente; solo una sera aceptada por tipo.
+        </p>
+
+        <section class="gestion-panel">
+            <div class="gestion-table-wrap">
+                <table class="gestion-table gestion-table--stack">
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Modalidad</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                            <th class="gestion-table__actions-cell">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in postulaciones %}
+                            <tr>
+                                <td data-label="Tipo">{{ p.tipo == 'DOCENTE' ? 'Docente' : 'Estudiante' }}</td>
+                                <td data-label="Modalidad">{{ p.modalidad|lower|capitalize }}</td>
+                                <td data-label="Estado"><span class="gestion-badge gestion-badge--{{ estadoClass[p.estado] ?? 'borrador' }}">{{ p.estado|lower|capitalize }}</span></td>
+                                <td data-label="Fecha">{{ p.createdAt|date('d/m/Y H:i') }}</td>
+                                <td class="gestion-table__actions" data-label="Acciones">
+                                    <a class="gestion-button" href="{{ path('inscripcion_ver', {id: p.id}) }}">Ver</a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="5">Aun no tienes postulaciones. Usa los botones de arriba para crear una.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    {% endif %}
+{% endblock %}

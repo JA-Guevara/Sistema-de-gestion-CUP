@@ -27,6 +27,20 @@ final readonly class VerInscripcion
             : null;
     }
 
+    /**
+     * Todas las postulaciones del usuario en la gestion activa (puede tener varias).
+     *
+     * @return list<Inscripcion>
+     */
+    public function listByUser(User $user): array
+    {
+        $gestion = $this->gestiones->findActive();
+
+        return $gestion !== null
+            ? $this->inscripciones->listByUserAndGestion($user->id, $gestion->id)
+            : [];
+    }
+
     public function executeById(int $id): Inscripcion
     {
         $inscripcion = $this->inscripciones->findById($id);

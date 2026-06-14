@@ -74,6 +74,18 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Inscripcion/Domain/Entity'
                 prefix: 'App\Inscripcion\Domain\Entity'
                 alias: Inscripcion
+            Usuario:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Usuario/Domain/Entity'
+                prefix: 'App\Usuario\Domain\Entity'
+                alias: Usuario
+            Notas:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Notas/Domain/Entity'
+                prefix: 'App\Notas\Domain\Entity'
+                alias: Notas
 
 when@test:
     doctrine:

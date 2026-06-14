@@ -16,6 +16,9 @@ twig:
         '%kernel.project_dir%/src/Perfil/UI/View': perfil
         '%kernel.project_dir%/src/Inscripcion/UI/View': inscripcion
         '%kernel.project_dir%/src/Dashboard/UI/View': dashboard
+        '%kernel.project_dir%/src/Usuario/UI/View': usuario
+        '%kernel.project_dir%/src/Notas/UI/View': notas
+        '%kernel.project_dir%/src/Asignacion/UI/View': asignacion
 
 when@test:
     twig:
