@@ -7,6 +7,10 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    stripe.secret_key: ''
+    stripe.webhook_secret: ''
+    stripe.inscripcion_fee_bob: '100'
+    stripe.currency: 'USD'
 
 services:
     _defaults:
@@ -14,10 +18,10 @@ services:
         autoconfigure: true
         bind:
             string $uploadDir: '%kernel.project_dir%/public'
-            string $stripeSecretKey: '%env(STRIPE_SECRET_KEY)%'
-            string $stripeWebhookSecret: '%env(STRIPE_WEBHOOK_SECRET)%'
-            string $stripeInscripcionFeeBob: '%env(STRIPE_INSCRIPCION_FEE_BOB)%'
-            string $stripeCurrency: '%env(STRIPE_CURRENCY)%'
+            string $stripeSecretKey: '%env(default:stripe.secret_key:STRIPE_SECRET_KEY)%'
+            string $stripeWebhookSecret: '%env(default:stripe.webhook_secret:STRIPE_WEBHOOK_SECRET)%'
+            string $stripeInscripcionFeeBob: '%env(default:stripe.inscripcion_fee_bob:STRIPE_INSCRIPCION_FEE_BOB)%'
+            string $stripeCurrency: '%env(default:stripe.currency:STRIPE_CURRENCY)%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name

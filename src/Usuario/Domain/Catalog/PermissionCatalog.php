@@ -11,28 +11,59 @@ final class PermissionCatalog
     {
         return [
             ['code' => 'usuarios.ver', 'module' => 'Usuarios', 'action' => 'Ver', 'description' => 'Ver usuarios'],
-            ['code' => 'usuarios.crear', 'module' => 'Usuarios', 'action' => 'Crear', 'description' => 'Crear usuarios'],
-            ['code' => 'usuarios.editar', 'module' => 'Usuarios', 'action' => 'Editar', 'description' => 'Editar usuarios'],
-            ['code' => 'usuarios.estado', 'module' => 'Usuarios', 'action' => 'Estado', 'description' => 'Activar o desactivar usuarios'],
-            ['code' => 'usuarios.reset', 'module' => 'Usuarios', 'action' => 'Reset', 'description' => 'Enviar recuperacion de contrasena'],
+            ['code' => 'usuarios.gestionar', 'module' => 'Usuarios', 'action' => 'Gestionar', 'description' => 'Crear, editar, activar y resetear usuarios'],
             ['code' => 'roles.ver', 'module' => 'Roles y permisos', 'action' => 'Ver', 'description' => 'Ver roles'],
-            ['code' => 'roles.crear', 'module' => 'Roles y permisos', 'action' => 'Crear', 'description' => 'Crear roles'],
-            ['code' => 'roles.editar', 'module' => 'Roles y permisos', 'action' => 'Editar', 'description' => 'Editar roles y permisos'],
-            ['code' => 'roles.estado', 'module' => 'Roles y permisos', 'action' => 'Estado', 'description' => 'Activar o desactivar roles'],
+            ['code' => 'roles.gestionar', 'module' => 'Roles y permisos', 'action' => 'Gestionar', 'description' => 'Crear, editar y activar roles'],
             ['code' => 'gestion.ver', 'module' => 'Gestion CUP', 'action' => 'Ver', 'description' => 'Ver gestiones CUP'],
-            ['code' => 'gestion.crear', 'module' => 'Gestion CUP', 'action' => 'Crear', 'description' => 'Crear gestiones CUP'],
-            ['code' => 'gestion.editar', 'module' => 'Gestion CUP', 'action' => 'Editar', 'description' => 'Editar parametros y cronograma'],
-            ['code' => 'gestion.activar', 'module' => 'Gestion CUP', 'action' => 'Activar', 'description' => 'Activar gestion CUP'],
+            ['code' => 'gestion.gestionar', 'module' => 'Gestion CUP', 'action' => 'Gestionar', 'description' => 'Crear, editar, activar y cerrar gestiones CUP'],
             ['code' => 'academico.ver', 'module' => 'Administracion academica', 'action' => 'Ver', 'description' => 'Ver catalogos academicos'],
-            ['code' => 'academico.crear', 'module' => 'Administracion academica', 'action' => 'Crear', 'description' => 'Crear catalogos academicos'],
-            ['code' => 'academico.editar', 'module' => 'Administracion academica', 'action' => 'Editar', 'description' => 'Editar catalogos academicos'],
-            ['code' => 'academico.estado', 'module' => 'Administracion academica', 'action' => 'Estado', 'description' => 'Activar o desactivar catalogos academicos'],
-            ['code' => 'bitacora.ver', 'module' => 'Bitacora', 'action' => 'Ver', 'description' => 'Consultar bitacora'],
+            ['code' => 'academico.gestionar', 'module' => 'Administracion academica', 'action' => 'Gestionar', 'description' => 'Crear, editar, activar y generar catalogos academicos'],
             ['code' => 'inscripciones.ver', 'module' => 'Inscripciones', 'action' => 'Ver', 'description' => 'Ver inscripciones CUP'],
-            ['code' => 'inscripciones.validar', 'module' => 'Inscripciones', 'action' => 'Validar', 'description' => 'Validar documentos e inscripciones'],
+            ['code' => 'inscripciones.gestionar', 'module' => 'Inscripciones', 'action' => 'Gestionar', 'description' => 'Validar, rechazar, confirmar y administrar inscripciones'],
+            ['code' => 'pagos.ver', 'module' => 'Pagos', 'action' => 'Ver', 'description' => 'Ver pagos de inscripcion'],
+            ['code' => 'pagos.gestionar', 'module' => 'Pagos', 'action' => 'Gestionar', 'description' => 'Conciliar y administrar pagos de inscripcion'],
+            ['code' => 'asignaciones.ver', 'module' => 'Asignaciones', 'action' => 'Ver', 'description' => 'Ver asignaciones academicas'],
+            ['code' => 'asignaciones.gestionar', 'module' => 'Asignaciones', 'action' => 'Gestionar', 'description' => 'Asignar roles, docentes y estudiantes'],
             ['code' => 'notas.ver', 'module' => 'Notas', 'action' => 'Ver', 'description' => 'Ver notas y boletines'],
-            ['code' => 'notas.registrar', 'module' => 'Notas', 'action' => 'Registrar', 'description' => 'Registrar y editar notas'],
-            ['code' => 'notas.asignar', 'module' => 'Notas', 'action' => 'Asignar', 'description' => 'Asignar docentes a materias'],
+            ['code' => 'notas.gestionar', 'module' => 'Notas', 'action' => 'Gestionar', 'description' => 'Registrar, importar, exportar y administrar notas'],
+            ['code' => 'bitacora.ver', 'module' => 'Bitacora', 'action' => 'Ver', 'description' => 'Consultar bitacora'],
         ];
+    }
+
+    /** @return list<string> */
+    public static function assignableCodes(): array
+    {
+        return array_map(
+            static fn (array $permission): string => $permission['code'],
+            self::all(),
+        );
+    }
+
+    /** @return list<string> */
+    public static function legacyCodes(): array
+    {
+        return [
+            'usuarios.crear',
+            'usuarios.editar',
+            'usuarios.estado',
+            'usuarios.reset',
+            'roles.crear',
+            'roles.editar',
+            'roles.estado',
+            'gestion.crear',
+            'gestion.editar',
+            'gestion.activar',
+            'academico.crear',
+            'academico.editar',
+            'academico.estado',
+            'inscripciones.validar',
+            'notas.registrar',
+            'notas.asignar',
+        ];
+    }
+
+    public static function isAssignable(string $code): bool
+    {
+        return in_array($code, self::assignableCodes(), true);
     }
 }

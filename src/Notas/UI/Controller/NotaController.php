@@ -72,8 +72,11 @@ final class NotaController extends AbstractController
         }
 
         // El menú tiene un único item "Notas": cada rol llega a su vista.
-        if (!$user->hasPermission('notas.asignar')) {
-            return $user->hasPermission('notas.registrar')
+        $puedeAsignar = $user->hasPermission('asignaciones.gestionar') || $user->hasPermission('notas.asignar');
+        $puedeRegistrar = $user->hasPermission('notas.gestionar') || $user->hasPermission('notas.registrar');
+
+        if (!$puedeAsignar) {
+            return $puedeRegistrar
                 ? $this->redirectToRoute('nota_docente')
                 : $this->redirectToRoute('nota_boletin');
         }

@@ -49,7 +49,7 @@ final readonly class AsignarDocente
             throw new NotaException('El docente seleccionado no existe o esta inactivo.');
         }
 
-        if (!$docente->hasPermission('notas.registrar')) {
+        if (!$docente->hasPermission('notas.gestionar') && !$docente->hasPermission('notas.registrar')) {
             throw new NotaException('El usuario seleccionado no tiene el rol Docente.');
         }
 

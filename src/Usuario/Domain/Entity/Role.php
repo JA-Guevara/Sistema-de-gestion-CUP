@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Usuario\Domain\Entity;
 
+use App\Usuario\Domain\Catalog\PermissionCatalog;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -69,7 +70,10 @@ class Role
     /** @return list<Permission> */
     public function permissions(): array
     {
-        return $this->permissions->toArray();
+        return array_values(array_filter(
+            $this->permissions->toArray(),
+            static fn (Permission $permission): bool => $permission->active && PermissionCatalog::isAssignable($permission->code),
+        ));
     }
 
     /** @return list<int> */

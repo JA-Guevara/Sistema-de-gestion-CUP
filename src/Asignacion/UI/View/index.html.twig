@@ -18,11 +18,11 @@
             <h1 class="app-content__title">Asignaciones</h1>
         </div>
         <div class="gestion-head__actions">
-            {% if user.hasPermission('notas.asignar') %}
+            {% if user.hasPermission('asignaciones.gestionar') or user.hasPermission('notas.asignar') %}
                 <a href="{{ path('nota_asignaciones') }}" class="gestion-button">Docentes</a>
                 <a href="{{ path('nota_grupos') }}" class="gestion-button gestion-button--primary">Estudiantes</a>
             {% endif %}
-            {% if user.hasPermission('academico.ver') %}
+            {% if user.hasPermission('academico.ver') or user.hasPermission('academico.gestionar') %}
                 <a href="{{ path('horario_index') }}" class="gestion-button">Horarios</a>
             {% endif %}
         </div>
@@ -49,7 +49,7 @@
         </section>
     </div>
 
-    {% if user.hasPermission('usuarios.ver') %}
+    {% if user.hasPermission('usuarios.gestionar') or user.hasPermission('asignaciones.gestionar') %}
         <section class="gestion-panel" data-bulk-root>
             <div class="gestion-panel__header">
                 <div>
@@ -181,11 +181,11 @@
             </section>
         </div>
         <div class="gestion-actions">
-            {% if user.hasPermission('notas.asignar') %}
+            {% if user.hasPermission('asignaciones.gestionar') or user.hasPermission('notas.asignar') %}
                 <a href="{{ path('nota_asignaciones') }}" class="gestion-button">Asignar docentes</a>
                 <a href="{{ path('nota_grupos') }}" class="gestion-button gestion-button--primary">Asignar estudiantes</a>
             {% endif %}
-            {% if user.hasPermission('academico.ver') %}
+            {% if user.hasPermission('academico.ver') or user.hasPermission('academico.gestionar') %}
                 <a href="{{ path('horario_index') }}" class="gestion-button">Gestionar horarios</a>
             {% endif %}
         </div>

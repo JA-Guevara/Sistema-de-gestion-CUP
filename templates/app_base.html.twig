@@ -46,15 +46,16 @@
 
                 <nav class="app-sidebar__nav">
                     {% set current = app.request.attributes.get('_route') %}
-                    {% set puedeInscripcion = user is defined and user and user.hasPermission('inscripciones.ver') %}
-                    {% set puedeGestion = user is defined and user and user.hasPermission('gestion.ver') %}
-                    {% set puedeAcademico = user is defined and user and user.hasPermission('academico.ver') %}
-                    {% set puedeAdmisiones = user is defined and user and user.hasPermission('inscripciones.validar') %}
-                    {% set puedeAsignaciones = user is defined and user and user.hasPermission('notas.asignar') %}
-                    {% set puedeUsuarios = user is defined and user and user.hasPermission('usuarios.ver') %}
-                    {% set puedeRoles = user is defined and user and user.hasPermission('roles.ver') %}
+                    {% set puedeInscripcion = user is defined and user and (user.hasPermission('inscripciones.ver') or user.hasPermission('inscripciones.gestionar') or user.hasPermission('inscripciones.validar')) %}
+                    {% set puedeGestion = user is defined and user and (user.hasPermission('gestion.ver') or user.hasPermission('gestion.gestionar')) %}
+                    {% set puedeAcademico = user is defined and user and (user.hasPermission('academico.ver') or user.hasPermission('academico.gestionar')) %}
+                    {% set puedeAdmisiones = user is defined and user and (user.hasPermission('inscripciones.gestionar') or user.hasPermission('inscripciones.validar')) %}
+                    {% set puedePagos = user is defined and user and (user.hasPermission('pagos.ver') or user.hasPermission('pagos.gestionar') or user.hasPermission('inscripciones.validar')) %}
+                    {% set puedeAsignaciones = user is defined and user and (user.hasPermission('asignaciones.ver') or user.hasPermission('asignaciones.gestionar') or user.hasPermission('notas.asignar')) %}
+                    {% set puedeUsuarios = user is defined and user and (user.hasPermission('usuarios.ver') or user.hasPermission('usuarios.gestionar')) %}
+                    {% set puedeRoles = user is defined and user and (user.hasPermission('roles.ver') or user.hasPermission('roles.gestionar')) %}
                     {% set puedeBitacora = user is defined and user and user.hasPermission('bitacora.ver') %}
-                    {% set puedeNotas = user is defined and user and user.hasPermission('notas.ver') %}
+                    {% set puedeNotas = user is defined and user and (user.hasPermission('notas.ver') or user.hasPermission('notas.gestionar') or user.hasPermission('notas.registrar')) %}
                     {% set esEstudiante = user is defined and user and user.hasRole('Estudiante') %}
 
                     {# Inicio (activo cuando estás en / ) #}
@@ -84,7 +85,7 @@
                     </a>
                     {% endif %}
 
-                    {% if puedeGestion or puedeAcademico or puedeAdmisiones or puedeAsignaciones %}
+                    {% if puedeGestion or puedeAcademico or puedeAdmisiones or puedePagos or puedeAsignaciones %}
                     <p class="app-sidebar__section-title">Administración Académica</p>
                     {% endif %}
 
@@ -183,7 +184,9 @@
                         </span>
                         <span class="app-sidebar__label">Admisiones</span>
                     </a>
+                    {% endif %}
 
+                    {% if puedePagos %}
                     <a href="{{ path('inscripcion_admin_pagos') }}" class="app-sidebar__item {{ current starts with 'inscripcion_admin_pagos' ? 'app-sidebar__item--active' : '' }}">
                         <span class="app-sidebar__icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Usuario\Infrastructure\Persistence;
 
+use App\Usuario\Domain\Catalog\PermissionCatalog;
 use App\Usuario\Domain\Entity\Permission;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -53,6 +54,8 @@ final readonly class PermissionRepository
             ->getRepository(Permission::class)
             ->createQueryBuilder('p')
             ->where('p.active = true')
+            ->andWhere('p.code IN (:assignableCodes)')
+            ->setParameter('assignableCodes', PermissionCatalog::assignableCodes())
             ->orderBy('p.module', 'ASC')
             ->addOrderBy('p.action', 'ASC')
             ->getQuery()

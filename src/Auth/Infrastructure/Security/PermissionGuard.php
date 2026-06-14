@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Auth\Infrastructure\Security;
 
+use App\Auth\Entity\User;
 use App\Auth\Infrastructure\Persistence\UserRepository;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -12,61 +13,97 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
- * Guard de autorización por permiso. Corre después del SessionGuard y, según la
- * ruta solicitada, exige que el usuario en sesión tenga el permiso requerido
- * (vía User::hasPermission()).
- *
- * Las reglas se centralizan en ROUTE_PERMISSIONS (prefijo de nombre de ruta =>
- * permiso). El orden importa: las entradas más específicas van primero. Las
- * rutas que no aparecen (home, perfil_, auth_, internas) no requieren permiso.
- *
- * - Sin sesión en una ruta protegida → redirige a login.
- * - Sin permiso → redirige al inicio con un mensaje (en vez de un 403 crudo).
- *
- * Para proteger un módulo nuevo: añadir su prefijo de ruta aquí.
+ * Guard de autorizacion por permiso. Corre despues del SessionGuard y exige que
+ * el usuario tenga al menos uno de los permisos configurados para la ruta.
  */
 final readonly class PermissionGuard implements EventSubscriberInterface
 {
     private const SESSION_USER_KEY = 'auth_user_id';
 
-    /** @var array<string,string> Prefijo de _route => código de permiso. Más específico primero. */
+    /**
+     * Prefijo de _route => permisos aceptados. Mas especifico primero.
+     *
+     * El esquema nuevo usa *.ver y *.gestionar. Los permisos antiguos quedan
+     * como alternativa temporal para no romper roles existentes.
+     *
+     * @var array<string,string|list<string>>
+     */
     private const ROUTE_PERMISSIONS = [
-        // Inscripción: las pantallas de administración exigen "validar"; las del propio postulante, "ver".
-        'inscripcion_admin' => 'inscripciones.validar',
-        'inscripcion_buscar' => 'inscripciones.validar',
-        'inscripcion_edit' => 'inscripciones.validar',
-        'inscripcion_delete' => 'inscripciones.validar',
-        'inscripcion_documento' => 'inscripciones.validar',
-        'inscripcion_' => 'inscripciones.ver',
+        // Inscripcion y pagos.
+        'inscripcion_admin_pagos' => ['pagos.ver', 'pagos.gestionar', 'inscripciones.validar'],
+        'inscripcion_admin' => ['inscripciones.gestionar', 'inscripciones.validar'],
+        'inscripcion_buscar' => ['inscripciones.gestionar', 'inscripciones.validar'],
+        'inscripcion_edit' => ['inscripciones.gestionar', 'inscripciones.validar'],
+        'inscripcion_delete' => ['inscripciones.gestionar', 'inscripciones.validar'],
+        'inscripcion_documento' => ['inscripciones.gestionar', 'inscripciones.validar'],
+        'inscripcion_pago' => 'inscripciones.ver',
+        'inscripcion_' => ['inscripciones.ver', 'inscripciones.gestionar', 'inscripciones.validar'],
 
-        // Notas: asignar (admin/coord), registrar (docente), ver (boletín del postulante).
-        'nota_asignacion' => 'notas.asignar',
-        'nota_grupo' => 'notas.asignar',
-        'nota_planilla' => 'notas.registrar',
-        'nota_guardar' => 'notas.registrar',
-        'nota_docente' => 'notas.registrar',
-        'nota_' => 'notas.ver',
+        // Asignaciones y notas.
+        'nota_asignacion' => ['asignaciones.gestionar', 'notas.asignar'],
+        'nota_grupo' => ['asignaciones.gestionar', 'notas.asignar'],
+        'nota_planilla_importar' => ['notas.gestionar', 'notas.registrar'],
+        'nota_planilla_exportar' => ['notas.gestionar', 'notas.registrar'],
+        'nota_planilla' => ['notas.gestionar', 'notas.registrar'],
+        'nota_guardar' => ['notas.gestionar', 'notas.registrar'],
+        'nota_docente' => ['notas.gestionar', 'notas.registrar'],
+        'nota_' => ['notas.ver', 'notas.gestionar', 'notas.registrar'],
 
-        // Hub de asignaciones.
-        'asignacion_roles' => 'usuarios.ver',
-        'asignacion_' => 'notas.asignar',
+        'asignacion_roles' => ['asignaciones.gestionar', 'usuarios.gestionar', 'notas.asignar'],
+        'asignacion_' => ['asignaciones.ver', 'asignaciones.gestionar', 'notas.asignar'],
 
-        // Gestión y dashboard.
-        'gestion_' => 'gestion.ver',
-        'dashboard_' => 'gestion.ver',
+        // Gestion y dashboard.
+        'gestion_new' => ['gestion.gestionar', 'gestion.crear'],
+        'gestion_edit' => ['gestion.gestionar', 'gestion.editar'],
+        'gestion_activate' => ['gestion.gestionar', 'gestion.activar'],
+        'gestion_open_inscription' => ['gestion.gestionar', 'gestion.activar'],
+        'gestion_close_inscription' => ['gestion.gestionar', 'gestion.activar'],
+        'gestion_' => ['gestion.ver', 'gestion.gestionar'],
+        'dashboard_' => ['gestion.ver', 'gestion.gestionar'],
 
-        // Catálogos académicos.
-        'carrera_' => 'academico.ver',
-        'materia_' => 'academico.ver',
-        'aula_' => 'academico.ver',
-        'grupo_' => 'academico.ver',
-        'horario_' => 'academico.ver',
+        // Catalogos academicos.
+        'carrera_new' => ['academico.gestionar', 'academico.crear'],
+        'carrera_edit' => ['academico.gestionar', 'academico.editar'],
+        'carrera_activate' => ['academico.gestionar', 'academico.estado'],
+        'carrera_deactivate' => ['academico.gestionar', 'academico.estado'],
+        'carrera_' => ['academico.ver', 'academico.gestionar'],
+        'materia_new' => ['academico.gestionar', 'academico.crear'],
+        'materia_edit' => ['academico.gestionar', 'academico.editar'],
+        'materia_toggle' => ['academico.gestionar', 'academico.estado'],
+        'materia_' => ['academico.ver', 'academico.gestionar'],
+        'aula_new' => ['academico.gestionar', 'academico.crear'],
+        'aula_generate' => ['academico.gestionar', 'academico.crear'],
+        'aula_bulk_state' => ['academico.gestionar', 'academico.estado'],
+        'aula_edit' => ['academico.gestionar', 'academico.editar'],
+        'aula_toggle' => ['academico.gestionar', 'academico.estado'],
+        'aula_' => ['academico.ver', 'academico.gestionar'],
+        'grupo_new' => ['academico.gestionar', 'academico.crear'],
+        'grupo_generate' => ['academico.gestionar', 'academico.crear'],
+        'grupo_bulk_state' => ['academico.gestionar', 'academico.estado'],
+        'grupo_edit' => ['academico.gestionar', 'academico.editar'],
+        'grupo_toggle' => ['academico.gestionar', 'academico.estado'],
+        'grupo_' => ['academico.ver', 'academico.gestionar'],
+        'horario_multigrupo' => ['academico.gestionar', 'academico.crear'],
+        'horario_grupo_materia_delete' => ['academico.gestionar', 'academico.estado'],
+        'horario_grupo_delete' => ['academico.gestionar', 'academico.estado'],
+        'horario_grupos_delete' => ['academico.gestionar', 'academico.estado'],
+        'horario_masivo' => ['academico.gestionar', 'academico.crear'],
+        'horario_edit' => ['academico.gestionar', 'academico.editar'],
+        'horario_delete' => ['academico.gestionar', 'academico.estado'],
+        'horario_' => ['academico.ver', 'academico.gestionar'],
 
         // Seguridad.
-        'usuario_' => 'usuarios.ver',
-        'rol_' => 'roles.ver',
+        'usuario_new' => ['usuarios.gestionar', 'usuarios.crear'],
+        'usuario_edit' => ['usuarios.gestionar', 'usuarios.editar'],
+        'usuario_toggle' => ['usuarios.gestionar', 'usuarios.estado'],
+        'usuario_reset_password' => ['usuarios.gestionar', 'usuarios.reset'],
+        'usuario_' => ['usuarios.ver', 'usuarios.gestionar'],
+        'rol_new' => ['roles.gestionar', 'roles.crear'],
+        'rol_edit' => ['roles.gestionar', 'roles.editar'],
+        'rol_toggle' => ['roles.gestionar', 'roles.estado'],
+        'rol_' => ['roles.ver', 'roles.gestionar'],
 
-        // Auditoría.
+        // Auditoria.
         'bitacora_' => 'bitacora.ver',
     ];
 
@@ -78,7 +115,6 @@ final readonly class PermissionGuard implements EventSubscriberInterface
 
     public static function getSubscribedEvents(): array
     {
-        // Prioridad 6: después del SessionGuard (7), antes del controller.
         return [
             KernelEvents::REQUEST => ['onKernelRequest', 6],
         ];
@@ -96,8 +132,8 @@ final readonly class PermissionGuard implements EventSubscriberInterface
             return;
         }
 
-        $permiso = $this->permisoParaRuta($routeName);
-        if ($permiso === null) {
+        $permisos = $this->permisosParaRuta($routeName);
+        if ($permisos === null) {
             return;
         }
 
@@ -110,20 +146,33 @@ final readonly class PermissionGuard implements EventSubscriberInterface
             return;
         }
 
-        if (!$user->hasPermission($permiso)) {
+        if (!$this->userHasAnyPermission($user, $permisos)) {
             $request->getSession()->getFlashBag()->add('error', 'No tienes permiso para acceder a esa seccion.');
             $event->setResponse(new RedirectResponse($this->router->generate('home')));
         }
     }
 
-    private function permisoParaRuta(string $routeName): ?string
+    /** @return list<string>|null */
+    private function permisosParaRuta(string $routeName): ?array
     {
-        foreach (self::ROUTE_PERMISSIONS as $prefijo => $permiso) {
+        foreach (self::ROUTE_PERMISSIONS as $prefijo => $permisos) {
             if (str_starts_with($routeName, $prefijo)) {
-                return $permiso;
+                return is_array($permisos) ? $permisos : [$permisos];
             }
         }
 
         return null;
+    }
+
+    /** @param list<string> $permisos */
+    private function userHasAnyPermission(User $user, array $permisos): bool
+    {
+        foreach ($permisos as $permiso) {
+            if ($user->hasPermission($permiso)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
