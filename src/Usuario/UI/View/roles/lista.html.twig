@@ -2,7 +2,7 @@
 
 {% block title %}Roles y permisos{% endblock %}
 
-{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=14">{% endblock %}
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">{% endblock %}
 {% block javascripts %}<script src="/assets/gestion/js/gestion-filters.js?v=9" defer></script>{% endblock %}
 
 {% block app_content %}
@@ -52,8 +52,8 @@
                     <tr>
                         <th>Rol</th>
                         <th>Descripcion</th>
-                        <th>Permisos</th>
-                        <th>Estado</th>
+                        <th class="gestion-col--num">Permisos</th>
+                        <th class="gestion-col--center">Estado</th>
                         <th class="gestion-table__actions-cell">Acciones</th>
                     </tr>
                 </thead>
@@ -63,8 +63,8 @@
                         <tr data-filter-row data-filter-texto="{{ rol.name }} {{ rol.description }}" data-filter-estado="{{ estado }}">
                             <td>{{ rol.name }}</td>
                             <td>{{ rol.description ?? '-' }}</td>
-                            <td>{{ rol.permissions|length }}</td>
-                            <td><span class="gestion-badge gestion-badge--{{ rol.active ? 'activa' : 'inactiva' }}">{{ rol.active ? 'Activo' : 'Inactivo' }}</span></td>
+                            <td class="gestion-col--num">{{ rol.permissions|length }}</td>
+                            <td class="gestion-col--center"><span class="gestion-badge gestion-badge--{{ rol.active ? 'activa' : 'inactiva' }}">{{ rol.active ? 'Activo' : 'Inactivo' }}</span></td>
                             <td class="gestion-table__actions-cell">
                                 <div class="gestion-table__actions">
                                     <a class="gestion-action-button gestion-action-button--view" href="{{ path('rol_show', {id: rol.id}) }}" aria-label="Ver rol" title="Ver">

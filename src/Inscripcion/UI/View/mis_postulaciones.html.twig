@@ -4,10 +4,10 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=15">
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">
 {% endblock %}
 
-{% set estadoClass = {'VALIDADA':'activa','CONFIRMADA':'activa','RECHAZADA':'inactiva','PRESENTADA':'borrador','BORRADOR':'borrador','PENDIENTE':'borrador','COMPLETADA':'activa'} %}
+{% set estadoClass = {'VALIDADA':'activa','CONFIRMADA':'activa','RECHAZADA':'inactiva','ANULADA':'inactiva','PRESENTADA':'borrador','BORRADOR':'borrador','PENDIENTE':'borrador','COMPLETADA':'activa'} %}
 
 {% block app_content %}
     <section class="gestion-head">
@@ -39,7 +39,7 @@
                         <tr>
                             <th>Tipo</th>
                             <th>Modalidad</th>
-                            <th>Estado</th>
+                            <th class="gestion-col--center">Estado</th>
                             <th>Fecha</th>
                             <th class="gestion-table__actions-cell">Acciones</th>
                         </tr>
@@ -49,10 +49,17 @@
                             <tr>
                                 <td data-label="Tipo">{{ p.tipo == 'DOCENTE' ? 'Docente' : 'Estudiante' }}</td>
                                 <td data-label="Modalidad">{{ p.modalidad|lower|capitalize }}</td>
-                                <td data-label="Estado"><span class="gestion-badge gestion-badge--{{ estadoClass[p.estado] ?? 'borrador' }}">{{ p.estado|lower|capitalize }}</span></td>
+                                <td class="gestion-col--center" data-label="Estado"><span class="gestion-badge gestion-badge--{{ estadoClass[p.estado] ?? 'borrador' }}">{{ p.estado|lower|capitalize }}</span></td>
                                 <td data-label="Fecha">{{ p.createdAt|date('d/m/Y H:i') }}</td>
                                 <td class="gestion-table__actions" data-label="Acciones">
-                                    <a class="gestion-button" href="{{ path('inscripcion_ver', {id: p.id}) }}">Ver</a>
+                                    <a class="gestion-button" href="{{ path('inscripcion_ver', {id: p.id}) }}">{{ p.estado == 'BORRADOR' ? 'Continuar' : 'Ver' }}</a>
+                                    {% if p.estado == 'BORRADOR' %}
+                                        <a class="gestion-button" href="{{ path('inscripcion_borrador_editar', {id: p.id}) }}">Editar</a>
+                                        <form method="post" action="{{ path('inscripcion_presentar', {id: p.id}) }}" onsubmit="return confirm('Presentar esta pre-inscripcion?')" style="display:inline">
+                                            <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
+                                            <button class="gestion-button gestion-button--primary" type="submit">Presentar</button>
+                                        </form>
+                                    {% endif %}
                                 </td>
                             </tr>
                         {% else %}

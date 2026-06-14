@@ -11,6 +11,8 @@ use App\Academico\Materia\Infrastructure\Persistence\MateriaRepository;
 use App\Bitacora\Application\EventLog\NotasEvents;
 use App\Gestion\Domain\Entity\Gestion;
 use App\Gestion\Infrastructure\Persistence\GestionRepository;
+use App\Inscripcion\Domain\Catalog\EstadoInscripcion;
+use App\Inscripcion\Domain\Catalog\TipoPostulacion;
 use App\Inscripcion\Domain\Entity\Inscripcion;
 use App\Inscripcion\Infrastructure\Persistence\InscripcionRepository;
 use App\Notas\Application\DTO\AsignarGruposMasivoInput;
@@ -88,7 +90,7 @@ final readonly class AsignarInscritosMasivo
     private function loadInscripciones(Gestion $gestion, AsignarGruposMasivoInput $input): array
     {
         return array_values(array_filter(
-            $this->inscripciones->listByGestion((int) $gestion->id),
+            $this->inscripciones->listByGestionTipoEstado((int) $gestion->id, TipoPostulacion::ESTUDIANTE, EstadoInscripcion::CONFIRMADA),
             fn (Inscripcion $inscripcion): bool => $this->matchesTurno($inscripcion, $input->turnoPreferencia),
         ));
     }

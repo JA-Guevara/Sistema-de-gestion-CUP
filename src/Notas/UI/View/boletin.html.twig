@@ -2,7 +2,7 @@
 
 {% block title %}Mi boletin{% endblock %}
 
-{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=15">{% endblock %}
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">{% endblock %}
 
 {% block app_content %}
     <section class="gestion-head">
@@ -36,10 +36,10 @@
                             <th>Materia</th>
                             <th>Grupo</th>
                             {% for examen in 1..boletin.cantidadExamenes %}
-                                <th>Examen {{ examen }}</th>
+                                <th class="gestion-col--num">Examen {{ examen }}</th>
                             {% endfor %}
-                            <th>Promedio</th>
-                            <th>Estado</th>
+                            <th class="gestion-col--num">Promedio</th>
+                            <th class="gestion-col--center">Estado</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -51,7 +51,7 @@
                                     <td class="gestion-col--num" data-label="Examen {{ examen }}">{{ fila.valores[examen] is not null ? fila.valores[examen] : '-' }}</td>
                                 {% endfor %}
                                 <td class="gestion-col--num" data-label="Promedio"><strong>{{ fila.promedio is not null ? fila.promedio : '-' }}</strong></td>
-                                <td data-label="Estado">
+                                <td class="gestion-col--center" data-label="Estado">
                                     {% if fila.aprobado is null %}
                                         <span class="gestion-badge gestion-badge--borrador">Incompleto</span>
                                     {% elseif fila.aprobado %}

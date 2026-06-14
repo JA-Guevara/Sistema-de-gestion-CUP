@@ -16,6 +16,7 @@
     </div>
 
     <form method="post" class="gestion-form">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
         <div class="gestion-panel">
             <h2>Datos del postulante</h2>
 

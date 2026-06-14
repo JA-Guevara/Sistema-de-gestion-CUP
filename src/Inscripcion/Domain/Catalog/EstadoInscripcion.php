@@ -11,6 +11,7 @@ final class EstadoInscripcion
     public const VALIDADA = 'VALIDADA';
     public const CONFIRMADA = 'CONFIRMADA';
     public const RECHAZADA = 'RECHAZADA';
+    public const ANULADA = 'ANULADA';
     // Estados heredados (compatibilidad con datos/flujo previo).
     public const PENDIENTE = 'PENDIENTE';
     public const COMPLETADA = 'COMPLETADA';
@@ -21,6 +22,7 @@ final class EstadoInscripcion
         self::VALIDADA => 'Validada',
         self::CONFIRMADA => 'Confirmada',
         self::RECHAZADA => 'Rechazada',
+        self::ANULADA => 'Anulada',
         self::PENDIENTE => 'Pendiente',
         self::COMPLETADA => 'Completada',
     ];

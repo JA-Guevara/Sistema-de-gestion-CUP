@@ -67,6 +67,22 @@ final readonly class InscripcionRepository
         $this->entityManager->flush();
     }
 
+    /**
+     * Postulaciones de una gestion filtradas por tipo y estado. Se usa para
+     * listar a los estudiantes CONFIRMADOS candidatos a asignar a grupos.
+     *
+     * @return list<Inscripcion>
+     */
+    public function listByGestionTipoEstado(int $gestionId, string $tipo, string $estado): array
+    {
+        return $this->entityManager
+            ->getRepository(Inscripcion::class)
+            ->findBy(
+                ['gestion' => $gestionId, 'tipo' => $tipo, 'estado' => $estado],
+                ['apellidos' => 'ASC', 'nombres' => 'ASC'],
+            );
+    }
+
     public function findByUserAndGestion(int $userId, int $gestionId): ?Inscripcion
     {
         return $this->entityManager
@@ -146,5 +162,27 @@ final readonly class InscripcionRepository
                 'gestion' => $gestionId,
                 'estado' => EstadoInscripcion::CONFIRMADA,
             ]) !== null;
+    }
+
+    /**
+     * ¿El usuario tiene OTRA postulacion CONFIRMADA del mismo tipo (excluyendo
+     * una)? Se usa al anular para no retirar el rol si sigue confirmado en otra
+     * gestion.
+     */
+    public function existeOtraConfirmadaPorUserTipo(int $userId, string $tipo, int $excludeInscripcionId): bool
+    {
+        return (int) $this->entityManager->createQueryBuilder()
+            ->select('COUNT(i.id)')
+            ->from(Inscripcion::class, 'i')
+            ->where('i.user = :userId')
+            ->andWhere('i.tipo = :tipo')
+            ->andWhere('i.estado = :estado')
+            ->andWhere('i.id != :excludeId')
+            ->setParameter('userId', $userId)
+            ->setParameter('tipo', $tipo)
+            ->setParameter('estado', EstadoInscripcion::CONFIRMADA)
+            ->setParameter('excludeId', $excludeInscripcionId)
+            ->getQuery()
+            ->getSingleScalarResult() > 0;
     }
 }

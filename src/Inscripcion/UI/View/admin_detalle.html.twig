@@ -4,10 +4,10 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=16">
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">
 {% endblock %}
 
-{% set estadoClass = {'VALIDADA':'activa','CONFIRMADA':'activa','RECHAZADA':'inactiva','PRESENTADA':'borrador','BORRADOR':'borrador','PENDIENTE':'borrador','COMPLETADA':'activa'} %}
+{% set estadoClass = {'VALIDADA':'activa','CONFIRMADA':'activa','RECHAZADA':'inactiva','ANULADA':'inactiva','PRESENTADA':'borrador','BORRADOR':'borrador','PENDIENTE':'borrador','COMPLETADA':'activa'} %}
 
 {% block app_content %}
     <div class="gestion-head">
@@ -88,6 +88,7 @@
                 <p class="gestion-panel__hint" style="padding:0;color:#9b1c1c">Motivo del rechazo: {{ inscripcion.motivoRechazo ?? '—' }}</p>
             {% elseif inscripcion.estado in ['PRESENTADA', 'VALIDADA'] %}
                 <form method="post" action="{{ path('inscripcion_admin_agendar', {id: inscripcion.id}) }}" class="gestion-form">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
                     <div class="gestion-grid" style="grid-template-columns:1fr auto;align-items:end">
                         <label>Fecha y hora de revision de documentos
                             <input type="datetime-local" name="fecha" required>
@@ -108,6 +109,7 @@
                     {% if inscripcion.estado == 'PRESENTADA' %}
                         {% if todosOk %}
                             <form method="post" action="{{ path('inscripcion_admin_validar', {id: inscripcion.id}) }}" onsubmit="return confirm('Aprobar la postulacion? Se habilitara el {{ inscripcion.tipo == 'DOCENTE' ? 'proceso de entrevista' : 'pago (billetera)' }} del postulante.')">
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
                                 <button class="gestion-button gestion-button--primary" type="submit">Aprobar postulacion</button>
                             </form>
                         {% else %}
@@ -116,6 +118,7 @@
                         {% endif %}
                     {% endif %}
                     <form method="post" action="{{ path('inscripcion_admin_rechazar', {id: inscripcion.id}) }}" onsubmit="return confirm('Rechazar esta postulacion?')" style="display:flex;gap:8px;align-items:center">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
                         <input type="text" name="motivo" placeholder="Motivo (opcional)" style="min-height:40px;border:1px solid #cbd5e1;border-radius:6px;padding:8px 10px">
                         <button class="gestion-button gestion-button--danger" type="submit">Rechazar</button>
                     </form>
@@ -124,19 +127,72 @@
                     <p class="gestion-panel__hint" style="padding:0;color:#166534">
                         &#10003; Documentacion aprobada.
                         {% if inscripcion.tipo == 'DOCENTE' %}
-                            Se habilito el proceso de entrevista para el docente.
+                            Agenda la entrevista y confirma (contrata) al docente.
                         {% else %}
-                            Se habilito la <strong>billetera de pago</strong> para el estudiante.
+                            Se habilito la <strong>billetera de pago</strong> para el estudiante; tambien puedes confirmar manualmente (pago presencial).
                         {% endif %}
                     </p>
+
+                    {% if inscripcion.tipo == 'DOCENTE' %}
+                        <form method="post" action="{{ path('inscripcion_admin_entrevista', {id: inscripcion.id}) }}" class="gestion-form">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
+                            <div class="gestion-grid" style="grid-template-columns:1fr auto;align-items:end">
+                                <label>Fecha y hora de entrevista
+                                    <input type="datetime-local" name="fecha" required>
+                                </label>
+                                <button class="gestion-button" type="submit" style="align-self:end">Agendar entrevista</button>
+                            </div>
+                        </form>
+                        {% if inscripcion.fechaEntrevista %}
+                            <p class="gestion-panel__hint" style="padding:0">Entrevista agendada: <strong>{{ inscripcion.fechaEntrevista|date('d/m/Y H:i') }}</strong>.</p>
+                        {% endif %}
+                    {% endif %}
+
+                    <div class="gestion-actions" style="margin-top:0">
+                        <form method="post" action="{{ path('inscripcion_admin_confirmar', {id: inscripcion.id}) }}" onsubmit="return confirm('Confirmar la postulacion? Se asignara el rol {{ inscripcion.tipo == 'DOCENTE' ? 'Docente' : 'Estudiante' }} al usuario.')">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
+                            <button class="gestion-button gestion-button--primary" type="submit">{{ inscripcion.tipo == 'DOCENTE' ? 'Confirmar (contratar docente)' : 'Confirmar inscripcion (pago presencial)' }}</button>
+                        </form>
+                    </div>
                 {% endif %}
             {% elseif inscripcion.estado == 'CONFIRMADA' %}
                 <p class="gestion-panel__hint" style="padding:0;color:#166534">Postulacion confirmada. Ya puede entrar a las asignaciones.</p>
+            {% elseif inscripcion.estado == 'ANULADA' %}
+                <p class="gestion-panel__hint" style="padding:0;color:#9b1c1c">Postulacion anulada.</p>
             {% else %}
                 <p class="gestion-panel__hint" style="padding:0">El postulante aun no ha presentado su pre-inscripcion (borrador).</p>
             {% endif %}
         </div>
     </section>
+
+    {# ---- Anulacion (admin) ---- #}
+    {% if inscripcion.estado in ['PRESENTADA', 'VALIDADA', 'CONFIRMADA'] %}
+        <section class="gestion-panel">
+            <div class="gestion-panel__header">
+                <div>
+                    <h2>Anulacion</h2>
+                    <p class="gestion-panel__hint">{{ inscripcion.anulacionSolicitada ? 'El postulante solicito anular esta postulacion.' : 'Anula la postulacion si corresponde (accion administrativa).' }}</p>
+                </div>
+            </div>
+            <div style="padding:0 18px 18px;display:grid;gap:12px">
+                {% if inscripcion.anulacionSolicitada %}
+                    <p class="gestion-panel__hint" style="padding:0;color:#9b1c1c">Solicitud de anulacion del postulante{% if inscripcion.motivoAnulacion %} &mdash; motivo: {{ inscripcion.motivoAnulacion }}{% endif %}.</p>
+                {% endif %}
+                <div class="gestion-actions" style="margin-top:0">
+                    <form method="post" action="{{ path('inscripcion_admin_anular', {id: inscripcion.id}) }}" onsubmit="return confirm('Anular la postulacion? Si estaba confirmada se quitara el rol al usuario.')">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
+                        <button class="gestion-button gestion-button--danger" type="submit">{{ inscripcion.anulacionSolicitada ? 'Anular (aprobar solicitud)' : 'Anular postulacion' }}</button>
+                    </form>
+                    {% if inscripcion.anulacionSolicitada %}
+                        <form method="post" action="{{ path('inscripcion_admin_anulacion_rechazar', {id: inscripcion.id}) }}" onsubmit="return confirm('Descartar la solicitud de anulacion?')">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
+                            <button class="gestion-button" type="submit">Rechazar solicitud</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
 
     {# ---- Documentos (checklist) ---- #}
     <section class="gestion-panel">
@@ -154,7 +210,7 @@
             <div class="gestion-table-wrap">
                 <table class="gestion-table gestion-table--stack">
                     <thead>
-                        <tr><th>Documento</th><th>Estado</th><th>Revisar</th><th class="gestion-table__actions-cell">Quitar</th></tr>
+                        <tr><th>Documento</th><th class="gestion-col--center">Estado</th><th>Revisar</th><th class="gestion-table__actions-cell">Quitar</th></tr>
                     </thead>
                     <tbody>
                         {% for doc in inscripcion.documentos %}
@@ -164,9 +220,10 @@
                                     <a href="/{{ doc.archivoRuta }}" target="_blank">{{ doc.nombre }}</a>
                                     <span class="gestion-table__meta">{{ doc.createdAt|date('d/m/Y') }}{% if doc.observacion %} · Obs: {{ doc.observacion }}{% endif %}</span>
                                 </td>
-                                <td data-label="Estado"><span class="gestion-badge gestion-badge--{{ docClass }}">{{ doc.estado|lower|capitalize }}</span></td>
+                                <td class="gestion-col--center" data-label="Estado"><span class="gestion-badge gestion-badge--{{ docClass }}">{{ doc.estado|lower|capitalize }}</span></td>
                                 <td data-label="Revisar">
                                     <form method="post" action="{{ path('inscripcion_admin_documento_revisar', {documentoId: doc.id}) }}" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
                                         <input type="hidden" name="inscripcionId" value="{{ inscripcion.id }}">
                                         <select name="estado" style="min-height:36px;border:1px solid #cbd5e1;border-radius:6px;padding:6px 8px">
                                             <option value="APROBADO" {{ doc.estado == 'APROBADO' ? 'selected' : '' }}>Aprobado</option>
@@ -178,6 +235,7 @@
                                 </td>
                                 <td class="gestion-table__actions" data-label="Quitar">
                                     <form method="post" action="{{ path('inscripcion_documento_eliminar', {documentoId: doc.id}) }}" onsubmit="return confirm('Eliminar este documento?')">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
                                         <button class="gestion-action-button gestion-action-button--danger" type="submit" title="Eliminar">
                                             <svg viewBox="0 0 24 24"><polyline points="3 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                                         </button>
@@ -193,6 +251,7 @@
         {% endif %}
 
         <form method="post" action="{{ path('inscripcion_documento_subir', {id: inscripcion.id}) }}" enctype="multipart/form-data" class="gestion-form">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
             <div class="gestion-grid" style="grid-template-columns:1fr 1fr auto;align-items:end">
                 <label>Nombre del documento
                     <input type="text" name="nombreDocumento" placeholder="Ej: Titulo bachiller" required>
@@ -207,6 +266,7 @@
 
     <div class="gestion-page-actions">
         <form method="post" action="{{ path('inscripcion_delete', {id: inscripcion.id}) }}" onsubmit="return confirm('Eliminar permanentemente esta postulacion?')">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
             <button class="gestion-button gestion-button--danger" type="submit">Eliminar postulacion</button>
         </form>
         <a class="gestion-button" href="{{ path('inscripcion_admin') }}">Volver al listado</a>

@@ -2,7 +2,7 @@
 
 {% block title %}Usuarios{% endblock %}
 
-{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=14">{% endblock %}
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">{% endblock %}
 {% block javascripts %}<script src="/assets/gestion/js/gestion-filters.js?v=9" defer></script>{% endblock %}
 
 {% block app_content %}
@@ -62,7 +62,7 @@
                         <th>Usuario</th>
                         <th>Correo</th>
                         <th>Roles</th>
-                        <th>Estado</th>
+                        <th class="gestion-col--center">Estado</th>
                         <th>Ultimo acceso</th>
                         <th class="gestion-table__actions-cell">Acciones</th>
                     </tr>
@@ -77,7 +77,7 @@
                             </td>
                             <td>{{ usuario.email }}</td>
                             <td>{{ usuario.roleNames() }}</td>
-                            <td><span class="gestion-badge gestion-badge--{{ usuario.active ? 'activa' : 'inactiva' }}">{{ usuario.active ? 'Activo' : 'Inactivo' }}</span></td>
+                            <td class="gestion-col--center"><span class="gestion-badge gestion-badge--{{ usuario.active ? 'activa' : 'inactiva' }}">{{ usuario.active ? 'Activo' : 'Inactivo' }}</span></td>
                             <td>{{ usuario.lastLoginAt ? usuario.lastLoginAt|date('Y-m-d H:i') : 'Sin acceso' }}</td>
                             <td class="gestion-table__actions-cell">
                                 <div class="gestion-table__actions">

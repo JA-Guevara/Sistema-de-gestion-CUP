@@ -133,6 +133,13 @@ class Inscripcion
     #[ORM\Column(type: 'text', nullable: true)]
     public ?string $motivoRechazo = null;
 
+    /** El postulante solicito anular su postulacion (validada/confirmada). */
+    #[ORM\Column(options: ['default' => false])]
+    public bool $anulacionSolicitada = false;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    public ?string $motivoAnulacion = null;
+
     #[ORM\Column]
     public \DateTimeImmutable $createdAt;
 
@@ -177,6 +184,11 @@ class Inscripcion
         $this->fechaPresentacionDocs = $fecha;
     }
 
+    public function agendarEntrevista(\DateTimeImmutable $fecha): void
+    {
+        $this->fechaEntrevista = $fecha;
+    }
+
     public function validar(?int $actorUserId): void
     {
         $this->estado = EstadoInscripcion::VALIDADA;
@@ -214,6 +226,40 @@ class Inscripcion
     public function isRechazada(): bool
     {
         return $this->estado === EstadoInscripcion::RECHAZADA;
+    }
+
+    public function isAnulada(): bool
+    {
+        return $this->estado === EstadoInscripcion::ANULADA;
+    }
+
+    /** Solo un borrador puede editarse libremente; una vez presentada, no. */
+    public function puedeEditarse(): bool
+    {
+        return $this->estado === EstadoInscripcion::BORRADOR;
+    }
+
+    /** Estado terminal: ya no admite acciones. */
+    public function esTerminal(): bool
+    {
+        return in_array($this->estado, [EstadoInscripcion::RECHAZADA, EstadoInscripcion::ANULADA], true);
+    }
+
+    public function solicitarAnulacion(?string $motivo): void
+    {
+        $this->anulacionSolicitada = true;
+        $this->motivoAnulacion = $motivo !== null && trim($motivo) !== '' ? trim($motivo) : null;
+    }
+
+    public function rechazarSolicitudAnulacion(): void
+    {
+        $this->anulacionSolicitada = false;
+    }
+
+    public function anular(): void
+    {
+        $this->estado = EstadoInscripcion::ANULADA;
+        $this->anulacionSolicitada = false;
     }
 
     /**

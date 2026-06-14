@@ -2,7 +2,7 @@
 
 {% block title %}Horarios{% endblock %}
 
-{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=13">{% endblock %}
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">{% endblock %}
 
 {% block javascripts %}
     <script src="/assets/gestion/js/gestion-wizard.js?v=9" defer></script>
@@ -284,8 +284,8 @@
                         <th>Materias</th>
                         <th>Dias</th>
                         <th>Rango horario</th>
-                        <th>Franjas</th>
-                        <th>Acciones</th>
+                        <th class="gestion-col--num">Franjas</th>
+                        <th class="gestion-col--center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -301,7 +301,7 @@
                             <td>
                                 {% if fila.horaInicio %}{{ fila.horaInicio|date('H:i') }} - {{ fila.horaFin|date('H:i') }}{% else %}-{% endif %}
                             </td>
-                            <td>{{ fila.total }}</td>
+                            <td class="gestion-col--num">{{ fila.total }}</td>
                             <td>
                                 <div class="gestion-table__actions">
                                     <a href="{{ path('horario_grupo_show', {grupoId: fila.grupo.id}) }}" class="gestion-action-button gestion-action-button--view" title="Ver detalle del grupo" aria-label="Ver detalle del grupo">

@@ -2,7 +2,7 @@
 
 {% block title %}Materias{% endblock %}
 
-{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=13">{% endblock %}
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">{% endblock %}
 
 {% block javascripts %}<script src="/assets/gestion/js/gestion-filters.js?v=9" defer></script>{% endblock %}
 
@@ -45,8 +45,8 @@
                         <th>Codigo</th>
                         <th>Nombre</th>
                         <th>Descripcion</th>
-                        <th>Estado</th>
-                        <th></th>
+                        <th class="gestion-col--center">Estado</th>
+                        <th class="gestion-table__actions-cell">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -55,7 +55,7 @@
                             <td>{{ materia.codigo }}</td>
                             <td>{{ materia.nombre }}</td>
                             <td>{{ materia.descripcion ?? '-' }}</td>
-                            <td><span class="gestion-badge gestion-badge--{{ materia.estado|lower }}">{{ materia.estado|lower|capitalize }}</span></td>
+                            <td class="gestion-col--center"><span class="gestion-badge gestion-badge--{{ materia.estado|lower }}">{{ materia.estado|lower|capitalize }}</span></td>
                             <td class="gestion-table__actions">
                                 <a class="gestion-action-button gestion-action-button--edit" href="{{ path('materia_edit', {id: materia.id}) }}" aria-label="Editar materia" title="Editar">
                                     <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>

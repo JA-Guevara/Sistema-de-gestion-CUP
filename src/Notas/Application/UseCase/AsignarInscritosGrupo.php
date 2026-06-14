@@ -46,7 +46,10 @@ final readonly class AsignarInscritosGrupo
         $asignados = 0;
         foreach ($input->inscripcionIds as $inscripcionId) {
             $inscripcion = $this->inscripciones->findById((int) $inscripcionId);
-            if ($inscripcion === null || $inscripcion->gestion->id !== $gestion->id) {
+            if ($inscripcion === null
+                || $inscripcion->gestion->id !== $gestion->id
+                || !$inscripcion->esEstudiante()
+                || !$inscripcion->isConfirmada()) {
                 continue;
             }
 

@@ -3,7 +3,7 @@
 {% block title %}Asignaciones{% endblock %}
 
 {% block stylesheets %}
-    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=15">
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">
 {% endblock %}
 
 {% block javascripts %}
@@ -120,7 +120,7 @@
                             <th>Usuario</th>
                             <th>Correo</th>
                             <th>Roles</th>
-                            <th>Estado</th>
+                            <th class="gestion-col--center">Estado</th>
                             <th class="gestion-table__actions-cell">Acciones</th>
                         </tr>
                     </thead>
@@ -137,7 +137,7 @@
                                 </td>
                                 <td data-label="Correo">{{ usuario.email }}</td>
                                 <td data-label="Roles">{{ usuario.roleNames() }}</td>
-                                <td data-label="Estado">
+                                <td class="gestion-col--center" data-label="Estado">
                                     <span class="gestion-badge gestion-badge--{{ usuario.active ? 'activa' : 'inactiva' }}">{{ usuario.active ? 'Activo' : 'Inactivo' }}</span>
                                 </td>
                                 <td class="gestion-table__actions-cell" data-label="Acciones">

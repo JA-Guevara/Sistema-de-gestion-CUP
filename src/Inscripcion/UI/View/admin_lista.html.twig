@@ -4,7 +4,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=16">
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">
 {% endblock %}
 
 {% block javascripts %}
@@ -12,7 +12,7 @@
     <script src="/assets/gestion/js/gestion-bulk-actions.js?v=9" defer></script>
 {% endblock %}
 
-{% set estadoClass = {'VALIDADA':'activa','CONFIRMADA':'activa','RECHAZADA':'inactiva','PRESENTADA':'borrador','BORRADOR':'borrador','PENDIENTE':'borrador','COMPLETADA':'activa'} %}
+{% set estadoClass = {'VALIDADA':'activa','CONFIRMADA':'activa','RECHAZADA':'inactiva','ANULADA':'inactiva','PRESENTADA':'borrador','BORRADOR':'borrador','PENDIENTE':'borrador','COMPLETADA':'activa'} %}
 
 {% block app_content %}
     <div class="gestion-head">
@@ -75,6 +75,7 @@
                     <option value="VALIDADA">Validada</option>
                     <option value="CONFIRMADA">Confirmada</option>
                     <option value="RECHAZADA">Rechazada</option>
+                    <option value="ANULADA">Anulada</option>
                 </select>
             </div>
             <input type="hidden" data-filter-field="aprobado" value="">
@@ -88,6 +89,7 @@
 
         {# ---- Barra de acciones masivas (aparece al seleccionar) ---- #}
         <form id="admision-bulk-form" method="post" class="gestion-bulk-actions" data-bulk-actions hidden>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
             <input type="hidden" name="gestion" value="{{ gestion.id }}">
             <div class="gestion-bulk-actions__info">
                 <span class="gestion-bulk-actions__count"><strong data-bulk-count>0</strong> postulaciones seleccionadas</span>
@@ -119,8 +121,8 @@
                         <th>Postulante</th>
                         <th>Tipo</th>
                         <th>Carrera / Area</th>
-                        <th>Estado</th>
-                        <th>Documentos</th>
+                        <th class="gestion-col--center">Estado</th>
+                        <th class="gestion-col--center">Documentos</th>
                         <th class="gestion-table__actions-cell">Acciones</th>
                     </tr>
                 </thead>
@@ -141,10 +143,13 @@
                             <td class="gestion-col--text" data-label="Carrera / Area">
                                 {{ inscripcion.tipo == 'DOCENTE' ? (inscripcion.docenteProfesion ?? '—') : (inscripcion.carrera ? inscripcion.carrera.nombre : '—') }}
                             </td>
-                            <td data-label="Estado">
+                            <td class="gestion-col--center" data-label="Estado">
                                 <span class="gestion-badge gestion-badge--{{ estadoClass[inscripcion.estado] ?? 'borrador' }}">{{ inscripcion.estado|lower|capitalize }}</span>
+                                {% if inscripcion.anulacionSolicitada %}
+                                    <span class="gestion-badge gestion-badge--inactiva" title="El postulante solicito anular">Anulacion solicitada</span>
+                                {% endif %}
                             </td>
-                            <td data-label="Documentos">
+                            <td class="gestion-col--center" data-label="Documentos">
                                 {% if resumen.total == 0 %}
                                     <span class="gestion-table__meta">Sin documentos</span>
                                 {% else %}

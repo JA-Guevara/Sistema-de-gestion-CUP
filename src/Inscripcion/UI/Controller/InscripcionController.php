@@ -6,18 +6,27 @@ namespace App\Inscripcion\UI\Controller;
 
 use App\Auth\Entity\User;
 use App\Auth\Infrastructure\Persistence\UserRepository;
+use App\Auth\Infrastructure\Security\CsrfManager;
 use App\Gestion\Domain\Catalog\EstadoGestion;
 use App\Gestion\Infrastructure\Persistence\GestionRepository;
 use App\Inscripcion\Application\DTO\InscripcionEditInput;
 use App\Inscripcion\Application\DTO\InscripcionesBulkInput;
 use App\Inscripcion\Application\DTO\RechazarInscripcionesBulkInput;
 use App\Inscripcion\Application\UseCase\ActualizarInscripcion;
+use App\Inscripcion\Application\UseCase\AgendarEntrevista;
 use App\Inscripcion\Application\UseCase\AgendarRevision;
+use App\Inscripcion\Application\UseCase\AnularInscripcion;
 use App\Inscripcion\Application\UseCase\BuscarPostulante;
+use App\Inscripcion\Application\UseCase\EditarBorrador;
+use App\Inscripcion\Application\UseCase\RechazarSolicitudAnulacion;
+use App\Inscripcion\Application\UseCase\SolicitarAnulacion;
+use App\Inscripcion\Application\UseCase\ConfirmarInscripcion;
 use App\Inscripcion\Application\UseCase\CrearInscripcion;
 use App\Inscripcion\Application\UseCase\EliminarDocumento;
 use App\Inscripcion\Application\UseCase\EliminarInscripcion;
 use App\Inscripcion\Application\UseCase\ListInscripciones;
+use App\Inscripcion\Application\UseCase\PagarInscripcion;
+use App\Inscripcion\Application\UseCase\PresentarInscripcion;
 use App\Inscripcion\Application\UseCase\RechazarInscripcion;
 use App\Inscripcion\Application\UseCase\RechazarInscripcionesBulk;
 use App\Inscripcion\Application\UseCase\RevisarDocumento;
@@ -38,6 +47,8 @@ use Symfony\Component\Routing\Attribute\Route;
 final class InscripcionController extends AbstractController
 {
     private const SESSION_USER_KEY = 'auth_user_id';
+    private const CSRF_INTENTION = 'inscripcion';
+    private const CSRF_ERROR = 'La sesion expiro o el formulario no es valido. Vuelve a intentarlo.';
 
     public function __construct(
         private readonly CrearInscripcion $crearInscripcion,
@@ -53,9 +64,18 @@ final class InscripcionController extends AbstractController
         private readonly RechazarInscripcion $rechazarInscripcion,
         private readonly ValidarInscripcionesBulk $validarInscripcionesBulk,
         private readonly RechazarInscripcionesBulk $rechazarInscripcionesBulk,
+        private readonly AgendarEntrevista $agendarEntrevista,
+        private readonly ConfirmarInscripcion $confirmarInscripcion,
+        private readonly PagarInscripcion $pagarInscripcion,
+        private readonly PresentarInscripcion $presentarInscripcion,
+        private readonly EditarBorrador $editarBorrador,
+        private readonly AnularInscripcion $anularInscripcion,
+        private readonly SolicitarAnulacion $solicitarAnulacion,
+        private readonly RechazarSolicitudAnulacion $rechazarSolicitudAnulacion,
         private readonly RevisarDocumento $revisarDocumento,
         private readonly UserRepository $users,
         private readonly GestionRepository $gestiones,
+        private readonly CsrfManager $csrf,
     ) {
     }
 
@@ -71,6 +91,7 @@ final class InscripcionController extends AbstractController
             'user' => $user,
             'postulaciones' => $this->verInscripcion->listByUser($user),
             'gestion' => $this->gestiones->findActive(),
+            'csrf_token' => $this->csrf->issue(self::CSRF_INTENTION),
         ]);
     }
 
@@ -99,7 +120,196 @@ final class InscripcionController extends AbstractController
         return $this->render('@inscripcion/detalle.html.twig', [
             'inscripcion' => $inscripcion,
             'user' => $user,
+            'csrf_token' => $this->csrf->issue(self::CSRF_INTENTION),
         ]);
+    }
+
+    #[Route('/pagar/{id}', name: 'inscripcion_pagar', methods: ['POST'])]
+    public function pagar(Request $request, int $id): RedirectResponse
+    {
+        $user = $this->currentUser($request);
+        if ($user === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToRoute('inscripcion_ver', ['id' => $id]);
+        }
+
+        try {
+            $this->pagarInscripcion->execute($id, (int) $user->id);
+            $this->addFlash('success', 'Pago registrado. Tu inscripcion fue confirmada: ya eres estudiante del CUP.');
+        } catch (InscripcionException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('inscripcion_ver', ['id' => $id]);
+    }
+
+    #[Route('/presentar/{id}', name: 'inscripcion_presentar', methods: ['POST'])]
+    public function presentar(Request $request, int $id): RedirectResponse
+    {
+        $user = $this->currentUser($request);
+        if ($user === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToRoute('inscripcion_ver', ['id' => $id]);
+        }
+
+        try {
+            $this->presentarInscripcion->execute($id, (int) $user->id);
+            $this->addFlash('success', 'Pre-inscripcion presentada. Te asignaremos fecha para la validacion de documentos.');
+        } catch (InscripcionException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('inscripcion_ver', ['id' => $id]);
+    }
+
+    #[Route('/borrador/{id}/eliminar', name: 'inscripcion_borrador_eliminar', methods: ['POST'])]
+    public function eliminarBorrador(Request $request, int $id): RedirectResponse
+    {
+        $user = $this->currentUser($request);
+        if ($user === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToRoute('inscripcion_index');
+        }
+
+        try {
+            $inscripcion = $this->verInscripcion->executeById($id);
+            if ($inscripcion->user->id !== $user->id) {
+                throw new InscripcionException('No puedes descartar una postulacion que no es tuya.');
+            }
+            if (!$inscripcion->isBorrador()) {
+                throw new InscripcionException('Solo puedes descartar un borrador.');
+            }
+            $this->eliminarInscripcion->execute($id, (int) $user->id);
+            $this->addFlash('success', 'Borrador descartado.');
+        } catch (InscripcionException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('inscripcion_index');
+    }
+
+    #[Route('/borrador/{id}/editar', name: 'inscripcion_borrador_editar', methods: ['GET', 'POST'])]
+    public function editarBorrador(Request $request, int $id): Response
+    {
+        $user = $this->currentUser($request);
+        if ($user === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        try {
+            $inscripcion = $this->verInscripcion->executeById($id);
+        } catch (InscripcionException $e) {
+            $this->addFlash('error', $e->getMessage());
+
+            return $this->redirectToRoute('inscripcion_index');
+        }
+
+        if ($inscripcion->user->id !== $user->id) {
+            $this->addFlash('error', 'No puedes editar esa postulacion.');
+
+            return $this->redirectToRoute('inscripcion_index');
+        }
+
+        if (!$inscripcion->puedeEditarse()) {
+            $this->addFlash('error', 'Solo puedes editar un borrador.');
+
+            return $this->redirectToRoute('inscripcion_ver', ['id' => $id]);
+        }
+
+        $gestion = $this->gestiones->findActive();
+
+        if (!$request->isMethod('POST')) {
+            return $this->renderFormulario($request, $user, $gestion, $inscripcion);
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->renderFormulario($request, $user, $gestion, $inscripcion);
+        }
+
+        try {
+            $this->editarBorrador->execute($id, InscripcionRequest::fromRequest($request), (int) $user->id);
+            $this->addFlash('success', 'Borrador actualizado.');
+
+            return $this->redirectToRoute('inscripcion_ver', ['id' => $id]);
+        } catch (InscripcionException $e) {
+            $this->addFlash('error', $e->getMessage());
+
+            return $this->renderFormulario($request, $user, $gestion, $inscripcion);
+        }
+    }
+
+    #[Route('/anular/{id}', name: 'inscripcion_anular', methods: ['POST'])]
+    public function anular(Request $request, int $id): RedirectResponse
+    {
+        $user = $this->currentUser($request);
+        if ($user === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToRoute('inscripcion_ver', ['id' => $id]);
+        }
+
+        try {
+            $inscripcion = $this->verInscripcion->executeById($id);
+            if ($inscripcion->user->id !== $user->id) {
+                throw new InscripcionException('No puedes anular una postulacion que no es tuya.');
+            }
+            if (!$inscripcion->isPresentada()) {
+                throw new InscripcionException('Solo puedes anular directamente una postulacion presentada. Si ya fue validada o confirmada, solicita la anulacion.');
+            }
+            $this->anularInscripcion->execute($id, (int) $user->id);
+            $this->addFlash('success', 'Postulacion anulada.');
+        } catch (InscripcionException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('inscripcion_ver', ['id' => $id]);
+    }
+
+    #[Route('/solicitar-anulacion/{id}', name: 'inscripcion_solicitar_anulacion', methods: ['POST'])]
+    public function solicitarAnulacion(Request $request, int $id): RedirectResponse
+    {
+        $user = $this->currentUser($request);
+        if ($user === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToRoute('inscripcion_ver', ['id' => $id]);
+        }
+
+        $motivo = self::nullableString($request->request->get('motivo'));
+
+        try {
+            $this->solicitarAnulacion->execute($id, (int) $user->id, $motivo);
+            $this->addFlash('success', 'Solicitud de anulacion enviada. La administracion la revisara.');
+        } catch (InscripcionException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('inscripcion_ver', ['id' => $id]);
     }
 
     #[Route('/formulario', name: 'inscripcion_formulario', methods: ['GET', 'POST'])]
@@ -113,6 +323,12 @@ final class InscripcionController extends AbstractController
         $gestion = $this->gestiones->findActive();
 
         if (!$request->isMethod('POST')) {
+            return $this->renderFormulario($request, $user, $gestion);
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
             return $this->renderFormulario($request, $user, $gestion);
         }
 
@@ -161,6 +377,18 @@ final class InscripcionController extends AbstractController
                 'inscripcion' => $inscripcion,
                 'carreras' => $carrerasDisponibles,
                 'user' => $user,
+                'csrf_token' => $this->csrf->issue(self::CSRF_INTENTION),
+            ]);
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->render('@inscripcion/edit.html.twig', [
+                'inscripcion' => $inscripcion,
+                'carreras' => $carrerasDisponibles,
+                'user' => $user,
+                'csrf_token' => $this->csrf->issue(self::CSRF_INTENTION),
             ]);
         }
 
@@ -190,6 +418,7 @@ final class InscripcionController extends AbstractController
                 'inscripcion' => $inscripcion,
                 'carreras' => $carrerasDisponibles,
                 'user' => $user,
+                'csrf_token' => $this->csrf->issue(self::CSRF_INTENTION),
             ]);
         }
     }
@@ -199,6 +428,12 @@ final class InscripcionController extends AbstractController
     {
         if ($this->currentUser($request) === null) {
             return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToRoute('inscripcion_admin');
         }
 
         try {
@@ -216,6 +451,12 @@ final class InscripcionController extends AbstractController
     {
         if ($this->currentUser($request) === null) {
             return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $id]);
         }
 
         try {
@@ -243,14 +484,22 @@ final class InscripcionController extends AbstractController
             return $this->redirectToRoute('auth_login');
         }
 
+        $referer = $request->headers->get('referer');
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $referer !== null
+                ? $this->redirect($referer)
+                : $this->redirectToRoute('inscripcion_admin');
+        }
+
         try {
             $this->eliminarDocumento->execute($documentoId, $this->actorUserId($request));
             $this->addFlash('success', 'Documento eliminado correctamente.');
         } catch (DocumentoException $e) {
             $this->addFlash('error', $e->getMessage());
         }
-
-        $referer = $request->headers->get('referer');
 
         return $referer !== null
             ? $this->redirect($referer)
@@ -281,6 +530,7 @@ final class InscripcionController extends AbstractController
             'gestion' => $gestion,
             'gestiones' => $gestiones,
             'user' => $this->currentUser($request),
+            'csrf_token' => $this->csrf->issue(self::CSRF_INTENTION),
         ]);
     }
 
@@ -302,6 +552,7 @@ final class InscripcionController extends AbstractController
             'gestion' => $this->gestiones->findActive(),
             'gestiones' => $this->gestiones->listAll(),
             'user' => $this->currentUser($request),
+            'csrf_token' => $this->csrf->issue(self::CSRF_INTENTION),
         ]);
     }
 
@@ -310,6 +561,12 @@ final class InscripcionController extends AbstractController
     {
         if ($this->currentUser($request) === null) {
             return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToGestion($request);
         }
 
         $ids = array_map('intval', (array) $request->request->all('inscripciones'));
@@ -335,6 +592,12 @@ final class InscripcionController extends AbstractController
     {
         if ($this->currentUser($request) === null) {
             return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToGestion($request);
         }
 
         $ids = array_map('intval', (array) $request->request->all('inscripciones'));
@@ -365,6 +628,7 @@ final class InscripcionController extends AbstractController
             return $this->render('@inscripcion/admin_detalle.html.twig', [
                 'inscripcion' => $inscripcion,
                 'user' => $this->currentUser($request),
+                'csrf_token' => $this->csrf->issue(self::CSRF_INTENTION),
             ]);
         } catch (InscripcionException $e) {
             $this->addFlash('error', $e->getMessage());
@@ -378,6 +642,12 @@ final class InscripcionController extends AbstractController
     {
         if ($this->currentUser($request) === null) {
             return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $id]);
         }
 
         $fechaStr = trim((string) $request->request->get('fecha', ''));
@@ -406,6 +676,12 @@ final class InscripcionController extends AbstractController
             return $this->redirectToRoute('auth_login');
         }
 
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $id]);
+        }
+
         try {
             $this->validarInscripcion->execute($id, $this->actorUserId($request));
             $this->addFlash('success', 'Documentacion validada. Continua con la confirmacion.');
@@ -423,11 +699,118 @@ final class InscripcionController extends AbstractController
             return $this->redirectToRoute('auth_login');
         }
 
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $id]);
+        }
+
         $motivo = self::nullableString($request->request->get('motivo'));
 
         try {
             $this->rechazarInscripcion->execute($id, $motivo, $this->actorUserId($request));
             $this->addFlash('success', 'Postulacion rechazada.');
+        } catch (InscripcionException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $id]);
+    }
+
+    #[Route('/admin/{id}/entrevista', name: 'inscripcion_admin_entrevista', methods: ['POST'])]
+    public function entrevista(Request $request, int $id): RedirectResponse
+    {
+        if ($this->currentUser($request) === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $id]);
+        }
+
+        $fechaStr = trim((string) $request->request->get('fecha', ''));
+        if ($fechaStr === '') {
+            $this->addFlash('error', 'Indica una fecha y hora para la entrevista.');
+
+            return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $id]);
+        }
+
+        try {
+            $this->agendarEntrevista->execute($id, new \DateTimeImmutable($fechaStr), $this->actorUserId($request));
+            $this->addFlash('success', 'Entrevista agendada.');
+        } catch (InscripcionException $e) {
+            $this->addFlash('error', $e->getMessage());
+        } catch (\Exception) {
+            $this->addFlash('error', 'La fecha indicada no es valida.');
+        }
+
+        return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $id]);
+    }
+
+    #[Route('/admin/{id}/confirmar', name: 'inscripcion_admin_confirmar', methods: ['POST'])]
+    public function confirmar(Request $request, int $id): RedirectResponse
+    {
+        if ($this->currentUser($request) === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $id]);
+        }
+
+        try {
+            $this->confirmarInscripcion->execute($id, $this->actorUserId($request));
+            $this->addFlash('success', 'Postulacion confirmada y rol asignado.');
+        } catch (InscripcionException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $id]);
+    }
+
+    #[Route('/admin/{id}/anular', name: 'inscripcion_admin_anular', methods: ['POST'])]
+    public function adminAnular(Request $request, int $id): RedirectResponse
+    {
+        if ($this->currentUser($request) === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $id]);
+        }
+
+        try {
+            $this->anularInscripcion->execute($id, $this->actorUserId($request));
+            $this->addFlash('success', 'Postulacion anulada.');
+        } catch (InscripcionException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $id]);
+    }
+
+    #[Route('/admin/{id}/anulacion-rechazar', name: 'inscripcion_admin_anulacion_rechazar', methods: ['POST'])]
+    public function adminRechazarAnulacion(Request $request, int $id): RedirectResponse
+    {
+        if ($this->currentUser($request) === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $id]);
+        }
+
+        try {
+            $this->rechazarSolicitudAnulacion->execute($id, $this->actorUserId($request));
+            $this->addFlash('success', 'Solicitud de anulacion descartada.');
         } catch (InscripcionException $e) {
             $this->addFlash('error', $e->getMessage());
         }
@@ -442,9 +825,16 @@ final class InscripcionController extends AbstractController
             return $this->redirectToRoute('auth_login');
         }
 
+        $inscripcionId = (int) $request->request->get('inscripcionId', 0);
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $inscripcionId]);
+        }
+
         $estado = strtoupper(trim((string) $request->request->get('estado', '')));
         $observacion = self::nullableString($request->request->get('observacion'));
-        $inscripcionId = (int) $request->request->get('inscripcionId', 0);
 
         try {
             $this->revisarDocumento->execute($documentoId, $estado, $observacion, $this->actorUserId($request));
@@ -456,7 +846,7 @@ final class InscripcionController extends AbstractController
         return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $inscripcionId]);
     }
 
-    private function renderFormulario(Request $request, User $user, ?\App\Gestion\Domain\Entity\Gestion $gestion): Response
+    private function renderFormulario(Request $request, User $user, ?\App\Gestion\Domain\Entity\Gestion $gestion, ?\App\Inscripcion\Domain\Entity\Inscripcion $inscripcion = null): Response
     {
         $carrerasDisponibles = [];
         $inscripcionAbierta = false;
@@ -470,11 +860,18 @@ final class InscripcionController extends AbstractController
             }
         }
 
+        // En modo edicion de un borrador siempre se muestra el formulario.
+        if ($inscripcion !== null) {
+            $inscripcionAbierta = true;
+        }
+
         return $this->render('@inscripcion/formulario.html.twig', [
             'user' => $user,
             'gestion' => $gestion,
             'carreras' => $carrerasDisponibles,
             'inscripcionAbierta' => $inscripcionAbierta,
+            'inscripcion' => $inscripcion,
+            'csrf_token' => $this->csrf->issue(self::CSRF_INTENTION),
         ]);
     }
 
@@ -490,6 +887,18 @@ final class InscripcionController extends AbstractController
     private static function nullableString(mixed $value): ?string
     {
         return is_string($value) && trim($value) !== '' ? trim($value) : null;
+    }
+
+    /**
+     * Valida el token CSRF enviado por el formulario contra el emitido en sesion.
+     * Mismo patron que el modulo Auth (CsrfManager, uso unico por intencion).
+     */
+    private function isCsrfValid(Request $request): bool
+    {
+        return $this->csrf->validate(
+            self::CSRF_INTENTION,
+            (string) $request->request->get('_csrf_token', ''),
+        );
     }
 
     private function actorUserId(Request $request): ?int

@@ -1,19 +1,27 @@
 {% extends 'app_base.html.twig' %}
 
-{% block title %}Pre-inscripcion CUP · {{ parent() }}{% endblock %}
+{% set ins = inscripcion|default(null) %}
+{% set vTipo = ins ? ins.tipo : (app.request.query.get('tipo') == 'DOCENTE' ? 'DOCENTE' : 'ESTUDIANTE') %}
+{% set vModalidad = ins ? ins.modalidad : 'PRESENCIAL' %}
+{% set vSexo = ins ? ins.sexo : '' %}
+{% set vTurno = ins ? ins.turnoPreferencia : '' %}
+{% set vCarrera = ins and ins.carrera ? ins.carrera.id : 0 %}
+{% set vCarrera2 = ins and ins.carreraSegunda ? ins.carreraSegunda.id : 0 %}
+
+{% block title %}{{ ins ? 'Editar borrador' : 'Pre-inscripcion CUP' }} · {{ parent() }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=15">
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">
 {% endblock %}
 
 {% block app_content %}
     <section class="gestion-head">
         <div>
             <p class="gestion-eyebrow">CUP FICCT</p>
-            <h1 class="app-content__title">Pre-inscripcion CUP</h1>
+            <h1 class="app-content__title">{{ ins ? 'Editar borrador' : 'Pre-inscripcion CUP' }}</h1>
         </div>
-        <a class="gestion-button" href="{{ path('home') }}">Cancelar</a>
+        <a class="gestion-button" href="{{ ins ? path('inscripcion_ver', {id: ins.id}) : path('inscripcion_index') }}">Cancelar</a>
     </section>
 
     {% include '@gestion/partials/_flash.html.twig' %}
@@ -28,6 +36,7 @@
         </p>
 
         <form method="post" class="gestion-form" data-gestion-wizard>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
             <div class="gestion-wizard">
                 <ol class="gestion-wizard__steps" aria-label="Pasos de la pre-inscripcion">
                     <li class="gestion-wizard__step" data-wizard-step><span>1</span> Tipo</li>
@@ -42,14 +51,14 @@
                     <div class="gestion-grid">
                         <label>Postulo como
                             <select name="tipo" id="tipoPostulacion" required>
-                                <option value="ESTUDIANTE" {{ app.request.query.get('tipo') != 'DOCENTE' ? 'selected' : '' }}>Estudiante (recibir clases del CUP)</option>
-                                <option value="DOCENTE" {{ app.request.query.get('tipo') == 'DOCENTE' ? 'selected' : '' }}>Docente (dictar clases en el CUP)</option>
+                                <option value="ESTUDIANTE" {{ vTipo != 'DOCENTE' ? 'selected' : '' }}>Estudiante (recibir clases del CUP)</option>
+                                <option value="DOCENTE" {{ vTipo == 'DOCENTE' ? 'selected' : '' }}>Docente (dictar clases en el CUP)</option>
                             </select>
                         </label>
                         <label>Modalidad
                             <select name="modalidad">
-                                <option value="PRESENCIAL">Presencial</option>
-                                <option value="VIRTUAL">Virtual</option>
+                                <option value="PRESENCIAL" {{ vModalidad == 'PRESENCIAL' ? 'selected' : '' }}>Presencial</option>
+                                <option value="VIRTUAL" {{ vModalidad == 'VIRTUAL' ? 'selected' : '' }}>Virtual</option>
                             </select>
                         </label>
                     </div>
@@ -60,42 +69,42 @@
                     <h2>Datos personales</h2>
                     <div class="gestion-grid">
                         <label>CI <span style="color:#9b1c1c">*</span>
-                            <input type="text" name="ci" maxlength="20" required>
+                            <input type="text" name="ci" maxlength="20" value="{{ ins ? ins.ci : '' }}" required>
                         </label>
                         <label>Fecha de nacimiento <span style="color:#9b1c1c">*</span>
-                            <input type="date" name="fechaNacimiento" required>
+                            <input type="date" name="fechaNacimiento" value="{{ ins ? ins.fechaNacimiento|date('Y-m-d') : '' }}" required>
                         </label>
                     </div>
                     <div class="gestion-grid">
                         <label>Nombres <span style="color:#9b1c1c">*</span>
-                            <input type="text" name="nombres" maxlength="120" value="{{ user.firstName }}" required>
+                            <input type="text" name="nombres" maxlength="120" value="{{ ins ? ins.nombres : user.firstName }}" required>
                         </label>
                         <label>Apellidos <span style="color:#9b1c1c">*</span>
-                            <input type="text" name="apellidos" maxlength="120" value="{{ user.lastName }}" required>
+                            <input type="text" name="apellidos" maxlength="120" value="{{ ins ? ins.apellidos : user.lastName }}" required>
                         </label>
                     </div>
                     <div class="gestion-grid">
                         <label>Sexo <span style="color:#9b1c1c">*</span>
                             <select name="sexo" required>
                                 <option value="">Seleccionar</option>
-                                <option value="M">Masculino</option>
-                                <option value="F">Femenino</option>
+                                <option value="M" {{ vSexo == 'M' ? 'selected' : '' }}>Masculino</option>
+                                <option value="F" {{ vSexo == 'F' ? 'selected' : '' }}>Femenino</option>
                             </select>
                         </label>
                         <label>Telefono
-                            <input type="tel" name="telefono" maxlength="20">
+                            <input type="tel" name="telefono" maxlength="20" value="{{ ins ? ins.telefono : '' }}">
                         </label>
                     </div>
                     <div class="gestion-grid">
                         <label>Correo electronico <span style="color:#9b1c1c">*</span>
-                            <input type="email" name="email" maxlength="180" value="{{ user.email }}" required>
+                            <input type="email" name="email" maxlength="180" value="{{ ins ? ins.email : user.email }}" required>
                         </label>
                         <label>Ciudad
-                            <input type="text" name="ciudad" maxlength="80">
+                            <input type="text" name="ciudad" maxlength="80" value="{{ ins ? ins.ciudad : '' }}">
                         </label>
                     </div>
                     <label>Direccion
-                        <textarea name="direccion" rows="2"></textarea>
+                        <textarea name="direccion" rows="2">{{ ins ? ins.direccion : '' }}</textarea>
                     </label>
                 </section>
 
@@ -110,7 +119,7 @@
                                 <select name="carrera">
                                     <option value="">Seleccionar</option>
                                     {% for carrera in carreras %}
-                                        <option value="{{ carrera.id }}">{{ carrera.nombre }} ({{ carrera.codigo }})</option>
+                                        <option value="{{ carrera.id }}" {{ vCarrera == carrera.id ? 'selected' : '' }}>{{ carrera.nombre }} ({{ carrera.codigo }})</option>
                                     {% endfor %}
                                 </select>
                             </label>
@@ -118,40 +127,40 @@
                                 <select name="carreraSegunda">
                                     <option value="">Sin segunda opcion</option>
                                     {% for carrera in carreras %}
-                                        <option value="{{ carrera.id }}">{{ carrera.nombre }} ({{ carrera.codigo }})</option>
+                                        <option value="{{ carrera.id }}" {{ vCarrera2 == carrera.id ? 'selected' : '' }}>{{ carrera.nombre }} ({{ carrera.codigo }})</option>
                                     {% endfor %}
                                 </select>
                             </label>
                         </div>
                         <div class="gestion-grid">
                             <label>Colegio de procedencia
-                                <input type="text" name="colegioProcedencia" maxlength="120">
+                                <input type="text" name="colegioProcedencia" maxlength="120" value="{{ ins ? ins.colegioProcedencia : '' }}">
                             </label>
                             <label>Turno de preferencia
                                 <select name="turnoPreferencia">
                                     <option value="">Indiferente</option>
-                                    <option value="MANANA">Manana</option>
-                                    <option value="TARDE">Tarde</option>
-                                    <option value="NOCHE">Noche</option>
+                                    <option value="MANANA" {{ vTurno == 'MANANA' ? 'selected' : '' }}>Manana</option>
+                                    <option value="TARDE" {{ vTurno == 'TARDE' ? 'selected' : '' }}>Tarde</option>
+                                    <option value="NOCHE" {{ vTurno == 'NOCHE' ? 'selected' : '' }}>Noche</option>
                                 </select>
                             </label>
                         </div>
                         <div class="gestion-checks">
-                            <label><input type="checkbox" name="tituloBachiller" value="1"> <span>Poseo titulo de bachiller</span></label>
+                            <label><input type="checkbox" name="tituloBachiller" value="1" {{ ins and ins.tituloBachiller ? 'checked' : '' }}> <span>Poseo titulo de bachiller</span></label>
                         </div>
                     </div>
 
                     <div data-seccion="docente" hidden>
                         <p class="gestion-panel__hint" style="padding:0 0 12px">Requisitos: profesional en el area, con maestria y diplomado en educacion superior.</p>
                         <label>Profesion / area <span style="color:#9b1c1c">*</span>
-                            <input type="text" name="docenteProfesion" maxlength="160" placeholder="Ej. Ing. de Sistemas - area de Computacion">
+                            <input type="text" name="docenteProfesion" maxlength="160" value="{{ ins ? ins.docenteProfesion : '' }}" placeholder="Ej. Ing. de Sistemas - area de Computacion">
                         </label>
                         <div class="gestion-checks">
-                            <label><input type="checkbox" name="docenteMaestria" value="1"> <span>Tengo maestria</span></label>
-                            <label><input type="checkbox" name="docenteDiplomado" value="1"> <span>Tengo diplomado en educacion superior</span></label>
+                            <label><input type="checkbox" name="docenteMaestria" value="1" {{ ins and ins.docenteMaestria ? 'checked' : '' }}> <span>Tengo maestria</span></label>
+                            <label><input type="checkbox" name="docenteDiplomado" value="1" {{ ins and ins.docenteDiplomado ? 'checked' : '' }}> <span>Tengo diplomado en educacion superior</span></label>
                         </div>
                         <label>Experiencia / observaciones
-                            <textarea name="docenteExperiencia" rows="3" placeholder="Materias que puedes dictar, anios de experiencia..."></textarea>
+                            <textarea name="docenteExperiencia" rows="3" placeholder="Materias que puedes dictar, anios de experiencia...">{{ ins ? ins.docenteExperiencia : '' }}</textarea>
                         </label>
                     </div>
                 </section>
@@ -160,7 +169,7 @@
                 <section class="gestion-panel" data-wizard-panel>
                     <h2>Otros</h2>
                     <label>Informacion adicional
-                        <textarea name="otros" rows="3" placeholder="Cualquier otro dato relevante..."></textarea>
+                        <textarea name="otros" rows="3" placeholder="Cualquier otro dato relevante...">{{ ins ? ins.otros : '' }}</textarea>
                     </label>
                     <p class="gestion-panel__hint" style="padding:12px 0 0">Al <strong>presentar</strong>, se te asignara una fecha de revision de documentos.</p>
                 </section>

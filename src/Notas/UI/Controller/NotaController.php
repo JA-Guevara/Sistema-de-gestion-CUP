@@ -9,6 +9,8 @@ use App\Academico\Materia\Infrastructure\Persistence\MateriaRepository;
 use App\Auth\Entity\User;
 use App\Auth\Infrastructure\Persistence\UserRepository;
 use App\Gestion\Infrastructure\Persistence\GestionRepository;
+use App\Inscripcion\Domain\Catalog\EstadoInscripcion;
+use App\Inscripcion\Domain\Catalog\TipoPostulacion;
 use App\Inscripcion\Infrastructure\Persistence\InscripcionRepository;
 use App\Notas\Application\DTO\AsignarGrupoInput;
 use App\Notas\Application\DTO\AsignarGruposMasivoInput;
@@ -179,7 +181,8 @@ final class NotaController extends AbstractController
                 $grupoActualPorInscrito[$asignacion->inscripcion->id] = $asignacion->grupo->codigo;
             }
 
-            foreach ($this->inscripciones->listByGestion($gestion->id) as $inscripcion) {
+            $candidatos = $this->inscripciones->listByGestionTipoEstado($gestion->id, TipoPostulacion::ESTUDIANTE, EstadoInscripcion::CONFIRMADA);
+            foreach ($candidatos as $inscripcion) {
                 if (isset($enEsteGrupo[$inscripcion->id])) {
                     continue;
                 }

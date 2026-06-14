@@ -571,7 +571,7 @@
 .gestion-table td {
     border-bottom: 1px solid #eef0f3;
     padding: 12px 14px;
-    text-align: center;
+    text-align: left;
     vertical-align: middle;
     overflow-wrap: anywhere;
 }
@@ -1286,7 +1286,8 @@
    ========================================================================= */
 
 /* ---- Alineacion por columna (desktop) ---- */
-/* Gana sobre el "text-align: center" base por mayor especificidad. */
+/* El default de celda ahora es izquierda (texto legible). Estas clases
+   permiten centrar o tratar columnas numericas donde convenga. */
 .gestion-table th.gestion-col--text,
 .gestion-table td.gestion-col--text {
     text-align: left;
@@ -1299,8 +1300,43 @@
 
 .gestion-table th.gestion-col--num,
 .gestion-table td.gestion-col--num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* ---- Columnas estructurales: siempre centradas ----
+   Seleccion (checkbox) y acciones no dependen del tipo de dato: van
+   centradas en su columna sin tener que marcar cada celda en las vistas. */
+.gestion-table th:has(> .gestion-bulk-check),
+.gestion-table td:has(> .gestion-bulk-check) {
+    text-align: center;
+    width: 44px;
+}
+
+.gestion-table th.gestion-table__actions-cell,
+.gestion-table thead th:last-child:empty {
+    text-align: center;
+}
+
+/* Input de nota (planilla): ancho uniforme, centrado y numeros tabulares.
+   Reemplaza el style="width:5rem" inline para que todas las celdas queden parejas. */
+.gestion-nota-input {
+    width: 4.75rem;
+    min-height: 36px;
+    padding: 6px 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    color: #0f172a;
+    font: inherit;
     text-align: center;
     font-variant-numeric: tabular-nums;
+}
+
+.gestion-nota-input:focus {
+    border-color: #1e3a8a;
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, .12);
+    outline: none;
 }
 
 /* ---- Responsive: cada fila se convierte en una tarjeta "etiqueta: valor" ---- */

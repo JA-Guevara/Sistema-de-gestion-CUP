@@ -2,7 +2,7 @@
 
 {% block title %}Grupos{% endblock %}
 
-{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=13">{% endblock %}
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">{% endblock %}
 
 {% block javascripts %}
     <script src="/assets/gestion/js/gestion-toggle-panel.js?v=9" defer></script>
@@ -142,9 +142,9 @@
                         <th><input class="gestion-bulk-check" type="checkbox" data-bulk-check-all aria-label="Seleccionar grupos visibles"></th>
                         <th>Grupo</th>
                         <th>Nombre</th>
-                        <th>Cupo</th>
-                        <th>Estimados</th>
-                        <th>Estado</th>
+                        <th class="gestion-col--num">Cupo</th>
+                        <th class="gestion-col--num">Estimados</th>
+                        <th class="gestion-col--center">Estado</th>
                         <th class="gestion-table__actions-cell">Acciones</th>
                     </tr>
                 </thead>
@@ -157,9 +157,9 @@
                                 <span class="gestion-table__meta">{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}</span>
                             </td>
                             <td>{{ grupo.nombre }}</td>
-                            <td>{{ grupo.cupo }}</td>
-                            <td>{{ grupo.inscritosEstimados }}</td>
-                            <td><span class="gestion-badge gestion-badge--{{ grupo.estado|lower }}">{{ grupo.estado|lower|capitalize }}</span></td>
+                            <td class="gestion-col--num">{{ grupo.cupo }}</td>
+                            <td class="gestion-col--num">{{ grupo.inscritosEstimados }}</td>
+                            <td class="gestion-col--center"><span class="gestion-badge gestion-badge--{{ grupo.estado|lower }}">{{ grupo.estado|lower|capitalize }}</span></td>
                             <td class="gestion-table__actions-cell">
                                 <div class="gestion-table__actions">
                                     <a class="gestion-action-button gestion-action-button--view" href="{{ path('grupo_show', {id: grupo.id}) }}" aria-label="Ver grupo" title="Ver">

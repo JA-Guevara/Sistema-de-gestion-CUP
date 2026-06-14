@@ -86,4 +86,70 @@ final readonly class InscripcionEvents
             userId: $actorUserId,
         );
     }
+
+    public function presentada(string $ci, ?int $actorUserId): void
+    {
+        $this->audit->log(
+            ModuleCatalog::INSCRIPCIONES,
+            ActionCatalog::STATE_CHANGE,
+            sprintf('Presento la postulacion CI %s.', $ci),
+            entity: sprintf('Inscripcion CI %s', $ci),
+            userId: $actorUserId,
+        );
+    }
+
+    public function entrevistaAgendada(string $ci, \DateTimeImmutable $fecha, ?int $actorUserId): void
+    {
+        $this->audit->log(
+            ModuleCatalog::INSCRIPCIONES,
+            ActionCatalog::REPROGRAM,
+            sprintf('Agendo entrevista del docente CI %s para %s.', $ci, $fecha->format('d/m/Y H:i')),
+            entity: sprintf('Inscripcion CI %s', $ci),
+            userId: $actorUserId,
+        );
+    }
+
+    public function confirmada(string $ci, string $tipo, ?string $rol, ?int $actorUserId): void
+    {
+        $this->audit->log(
+            ModuleCatalog::INSCRIPCIONES,
+            ActionCatalog::APPROVE,
+            sprintf('Confirmo la postulacion CI %s (%s)%s.', $ci, $tipo, $rol !== null ? ' y asigno el rol ' . $rol : ''),
+            entity: sprintf('Inscripcion CI %s', $ci),
+            userId: $actorUserId,
+        );
+    }
+
+    public function anulacionSolicitada(string $ci, ?string $motivo, ?int $actorUserId): void
+    {
+        $this->audit->log(
+            ModuleCatalog::INSCRIPCIONES,
+            ActionCatalog::UPDATE,
+            sprintf('Solicito anular la postulacion CI %s.%s', $ci, $motivo !== null && $motivo !== '' ? ' Motivo: ' . $motivo : ''),
+            entity: sprintf('Inscripcion CI %s', $ci),
+            userId: $actorUserId,
+        );
+    }
+
+    public function solicitudAnulacionRechazada(string $ci, ?int $actorUserId): void
+    {
+        $this->audit->log(
+            ModuleCatalog::INSCRIPCIONES,
+            ActionCatalog::UPDATE,
+            sprintf('Rechazo la solicitud de anulacion de la postulacion CI %s.', $ci),
+            entity: sprintf('Inscripcion CI %s', $ci),
+            userId: $actorUserId,
+        );
+    }
+
+    public function anulada(string $ci, ?int $actorUserId): void
+    {
+        $this->audit->log(
+            ModuleCatalog::INSCRIPCIONES,
+            ActionCatalog::STATE_CHANGE,
+            sprintf('Anulo la postulacion CI %s.', $ci),
+            entity: sprintf('Inscripcion CI %s', $ci),
+            userId: $actorUserId,
+        );
+    }
 }

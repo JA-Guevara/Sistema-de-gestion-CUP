@@ -4,10 +4,22 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=15">
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">
+    <style>
+        .cup-stepper{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+        .cup-step{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:#f1f5f9;color:#64748b;font-weight:700;font-size:13px}
+        .cup-step--done{background:#dbeafe;color:#1e3a8a}
+        .cup-step--current{background:#1e3a8a;color:#fff}
+        .cup-step__num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:rgba(148,163,184,.25);font-size:12px}
+        .cup-step--done .cup-step__num,.cup-step--current .cup-step__num{background:rgba(255,255,255,.3)}
+        .cup-banner{margin:0 0 16px;padding:12px 16px;border-radius:8px;background:#f1f5f9;color:#334155;font-weight:700}
+        .cup-banner--danger{background:#fef2f2;color:#9b1c1c}
+    </style>
 {% endblock %}
 
-{% set estadoClass = {'VALIDADA':'activa','CONFIRMADA':'activa','RECHAZADA':'inactiva','PRESENTADA':'borrador','BORRADOR':'borrador','PENDIENTE':'borrador','COMPLETADA':'activa'} %}
+{% set estadoClass = {'VALIDADA':'activa','CONFIRMADA':'activa','RECHAZADA':'inactiva','ANULADA':'inactiva','PRESENTADA':'borrador','BORRADOR':'borrador','PENDIENTE':'borrador','COMPLETADA':'activa'} %}
+{% set ordenEtapas = {'BORRADOR':0,'PRESENTADA':1,'VALIDADA':2,'CONFIRMADA':3} %}
+{% set etapaActual = ordenEtapas[inscripcion.estado] is defined ? ordenEtapas[inscripcion.estado] : -1 %}
 
 {% block app_content %}
     <section class="gestion-head">
@@ -20,16 +32,70 @@
 
     {% include '@gestion/partials/_flash.html.twig' %}
 
+    {# ---- Linea de etapas ---- #}
+    {% if etapaActual >= 0 %}
+        <div class="cup-stepper">
+            {% for paso in [{'i':0,'l':'Borrador'},{'i':1,'l':'Presentada'},{'i':2,'l':'Validada'},{'i':3,'l':'Confirmada'}] %}
+                <div class="cup-step {{ paso.i < etapaActual ? 'cup-step--done' : (paso.i == etapaActual ? 'cup-step--current' : '') }}">
+                    <span class="cup-step__num">{{ paso.i + 1 }}</span> {{ paso.l }}
+                </div>
+            {% endfor %}
+        </div>
+    {% elseif inscripcion.estado == 'RECHAZADA' %}
+        <div class="cup-banner cup-banner--danger">Postulacion rechazada</div>
+    {% elseif inscripcion.estado == 'ANULADA' %}
+        <div class="cup-banner">Postulacion anulada</div>
+    {% endif %}
+
+    {# ---- BORRADOR: editar / presentar / descartar ---- #}
+    {% if inscripcion.estado == 'BORRADOR' %}
+        <section class="gestion-panel">
+            <div class="gestion-panel__header">
+                <div>
+                    <h2>Borrador sin presentar</h2>
+                    <p class="gestion-panel__hint">Puedes editar todos los datos, presentarla para iniciar la admision, o descartarla.</p>
+                </div>
+            </div>
+            <div class="gestion-actions" style="padding:0 18px 18px">
+                <a class="gestion-button gestion-button--primary" href="{{ path('inscripcion_borrador_editar', {id: inscripcion.id}) }}">Editar</a>
+                <form method="post" action="{{ path('inscripcion_presentar', {id: inscripcion.id}) }}" onsubmit="return confirm('Presentar esta pre-inscripcion? Despues ya no podras editarla.')">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
+                    <button class="gestion-button gestion-button--primary" type="submit">Presentar pre-inscripcion</button>
+                </form>
+                <form method="post" action="{{ path('inscripcion_borrador_eliminar', {id: inscripcion.id}) }}" onsubmit="return confirm('Descartar este borrador? No se puede deshacer.')">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
+                    <button class="gestion-button gestion-button--danger" type="submit">Descartar</button>
+                </form>
+            </div>
+        </section>
+    {% endif %}
+
+    {# ---- Mensajes de etapa ---- #}
     {% if inscripcion.estado == 'RECHAZADA' and inscripcion.motivoRechazo %}
         <section class="gestion-panel">
             <p class="gestion-panel__hint" style="color:#9b1c1c">Tu postulacion fue rechazada. Motivo: {{ inscripcion.motivoRechazo }}</p>
         </section>
-    {% elseif inscripcion.fechaPresentacionDocs %}
+    {% elseif inscripcion.estado == 'PRESENTADA' %}
         <section class="gestion-panel">
-            <p class="gestion-panel__hint">Tienes una cita para revision de documentos: <strong>{{ inscripcion.fechaPresentacionDocs|date('d/m/Y H:i') }}</strong>.</p>
+            <div class="gestion-panel__header">
+                <div>
+                    <h2>En revision</h2>
+                    <p class="gestion-panel__hint">
+                        Tu pre-inscripcion fue presentada y esta en revision de documentos.
+                        {% if inscripcion.fechaPresentacionDocs %} Cita: <strong>{{ inscripcion.fechaPresentacionDocs|date('d/m/Y H:i') }}</strong>.{% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="gestion-actions" style="padding:0 18px 18px">
+                <form method="post" action="{{ path('inscripcion_anular', {id: inscripcion.id}) }}" onsubmit="return confirm('Anular esta postulacion? No se puede deshacer.')">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
+                    <button class="gestion-button gestion-button--danger" type="submit">Anular postulacion</button>
+                </form>
+            </div>
         </section>
     {% endif %}
 
+    {# ---- VALIDADA: billetera (estudiante) / entrevista (docente) ---- #}
     {% if inscripcion.estado == 'VALIDADA' %}
         <section class="gestion-panel">
             <div class="gestion-panel__header">
@@ -44,14 +110,50 @@
                     </p>
                 </div>
             </div>
-            {% if inscripcion.tipo != 'DOCENTE' %}
-                <div class="gestion-actions" style="padding:0 18px 18px">
-                    <button class="gestion-button gestion-button--primary" type="button" disabled title="Pasarela de pago — siguiente fase">Ir a la billetera de pago</button>
-                </div>
-            {% endif %}
+            <div class="gestion-actions" style="padding:0 18px 18px">
+                {% if inscripcion.tipo != 'DOCENTE' %}
+                    <form method="post" action="{{ path('inscripcion_pagar', {id: inscripcion.id}) }}" onsubmit="return confirm('Confirmar el pago (simulado)? Esto confirmara tu inscripcion como estudiante.')">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
+                        <button class="gestion-button gestion-button--primary" type="submit">Pagar y confirmar inscripcion</button>
+                    </form>
+                {% elseif inscripcion.fechaEntrevista %}
+                    <p class="gestion-panel__hint" style="padding:0">Entrevista agendada: <strong>{{ inscripcion.fechaEntrevista|date('d/m/Y H:i') }}</strong>.</p>
+                {% endif %}
+            </div>
         </section>
     {% endif %}
 
+    {# ---- CONFIRMADA ---- #}
+    {% if inscripcion.estado == 'CONFIRMADA' %}
+        <section class="gestion-panel">
+            <div class="gestion-panel__header">
+                <div>
+                    <h2>Inscripcion confirmada</h2>
+                    <p class="gestion-panel__hint" style="color:#166534">&#10003; Felicidades, ya eres {{ inscripcion.tipo == 'DOCENTE' ? 'docente' : 'estudiante' }} del CUP. Tus modulos quedaron habilitados en el menu.</p>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    {# ---- Solicitar anulacion (validada/confirmada) ---- #}
+    {% if inscripcion.estado in ['VALIDADA', 'CONFIRMADA'] %}
+        <section class="gestion-panel">
+            <div class="gestion-panel__header"><div><h2>Anulacion</h2></div></div>
+            <div style="padding:0 18px 18px">
+                {% if inscripcion.anulacionSolicitada %}
+                    <p class="gestion-panel__hint" style="padding:0">Solicitud de anulacion enviada{% if inscripcion.motivoAnulacion %} (motivo: {{ inscripcion.motivoAnulacion }}){% endif %}. La administracion la revisara.</p>
+                {% else %}
+                    <form method="post" action="{{ path('inscripcion_solicitar_anulacion', {id: inscripcion.id}) }}" onsubmit="return confirm('Enviar solicitud de anulacion?')" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
+                        <input type="text" name="motivo" placeholder="Motivo (opcional)" style="min-height:40px;border:1px solid #cbd5e1;border-radius:6px;padding:8px 10px">
+                        <button class="gestion-button gestion-button--danger" type="submit">Solicitar anulacion</button>
+                    </form>
+                {% endif %}
+            </div>
+        </section>
+    {% endif %}
+
+    {# ---- Datos personales ---- #}
     <section class="gestion-panel">
         <div class="gestion-panel__header"><div><h2>{{ inscripcion.nombres }} {{ inscripcion.apellidos }}</h2><p class="gestion-panel__hint">CI {{ inscripcion.ci }} &middot; {{ inscripcion.email }}</p></div></div>
         <div class="gestion-table-wrap">
@@ -78,14 +180,14 @@
             <div class="gestion-table-wrap">
                 <table class="gestion-table gestion-table--stack">
                     <thead>
-                        <tr><th>Documento</th><th>Estado</th><th>Observacion</th></tr>
+                        <tr><th>Documento</th><th class="gestion-col--center">Estado</th><th>Observacion</th></tr>
                     </thead>
                     <tbody>
                         {% for doc in inscripcion.documentos %}
                             {% set docClass = doc.estado == 'APROBADO' ? 'activa' : (doc.estado == 'OBSERVADO' ? 'inactiva' : 'borrador') %}
                             <tr>
                                 <td class="gestion-col--text" data-label="Documento"><a href="/{{ doc.archivoRuta }}" target="_blank">{{ doc.nombre }}</a></td>
-                                <td data-label="Estado"><span class="gestion-badge gestion-badge--{{ docClass }}">{{ doc.estado|lower|capitalize }}</span></td>
+                                <td class="gestion-col--center" data-label="Estado"><span class="gestion-badge gestion-badge--{{ docClass }}">{{ doc.estado|lower|capitalize }}</span></td>
                                 <td class="gestion-col--text" data-label="Observacion">{{ doc.observacion ?? '—' }}</td>
                             </tr>
                         {% endfor %}

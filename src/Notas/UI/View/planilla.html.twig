@@ -2,7 +2,7 @@
 
 {% block title %}Planilla de notas{% endblock %}
 
-{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=14">{% endblock %}
+{% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">{% endblock %}
 
 {% block javascripts %}<script src="/assets/gestion/js/gestion-filters.js?v=9" defer></script>{% endblock %}
 
@@ -56,14 +56,14 @@
                 <table class="gestion-table" data-gestion-filter-table="planilla">
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th class="gestion-col--num">#</th>
                             <th>CI</th>
                             <th>Estudiante</th>
                             {% for examen in 1..cantidadExamenes %}
-                                <th>Examen {{ examen }}</th>
+                                <th class="gestion-col--center">Examen {{ examen }}</th>
                             {% endfor %}
-                            <th>Promedio</th>
-                            <th>Estado</th>
+                            <th class="gestion-col--num">Promedio</th>
+                            <th class="gestion-col--center">Estado</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -72,19 +72,19 @@
                             <tr data-filter-row
                                 data-filter-texto="{{ fila.inscripcion.ci }} {{ fila.inscripcion.apellidos }} {{ fila.inscripcion.nombres }}"
                                 data-filter-estado="{{ estadoFila }}">
-                                <td>{{ loop.index }}</td>
+                                <td class="gestion-col--num">{{ loop.index }}</td>
                                 <td>{{ fila.inscripcion.ci }}</td>
                                 <td>{{ fila.inscripcion.apellidos }} {{ fila.inscripcion.nombres }}</td>
                                 {% for examen in 1..cantidadExamenes %}
-                                    <td>
+                                    <td class="gestion-col--center">
                                         <input type="number" min="0" max="100" step="1"
                                                name="nota[{{ fila.inscripcion.id }}][{{ examen }}]"
                                                value="{{ fila.valores[examen] is not null ? fila.valores[examen] : '' }}"
-                                               style="width:5rem">
+                                               class="gestion-nota-input">
                                     </td>
                                 {% endfor %}
-                                <td><strong>{{ fila.promedio is not null ? fila.promedio : '-' }}</strong></td>
-                                <td>
+                                <td class="gestion-col--num"><strong>{{ fila.promedio is not null ? fila.promedio : '-' }}</strong></td>
+                                <td class="gestion-col--center">
                                     {% if fila.aprobado is null %}
                                         <span class="gestion-badge gestion-badge--borrador">Incompleto</span>
                                     {% elseif fila.aprobado %}
