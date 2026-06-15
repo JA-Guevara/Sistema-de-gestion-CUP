@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Dashboard\Application\UseCase;
 
+use App\Inscripcion\Domain\Catalog\EstadoInscripcion;
+use App\Inscripcion\Domain\Catalog\TipoPostulacion;
 use App\Dashboard\Infrastructure\Persistence\ReporteRepository;
 use App\Gestion\Domain\Entity\Gestion;
 
@@ -31,26 +33,64 @@ final readonly class GetReportes
         $cantidadExamenes = $gestion->configuracion?->cantidadExamenes ?? 3;
         $maxPorGrupo = $gestion->configuracion?->maxEstudiantesPorGrupo ?? 70;
 
-        $rows = $this->repo->notasEstudiantes($gestionId, $carreraId, $materiaId, $docenteId);
+        $estudiantesBase = [];
+        foreach ($this->repo->estudiantesDeGestion($gestionId, $carreraId) as $r) {
+            $insId = (int) $r['insId'];
+            $estudiantesBase[$insId] = [
+                'ci' => (string) $r['ci'],
+                'nombres' => (string) $r['nombres'],
+                'apellidos' => (string) $r['apellidos'],
+                'email' => (string) ($r['email'] ?? ''),
+                'carrera' => (string) ($r['carreraNombre'] ?? '—'),
+                'estadoInscripcion' => (string) ($r['estado'] ?? EstadoInscripcion::BORRADOR),
+                'materias' => [],
+                'asignaciones' => [],
+            ];
+        }
 
-        // Agrupar notas por estudiante y materia.
-        $estudiantes = [];
+        $asignaciones = $this->repo->asignacionesEstudianteMateria($gestionId, $carreraId, $materiaId, $docenteId);
         $materiaNombre = [];
+        $grupoNombre = [];
+        foreach ($asignaciones as $a) {
+            $insId = (int) $a['insId'];
+            if (!isset($estudiantesBase[$insId])) {
+                continue;
+            }
+
+            $matId = (int) $a['materiaId'];
+            $materiaNombre[$matId] = (string) $a['materiaNombre'];
+            $grupoNombre[$matId] = (string) $a['grupoCodigo'];
+            $docenteNombre = trim(((string) ($a['lastName'] ?? '')) . ' ' . ((string) ($a['firstName'] ?? '')));
+
+            $estudiantesBase[$insId]['asignaciones'][$matId] = [
+                'materiaId' => $matId,
+                'materia' => (string) $a['materiaNombre'],
+                'grupo' => (string) $a['grupoCodigo'],
+                'docente' => $docenteNombre !== '' ? $docenteNombre : null,
+                'notas' => [],
+            ];
+            $estudiantesBase[$insId]['materias'][$matId] = [];
+        }
+
+        $rows = $this->repo->notasEstudiantes($gestionId, $carreraId, $materiaId, $docenteId);
         foreach ($rows as $r) {
             $insId = (int) $r['insId'];
-            if (!isset($estudiantes[$insId])) {
-                $estudiantes[$insId] = [
-                    'ci' => $r['ci'],
-                    'nombres' => $r['nombres'],
-                    'apellidos' => $r['apellidos'],
-                    'email' => $r['email'] ?? '',
-                    'carrera' => $r['carreraNombre'] ?? '—',
-                    'materias' => [],
-                ];
+            if (!isset($estudiantesBase[$insId])) {
+                continue;
             }
             $matId = (int) $r['materiaId'];
-            $materiaNombre[$matId] = $r['materiaNombre'];
-            $estudiantes[$insId]['materias'][$matId][] = (int) $r['valor'];
+            $materiaNombre[$matId] = (string) $r['materiaNombre'];
+            $estudiantesBase[$insId]['materias'][$matId][] = (int) $r['valor'];
+            if (!isset($estudiantesBase[$insId]['asignaciones'][$matId])) {
+                $estudiantesBase[$insId]['asignaciones'][$matId] = [
+                    'materiaId' => $matId,
+                    'materia' => (string) $r['materiaNombre'],
+                    'grupo' => null,
+                    'docente' => null,
+                    'notas' => [],
+                ];
+            }
+            $estudiantesBase[$insId]['asignaciones'][$matId]['notas'][] = (int) $r['valor'];
         }
 
         $aprobados = 0;
@@ -58,16 +98,23 @@ final readonly class GetReportes
         $incompletos = 0;
         $sumaGlobal = 0;
         $countCompletos = 0;
+        $evaluados = 0;
         $estadoPorIns = [];
         $detalle = [];
         $matAcum = []; // matId => [nombre, sumProm, count, aprob, reprob]
 
-        foreach ($estudiantes as $insId => $e) {
+        foreach ($estudiantesBase as $insId => $e) {
             $promMaterias = [];
             $notasStudent = [];
             $completo = count($e['materias']) > 0;
+            $tieneAsignaciones = $e['asignaciones'] !== [];
 
             foreach ($e['materias'] as $matId => $valores) {
+                if ($valores === []) {
+                    $completo = false;
+                    continue;
+                }
+
                 $promMat = (int) round(array_sum($valores) / count($valores));
                 $promMaterias[] = $promMat;
                 $notasStudent[$materiaNombre[$matId]] = $promMat;
@@ -90,21 +137,26 @@ final readonly class GetReportes
                 }
             }
 
-            $global = $promMaterias !== [] ? (int) round(array_sum($promMaterias) / count($promMaterias)) : 0;
+            $global = $promMaterias !== [] ? (int) round(array_sum($promMaterias) / count($promMaterias)) : null;
 
-            if (!$completo) {
+            if ($global === null) {
                 $estado = 'INCOMPLETO';
                 $incompletos++;
-            } elseif ($global >= $notaMinima) {
+            } elseif ($completo && $global >= $notaMinima) {
                 $estado = 'APROBADO';
                 $aprobados++;
                 $sumaGlobal += $global;
                 $countCompletos++;
-            } else {
+                $evaluados++;
+            } elseif ($completo) {
                 $estado = 'REPROBADO';
                 $reprobados++;
                 $sumaGlobal += $global;
                 $countCompletos++;
+                $evaluados++;
+            } else {
+                $estado = 'INCOMPLETO';
+                $incompletos++;
             }
 
             $estadoPorIns[$insId] = $estado;
@@ -113,10 +165,13 @@ final readonly class GetReportes
                 'nombre' => trim($e['apellidos'] . ' ' . $e['nombres']),
                 'email' => $e['email'],
                 'carrera' => $e['carrera'],
+                'estadoInscripcion' => $e['estadoInscripcion'],
                 'materias' => count($e['materias']),
+                'asignaciones' => array_values($e['asignaciones']),
                 'notas' => $notasStudent,
-                'promedio' => $completo ? $global : null,
+                'promedio' => $global,
                 'estado' => $estado,
+                'tieneAsignaciones' => $tieneAsignaciones,
             ];
         }
 
@@ -184,7 +239,15 @@ final readonly class GetReportes
             'total' => (int) $c['total'],
         ], $this->repo->inscritosPorCarrera($gestionId));
 
-        $totalInscritos = $this->repo->totalInscritosEstudiantes($gestionId, $carreraId);
+        $postulacionesEstudiantes = $this->estadoMap($this->repo->postulacionesPorEstado($gestionId, TipoPostulacion::ESTUDIANTE));
+        $postulacionesDocentes = $this->estadoMap($this->repo->postulacionesPorEstado($gestionId, TipoPostulacion::DOCENTE));
+        $resumenEstudiantes = $this->estadoResumen($postulacionesEstudiantes);
+        $resumenDocentes = $this->estadoResumen($postulacionesDocentes);
+
+        $totalInscritos = $this->repo->totalPostulaciones($gestionId, TipoPostulacion::ESTUDIANTE);
+        $totalDocentesPostulaciones = $this->repo->totalPostulaciones($gestionId, TipoPostulacion::DOCENTE);
+        $totalDocentesConAsignacion = $this->repo->totalDocentes($gestionId);
+        $entrevistasAgendadas = $this->repo->entrevistasDocentesAgendadas($gestionId);
         $gruposHabilitados = $maxPorGrupo > 0 ? (int) ceil($totalInscritos / $maxPorGrupo) : 0;
         $promedioGeneral = $countCompletos > 0 ? (int) round($sumaGlobal / $countCompletos) : 0;
         $pctAprobacion = ($aprobados + $reprobados) > 0 ? round($aprobados / ($aprobados + $reprobados) * 100, 1) : 0;
@@ -201,19 +264,39 @@ final readonly class GetReportes
             ],
             'kpis' => [
                 'inscritos' => $totalInscritos,
-                'evaluados' => count($estudiantes),
+                'evaluados' => $evaluados,
                 'aprobados' => $aprobados,
                 'reprobados' => $reprobados,
                 'incompletos' => $incompletos,
                 'pctAprobacion' => $pctAprobacion,
                 'promedioGeneral' => $promedioGeneral,
                 'grupos' => $gruposHabilitados,
-                'docentes' => $this->repo->totalDocentes($gestionId),
+                'docentes' => $totalDocentesConAsignacion,
+                'postulacionesTotales' => $totalInscritos,
+                'postulacionesAceptadas' => $resumenEstudiantes['aprobados'],
+                'postulacionesRechazadas' => $resumenEstudiantes['rechazados'],
+                'postulacionesPresentadas' => $resumenEstudiantes['presentados'],
+                'postulacionesBorrador' => $resumenEstudiantes['borrador'],
+                'estudiantesAprobados' => $resumenEstudiantes['aprobados'],
+                'estudiantesRechazados' => $resumenEstudiantes['rechazados'],
+                'estudiantesEnProceso' => $resumenEstudiantes['enProceso'],
+                'postulacionesDocentes' => $totalDocentesPostulaciones,
+                'docentesAprobados' => $resumenDocentes['aprobados'],
+                'docentesRechazados' => $resumenDocentes['rechazados'],
+                'docentesEnProceso' => $resumenDocentes['enProceso'],
             ],
             'estadoAprobacion' => [
                 'aprobados' => $aprobados,
                 'reprobados' => $reprobados,
                 'incompletos' => $incompletos,
+            ],
+            'postulaciones' => [
+                'estudiantes' => $postulacionesEstudiantes,
+                'docentes' => $postulacionesDocentes,
+            ],
+            'postulacionesResumen' => [
+                'estudiantes' => $resumenEstudiantes,
+                'docentes' => $resumenDocentes,
             ],
             'promedioPorMateria' => $promedioPorMateria,
             'inscritosPorCarrera' => $inscritosPorCarrera,
@@ -221,12 +304,16 @@ final readonly class GetReportes
             'grupos' => $grupos,
             'docentesPorGrupo' => $docentesPorGrupo,
             'docentes' => [
-                'totalDocentes' => $this->repo->totalDocentes($gestionId),
-                'entrevistasAgendadas' => $this->repo->entrevistasDocentesAgendadas($gestionId),
-                'postulaciones' => array_map(static fn (array $p): array => [
-                    'estado' => (string) $p['estado'],
-                    'total' => (int) $p['total'],
-                ], $this->repo->postulacionesDocentesPorEstado($gestionId)),
+                'totalDocentes' => $totalDocentesConAsignacion,
+                'totalPostulaciones' => $totalDocentesPostulaciones,
+                'aprobados' => $resumenDocentes['aprobados'],
+                'rechazados' => $resumenDocentes['rechazados'],
+                'enProceso' => $resumenDocentes['enProceso'],
+                'entrevistasAgendadas' => $entrevistasAgendadas,
+                'postulaciones' => array_map(static fn (string $estado): array => [
+                    'estado' => $estado,
+                    'total' => (int) ($postulacionesDocentes[$estado] ?? 0),
+                ], array_keys($postulacionesDocentes)),
                 'carga' => array_map(static fn (array $d): array => [
                     'docente' => trim(((string) $d['lastName']) . ' ' . ((string) $d['firstName'])),
                     'materias' => (int) $d['materias'],
@@ -234,6 +321,72 @@ final readonly class GetReportes
                 ], $this->repo->cargaDocentes($gestionId, $docenteId)),
             ],
             'detalle' => $detalle,
+            'postulantes' => [
+                'totalEstudiantes' => $totalInscritos,
+                'totalDocentes' => $totalDocentesPostulaciones,
+                'estudiantes' => array_values($estudiantesBase),
+            ],
+        ];
+    }
+
+    /**
+     * @param list<array{estado:string,total:int|string}> $rows
+     * @return array<string,int>
+     */
+    private function estadoMap(array $rows): array
+    {
+        $map = array_fill_keys($this->estadoOrder(), 0);
+        foreach ($rows as $row) {
+            $estado = (string) $row['estado'];
+            if (array_key_exists($estado, $map)) {
+                $map[$estado] = (int) $row['total'];
+            }
+        }
+
+        return $map;
+    }
+
+    /**
+     * @param array<string,int> $map
+     * @return array{aprobados:int,rechazados:int,enProceso:int,borrador:int,presentados:int}
+     */
+    private function estadoResumen(array $map): array
+    {
+        return [
+            'aprobados' => $this->sumEstados($map, [EstadoInscripcion::CONFIRMADA, EstadoInscripcion::COMPLETADA]),
+            'rechazados' => $this->sumEstados($map, [EstadoInscripcion::RECHAZADA, EstadoInscripcion::ANULADA]),
+            'enProceso' => $this->sumEstados($map, [EstadoInscripcion::PRESENTADA, EstadoInscripcion::VALIDADA, EstadoInscripcion::PENDIENTE]),
+            'borrador' => (int) ($map[EstadoInscripcion::BORRADOR] ?? 0),
+            'presentados' => $this->sumEstados($map, [EstadoInscripcion::PRESENTADA, EstadoInscripcion::VALIDADA, EstadoInscripcion::CONFIRMADA, EstadoInscripcion::COMPLETADA, EstadoInscripcion::PENDIENTE]),
+        ];
+    }
+
+    /**
+     * @param array<string,int> $map
+     * @param list<string> $states
+     */
+    private function sumEstados(array $map, array $states): int
+    {
+        $total = 0;
+        foreach ($states as $state) {
+            $total += (int) ($map[$state] ?? 0);
+        }
+
+        return $total;
+    }
+
+    /** @return list<string> */
+    private function estadoOrder(): array
+    {
+        return [
+            EstadoInscripcion::CONFIRMADA,
+            EstadoInscripcion::VALIDADA,
+            EstadoInscripcion::PRESENTADA,
+            EstadoInscripcion::BORRADOR,
+            EstadoInscripcion::RECHAZADA,
+            EstadoInscripcion::ANULADA,
+            EstadoInscripcion::PENDIENTE,
+            EstadoInscripcion::COMPLETADA,
         ];
     }
 }

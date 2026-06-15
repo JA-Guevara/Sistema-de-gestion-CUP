@@ -21,6 +21,16 @@
     function safeJson(t, fb) { try { return JSON.parse(t || ''); } catch (e) { return fb; } }
     function cap(s) { s = String(s || '').toLowerCase(); return s.charAt(0).toUpperCase() + s.slice(1); }
     function fieldVal(form, f) { var el = form.querySelector('[data-field="' + f + '"]'); return el ? el.value : ''; }
+    var ESTADO_LABEL = {
+        CONFIRMADA: 'Aprobada',
+        COMPLETADA: 'Completada',
+        VALIDADA: 'En pago/entrevista',
+        PRESENTADA: 'En revision',
+        PENDIENTE: 'Pendiente',
+        BORRADOR: 'Borrador',
+        RECHAZADA: 'Rechazada',
+        ANULADA: 'Anulada',
+    };
 
     function filtersOf(form) {
         var o = {};
@@ -77,6 +87,16 @@
         XLSX.utils.book_append_sheet(wb, ws, name);
     }
 
+    function estadoRows(map) {
+        var order = ['CONFIRMADA', 'COMPLETADA', 'VALIDADA', 'PRESENTADA', 'PENDIENTE', 'BORRADOR', 'RECHAZADA', 'ANULADA'];
+        var rows = [['Estado', 'Total']];
+        order.forEach(function (estado) {
+            var total = map && map[estado] ? Number(map[estado]) : 0;
+            rows.push([ESTADO_LABEL[estado] || cap(estado), total]);
+        });
+        return rows;
+    }
+
     function buildXlsx(d, f) {
         var m = d.meta;
         var materias = m.materias || [];
@@ -91,13 +111,25 @@
             ['Nota mínima', m.notaMinima],
             [],
             ['Indicador', 'Valor'],
-            ['Inscritos', k.inscritos], ['Evaluados', k.evaluados],
-            ['Aprobados', k.aprobados], ['Reprobados', k.reprobados],
-            ['Incompletos', k.incompletos], ['% Aprobación', k.pctAprobacion],
+            ['Estudiantes inscritos', k.inscritos],
+            ['Estudiantes aprobados', k.estudiantesAprobados],
+            ['Estudiantes rechazados', k.estudiantesRechazados],
+            ['Estudiantes en proceso', k.estudiantesEnProceso],
+            ['Docentes postulados', k.postulacionesDocentes],
+            ['Docentes aprobados', k.docentesAprobados],
+            ['Docentes rechazados', k.docentesRechazados],
+            ['Docentes en proceso', k.docentesEnProceso],
+            ['Evaluados con notas', k.evaluados],
+            ['Aprobados por notas', k.aprobados],
+            ['Reprobados por notas', k.reprobados],
+            ['Sin notas completas', k.incompletos],
+            ['% aprobacion por notas', k.pctAprobacion],
             ['Promedio general', k.promedioGeneral], ['Grupos habilitados', k.grupos],
-            ['Docentes', k.docentes],
+            ['Docentes asignados', k.docentes],
         ];
         aoaSheet(wb, 'Resumen', res, [{ wch: 22 }, { wch: 36 }], 0);
+        aoaSheet(wb, 'Estados Estudiantes', estadoRows(d.postulaciones && d.postulaciones.estudiantes), [{ wch: 22 }, { wch: 10 }], 8);
+        aoaSheet(wb, 'Estados Docentes', estadoRows(d.postulaciones && d.postulaciones.docentes), [{ wch: 22 }, { wch: 10 }], 8);
 
         // Postulantes (columnas por materia) con autofiltro
         var det = filtrarDetalle(d.detalle, f);

@@ -539,6 +539,7 @@
 
 .rep-kpi__value--ok { color: #166534; }
 .rep-kpi__value--bad { color: #9b1c1c; }
+.rep-kpi__value--warn { color: #92580c; }
 
 /* ---- Grilla de gráficos ---- */
 .rep-grid {

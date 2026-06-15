@@ -281,18 +281,22 @@ select.bitacora-filters__input {
 .bitacora-table thead th {
     position: sticky;
     top: 0;
-    z-index: 2;
+    z-index: 5;
+    background: #f8fafc;
+    box-shadow: inset 0 -1px 0 var(--color-border), 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .bitacora-table th {
-    padding: 12px 14px;
+    height: 44px;
+    padding: 0 14px;
     text-align: left;
     font-size: 11px;
     font-weight: 700;
     color: var(--color-text-muted);
     letter-spacing: 1px;
+    line-height: 1.2;
     text-transform: uppercase;
-    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
     white-space: nowrap;
 }
 

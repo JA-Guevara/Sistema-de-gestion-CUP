@@ -29,6 +29,26 @@
         blue: '#1e3a8a', blueSoft: '#7c9bd6', grid: '#eef0f3', text: '#475569',
     };
     var ESTADO_BADGE = { APROBADO: 'activa', REPROBADO: 'inactiva', INCOMPLETO: 'borrador' };
+    var ESTADO_INSCRIPCION_LABEL = {
+        CONFIRMADA: 'Aprobada',
+        COMPLETADA: 'Completada',
+        VALIDADA: 'En pago/entrevista',
+        PRESENTADA: 'En revision',
+        PENDIENTE: 'Pendiente',
+        BORRADOR: 'Borrador',
+        RECHAZADA: 'Rechazada',
+        ANULADA: 'Anulada',
+    };
+    var ESTADO_INSCRIPCION_COLOR = {
+        CONFIRMADA: COL.ok,
+        COMPLETADA: COL.ok,
+        VALIDADA: COL.blueSoft,
+        PRESENTADA: COL.warn,
+        PENDIENTE: '#94a3b8',
+        BORRADOR: '#cbd5e1',
+        RECHAZADA: COL.bad,
+        ANULADA: '#7f1d1d',
+    };
 
     Chart.defaults.font.family = "'Inter','Segoe UI',system-ui,sans-serif";
     Chart.defaults.color = COL.text;
@@ -39,6 +59,7 @@
     var charts = {};
     var chartsData = initial; // datos de la vista de reportes
     var listData = initial;   // datos de la vista de lista
+    window.__repAssistantFlags = window.__repAssistantFlags || { soloOficiales: false, soloAsignados: false, soloSinAsignados: false, estadoPostulacion: '' };
 
     function safeJson(txt, fb) { try { return JSON.parse(txt || ''); } catch (e) { return fb; } }
     function esc(s) {
@@ -87,6 +108,48 @@
         });
     }
 
+    function estadoInscripcionSeries(map) {
+        var order = ['CONFIRMADA', 'COMPLETADA', 'VALIDADA', 'PRESENTADA', 'PENDIENTE', 'BORRADOR', 'RECHAZADA', 'ANULADA'];
+        var labels = [];
+        var values = [];
+        var colors = [];
+        order.forEach(function (estado) {
+            var value = map && map[estado] ? Number(map[estado]) : 0;
+            if (!value) { return; }
+            labels.push(ESTADO_INSCRIPCION_LABEL[estado] || cap(estado));
+            values.push(value);
+            colors.push(ESTADO_INSCRIPCION_COLOR[estado] || COL.blue);
+        });
+
+        if (!labels.length) {
+            labels.push('Sin registros');
+            values.push(0);
+            colors.push('#e2e8f0');
+        }
+
+        return { labels: labels, values: values, colors: colors };
+    }
+
+    function postulacionesChart(ctx, map) {
+        var s = estadoInscripcionSeries(map || {});
+        return new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: s.labels,
+                datasets: [{ label: 'Postulantes', data: s.values, backgroundColor: s.colors, borderRadius: 5 }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { grid: { display: false }, ticks: { autoSkip: false, maxRotation: 0, minRotation: 0, callback: truncTick(15), font: { size: 11 } } },
+                    y: { beginAtZero: true, grid: { color: COL.grid }, ticks: { precision: 0 } },
+                },
+                plugins: { legend: { display: false } },
+            },
+        });
+    }
+
     function renderKpis(k) {
         document.querySelectorAll('[data-kpi]').forEach(function (el) {
             var key = el.getAttribute('data-kpi');
@@ -117,6 +180,12 @@
                 options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'right' }, tooltip: { callbacks: { label: function (c) { var data = (c.dataset && c.dataset.data) || []; var t = data.reduce(function (a, b) { return a + (b || 0); }, 0); var v = c.parsed || 0; var p = t ? Math.round(v * 100 / t) : 0; return (c.label || '') + ': ' + v + ' (' + p + '%)'; } } } } },
             });
         }
+
+        var pe = canvas('postulacionesEstudiantes');
+        if (pe) { charts.pe = postulacionesChart(pe, (d.postulaciones && d.postulaciones.estudiantes) || {}); }
+
+        var pd = canvas('postulacionesDocentes');
+        if (pd) { charts.pd = postulacionesChart(pd, (d.postulaciones && d.postulaciones.docentes) || {}); }
 
         var pm = canvas('promedioMateria');
         if (pm) {
@@ -184,7 +253,9 @@
         });
         var pe = document.querySelector('[data-doc-postulaciones]');
         if (pe) {
-            var ps = (dd.postulaciones || []).map(function (p) { return cap(p.estado) + ': ' + p.total; });
+            var ps = (dd.postulaciones || [])
+                .filter(function (p) { return Number(p.total || 0) > 0; })
+                .map(function (p) { return (ESTADO_INSCRIPCION_LABEL[p.estado] || cap(p.estado)) + ': ' + p.total; });
             pe.textContent = ps.length ? ps.join(' · ') : 'Sin postulaciones de docente';
         }
         var tb = document.querySelector('[data-doc-tbody]');
@@ -235,9 +306,23 @@
     function listClientFilter(rows) {
         var estado = val('[data-rep-form="list"] [data-field="estado"]');
         var texto = (val('[data-rep-form="list"] [data-field="texto"]') || '').toLowerCase().trim();
+        var flags = window.__repAssistantFlags || {};
+        var soloOficiales = !!flags.soloOficiales;
+        var soloAsignados = !!flags.soloAsignados;
+        var soloSinAsignados = !!flags.soloSinAsignados;
+        var estadoPostulacion = String(flags.estadoPostulacion || '').toUpperCase();
         return (rows || []).filter(function (r) {
             if (estado && r.estado !== estado) { return false; }
             if (texto && ((String(r.ci || '') + ' ' + String(r.nombre || '')).toLowerCase().indexOf(texto) === -1)) { return false; }
+            var ei = String(r.estadoInscripcion || '').toUpperCase();
+            var tieneAsignaciones = !!(r.tieneAsignaciones || Number(r.materias || 0) > 0);
+
+            if (estadoPostulacion && ei !== estadoPostulacion) { return false; }
+            if (soloOficiales) {
+                if (!(ei === 'CONFIRMADA' || ei === 'VALIDADA' || ei === 'COMPLETADA')) { return false; }
+            }
+            if (soloAsignados && !tieneAsignaciones) { return false; }
+            if (soloSinAsignados && tieneAsignaciones) { return false; }
             return true;
         });
     }
@@ -261,7 +346,17 @@
     if (clearCharts) { clearCharts.addEventListener('click', function () { document.querySelectorAll('[data-rep-form="charts"] [data-field]').forEach(function (s) { s.value = ''; }); refreshCharts(); }); }
 
     var clearList = document.querySelector('[data-rep-clear="list"]');
-    if (clearList) { clearList.addEventListener('click', function () { document.querySelectorAll('[data-rep-form="list"] [data-field]').forEach(function (s) { s.value = ''; }); refreshList(); }); }
+    if (clearList) {
+        clearList.addEventListener('click', function () {
+            document.querySelectorAll('[data-rep-form="list"] [data-field]').forEach(function (s) { s.value = ''; });
+            window.__repAssistantFlags = { soloOficiales: false, soloAsignados: false, soloSinAsignados: false, estadoPostulacion: '' };
+            refreshList();
+        });
+    }
+
+    window.addEventListener('rep:assistant-flags-changed', function () {
+        renderList();
+    });
 
     // Carrusel / tabs
     document.querySelectorAll('[data-rep-tab]').forEach(function (btn) {
@@ -306,6 +401,14 @@
 
     // Imprimir / PDF — funciona en ambas vistas: la vista oculta del carrusel
     // no se imprime (CSS @media print), así que se imprime la que se ve.
+    function appendEstadoRows(rows, title, map) {
+        var serie = estadoInscripcionSeries(map || {});
+        rows.push([title]);
+        rows.push(['Estado', 'Cantidad']);
+        serie.labels.forEach(function (label, idx) { rows.push([label, serie.values[idx]]); });
+        rows.push([]);
+    }
+
     document.querySelectorAll('[data-rep-print]').forEach(function (btn) {
         btn.addEventListener('click', function () { window.print(); });
     });
@@ -331,14 +434,22 @@
 
         rows.push(['INDICADORES (KPIs)']);
         rows.push(['Indicador', 'Valor']);
-        rows.push(['Inscritos', d.kpis.inscritos]);
-        rows.push(['Aprobados', d.kpis.aprobados]);
-        rows.push(['Reprobados', d.kpis.reprobados]);
-        rows.push(['Incompletos', d.kpis.incompletos]);
-        rows.push(['% Aprobacion', d.kpis.pctAprobacion + '%']);
+        rows.push(['Estudiantes inscritos', d.kpis.inscritos]);
+        rows.push(['Estudiantes aprobados', d.kpis.estudiantesAprobados]);
+        rows.push(['Estudiantes rechazados', d.kpis.estudiantesRechazados]);
+        rows.push(['Estudiantes en proceso', d.kpis.estudiantesEnProceso]);
+        rows.push(['Docentes postulados', d.kpis.postulacionesDocentes]);
+        rows.push(['Docentes aprobados', d.kpis.docentesAprobados]);
+        rows.push(['Docentes rechazados', d.kpis.docentesRechazados]);
+        rows.push(['Docentes en proceso', d.kpis.docentesEnProceso]);
+        rows.push(['Evaluados con notas', d.kpis.evaluados]);
+        rows.push(['Aprobados por notas', d.kpis.aprobados]);
+        rows.push(['Reprobados por notas', d.kpis.reprobados]);
+        rows.push(['Sin notas completas', d.kpis.incompletos]);
+        rows.push(['% aprobacion por notas', d.kpis.pctAprobacion + '%']);
         rows.push(['Promedio general', d.kpis.promedioGeneral]);
         rows.push(['Grupos habilitados', d.kpis.grupos]);
-        rows.push(['Docentes', d.kpis.docentes]);
+        rows.push(['Docentes asignados', d.kpis.docentes]);
         rows.push([]);
 
         rows.push(['ESTADO DE APROBACION']);
@@ -347,6 +458,9 @@
         rows.push(['Reprobados', d.estadoAprobacion.reprobados]);
         rows.push(['Incompletos', d.estadoAprobacion.incompletos]);
         rows.push([]);
+
+        appendEstadoRows(rows, 'POSTULANTES ESTUDIANTES POR ESTADO', d.postulaciones && d.postulaciones.estudiantes);
+        appendEstadoRows(rows, 'POSTULANTES DOCENTES POR ESTADO', d.postulaciones && d.postulaciones.docentes);
 
         rows.push(['PROMEDIO Y RESULTADO POR MATERIA (min. ' + d.meta.notaMinima + ')']);
         rows.push(['Materia', 'Promedio', 'Aprobados', 'Reprobados']);

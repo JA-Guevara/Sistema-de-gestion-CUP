@@ -28,6 +28,16 @@
     function safeJson(t, fb) { try { return JSON.parse(t || ''); } catch (e) { return fb; } }
     function esc(s) { s = s == null ? '' : String(s); return s.replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
     function cap(s) { s = String(s || '').toLowerCase(); return s.charAt(0).toUpperCase() + s.slice(1); }
+    var ESTADO_INSCRIPCION_LABEL = {
+        CONFIRMADA: 'Aprobada',
+        COMPLETADA: 'Completada',
+        VALIDADA: 'En pago/entrevista',
+        PRESENTADA: 'En revision',
+        PENDIENTE: 'Pendiente',
+        BORRADOR: 'Borrador',
+        RECHAZADA: 'Rechazada',
+        ANULADA: 'Anulada',
+    };
 
     function open() { panel.hidden = false; launcher.setAttribute('aria-expanded', 'true'); if (input) { input.focus(); } }
     function close() { panel.hidden = true; launcher.setAttribute('aria-expanded', 'false'); }
@@ -85,10 +95,22 @@
         if (el && el.value !== val) { el.value = val; }
     }
 
+    function setAssistantFlags(res) {
+        window.__repAssistantFlags = {
+            soloOficiales: !!(res && res.soloOficiales),
+            soloAsignados: !!(res && res.soloAsignados),
+            soloSinAsignados: !!(res && res.soloSinAsignados),
+            estadoPostulacion: String((res && res.estadoPostulacion) || ''),
+        };
+        window.dispatchEvent(new CustomEvent('rep:assistant-flags-changed', { detail: window.__repAssistantFlags }));
+    }
+
     function applyFilters(res) {
         var tab = res.vista === 'reportes' ? 'charts' : 'list';
         var tabBtn = document.querySelector('[data-rep-tab="' + tab + '"]');
         if (tabBtn) { tabBtn.click(); }
+
+        setAssistantFlags(res);
 
         var form = document.querySelector('[data-rep-form="' + tab + '"]');
         if (!form) { return; }
@@ -122,6 +144,10 @@
         var m = chip(form, 'materia', res.materia); if (m) { parts.push({ t: m }); }
         var d = chip(form, 'docente', res.docente); if (d) { parts.push({ t: d }); }
         if (res.estado) { parts.push({ t: cap(res.estado), cls: 'estado' }); }
+        if (res.estadoPostulacion) { parts.push({ t: ESTADO_INSCRIPCION_LABEL[res.estadoPostulacion] || cap(res.estadoPostulacion) }); }
+        if (res.soloOficiales) { parts.push({ t: 'Solo oficiales' }); }
+        if (res.soloAsignados) { parts.push({ t: 'Solo con materias asignadas' }); }
+        if (res.soloSinAsignados) { parts.push({ t: 'Solo sin materias asignadas' }); }
         if (res.texto) { parts.push({ t: '“' + res.texto + '”' }); }
         if (!parts.length) { return; }
 

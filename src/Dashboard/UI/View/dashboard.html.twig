@@ -5,15 +5,15 @@
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">
-    <link rel="stylesheet" href="/assets/gestion/css/reportes.css?v=6">
+    <link rel="stylesheet" href="/assets/gestion/css/reportes.css?v=7">
 {% endblock %}
 
 {% block javascripts %}
     <script src="/assets/vendor/chartjs/chart.umd.min.js?v=4.4.1" defer></script>
-    <script src="/assets/gestion/js/dashboard-reportes.js?v=4" defer></script>
+    <script src="/assets/gestion/js/dashboard-reportes.js?v=5" defer></script>
     <script src="/assets/gestion/js/dashboard-asistente.js?v=1" defer></script>
     <script src="/assets/vendor/sheetjs/xlsx.full.min.js?v=0.18.5" defer></script>
-    <script src="/assets/gestion/js/dashboard-export.js?v=3" defer></script>
+    <script src="/assets/gestion/js/dashboard-export.js?v=4" defer></script>
 {% endblock %}
 
 {% block app_content %}
@@ -91,18 +91,28 @@
             </section>
 
             <div class="rep-kpis">
-                <div class="rep-kpi"><span class="rep-kpi__label">Inscritos</span><span class="rep-kpi__value" data-kpi="inscritos">{{ payload.kpis.inscritos }}</span></div>
-                <div class="rep-kpi"><span class="rep-kpi__label">Aprobados</span><span class="rep-kpi__value rep-kpi__value--ok" data-kpi="aprobados">{{ payload.kpis.aprobados }}</span></div>
-                <div class="rep-kpi"><span class="rep-kpi__label">Reprobados</span><span class="rep-kpi__value rep-kpi__value--bad" data-kpi="reprobados">{{ payload.kpis.reprobados }}</span></div>
-                <div class="rep-kpi"><span class="rep-kpi__label">Incompletos</span><span class="rep-kpi__value" data-kpi="incompletos">{{ payload.kpis.incompletos }}</span></div>
-                <div class="rep-kpi"><span class="rep-kpi__label">% Aprobación</span><span class="rep-kpi__value" data-kpi="pctAprobacion">{{ payload.kpis.pctAprobacion }}%</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">Estudiantes inscritos</span><span class="rep-kpi__value" data-kpi="inscritos">{{ payload.kpis.inscritos }}</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">Estudiantes aprobados</span><span class="rep-kpi__value rep-kpi__value--ok" data-kpi="estudiantesAprobados">{{ payload.kpis.estudiantesAprobados }}</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">Estudiantes rechazados</span><span class="rep-kpi__value rep-kpi__value--bad" data-kpi="estudiantesRechazados">{{ payload.kpis.estudiantesRechazados }}</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">Estudiantes en proceso</span><span class="rep-kpi__value rep-kpi__value--warn" data-kpi="estudiantesEnProceso">{{ payload.kpis.estudiantesEnProceso }}</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">Docentes postulados</span><span class="rep-kpi__value" data-kpi="postulacionesDocentes">{{ payload.kpis.postulacionesDocentes }}</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">Docentes aprobados</span><span class="rep-kpi__value rep-kpi__value--ok" data-kpi="docentesAprobados">{{ payload.kpis.docentesAprobados }}</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">Docentes rechazados</span><span class="rep-kpi__value rep-kpi__value--bad" data-kpi="docentesRechazados">{{ payload.kpis.docentesRechazados }}</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">Docentes en proceso</span><span class="rep-kpi__value rep-kpi__value--warn" data-kpi="docentesEnProceso">{{ payload.kpis.docentesEnProceso }}</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">Evaluados con notas</span><span class="rep-kpi__value" data-kpi="evaluados">{{ payload.kpis.evaluados }}</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">Aprobados por notas</span><span class="rep-kpi__value rep-kpi__value--ok" data-kpi="aprobados">{{ payload.kpis.aprobados }}</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">Reprobados por notas</span><span class="rep-kpi__value rep-kpi__value--bad" data-kpi="reprobados">{{ payload.kpis.reprobados }}</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">Sin notas completas</span><span class="rep-kpi__value rep-kpi__value--warn" data-kpi="incompletos">{{ payload.kpis.incompletos }}</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">% aprob. notas</span><span class="rep-kpi__value" data-kpi="pctAprobacion">{{ payload.kpis.pctAprobacion }}%</span></div>
                 <div class="rep-kpi"><span class="rep-kpi__label">Promedio gral</span><span class="rep-kpi__value" data-kpi="promedioGeneral">{{ payload.kpis.promedioGeneral }}</span></div>
                 <div class="rep-kpi"><span class="rep-kpi__label">Grupos habilitados</span><span class="rep-kpi__value" data-kpi="grupos">{{ payload.kpis.grupos }}</span></div>
-                <div class="rep-kpi"><span class="rep-kpi__label">Docentes</span><span class="rep-kpi__value" data-kpi="docentes">{{ payload.kpis.docentes }}</span></div>
+                <div class="rep-kpi"><span class="rep-kpi__label">Docentes asignados</span><span class="rep-kpi__value" data-kpi="docentes">{{ payload.kpis.docentes }}</span></div>
             </div>
 
             <div class="rep-grid">
-                <article class="gestion-panel rep-card"><p class="rep-card__title">Estado de aprobación</p><div class="rep-chart"><canvas data-chart="estado"></canvas></div></article>
+                <article class="gestion-panel rep-card"><p class="rep-card__title">Resultado academico por notas</p><div class="rep-chart"><canvas data-chart="estado"></canvas></div></article>
+                <article class="gestion-panel rep-card"><p class="rep-card__title">Postulantes estudiantes por estado</p><div class="rep-chart"><canvas data-chart="postulacionesEstudiantes"></canvas></div></article>
+                <article class="gestion-panel rep-card"><p class="rep-card__title">Postulantes docentes por estado</p><div class="rep-chart"><canvas data-chart="postulacionesDocentes"></canvas></div></article>
                 <article class="gestion-panel rep-card"><p class="rep-card__title">Promedio por materia <small>(mín. <span data-rep-min>{{ payload.meta.notaMinima }}</span>)</small></p><div class="rep-chart"><canvas data-chart="promedioMateria"></canvas></div></article>
                 <article class="gestion-panel rep-card"><p class="rep-card__title">Aprobados vs reprobados por materia</p><div class="rep-chart"><canvas data-chart="aprobMateria"></canvas></div></article>
                 <article class="gestion-panel rep-card"><p class="rep-card__title">Top grupos por aprobados</p><div class="rep-chart"><canvas data-chart="topGrupos"></canvas></div></article>
@@ -187,6 +197,10 @@
                     </div>
                 </div>
                 <div class="gestion-dashboard">
+                    <section class="gestion-metric"><span class="gestion-metric__label">Docentes postulados</span><strong data-doc-kpi="totalPostulaciones">0</strong></section>
+                    <section class="gestion-metric"><span class="gestion-metric__label">Docentes aprobados</span><strong data-doc-kpi="aprobados">0</strong></section>
+                    <section class="gestion-metric"><span class="gestion-metric__label">Docentes rechazados</span><strong data-doc-kpi="rechazados">0</strong></section>
+                    <section class="gestion-metric"><span class="gestion-metric__label">Docentes en proceso</span><strong data-doc-kpi="enProceso">0</strong></section>
                     <section class="gestion-metric"><span class="gestion-metric__label">Docentes con asignacion</span><strong data-doc-kpi="totalDocentes">0</strong></section>
                     <section class="gestion-metric"><span class="gestion-metric__label">Entrevistas agendadas</span><strong data-doc-kpi="entrevistasAgendadas">0</strong></section>
                 </div>
@@ -223,7 +237,7 @@
                 <button type="button" class="asis-panel__close" data-asis-close aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
             </div>
             <div class="asis-messages" data-asis-messages>
-                <div class="asis-hint">Probá: <strong>&ldquo;reprobados de Matem&aacute;ticas&rdquo;</strong> · <strong>&ldquo;aprobados de Sistemas&rdquo;</strong> · <strong>&ldquo;promedios por materia&rdquo;</strong>. Toc&aacute; el micr&oacute;fono para hablar.</div>
+                <div class="asis-hint">Prob&aacute;: <strong>&ldquo;promedios por materia&rdquo;</strong> · <strong>&ldquo;lista de estudiantes oficiales&rdquo;</strong> · <strong>&ldquo;solo con materias asignadas de Sistemas&rdquo;</strong> · <strong>&ldquo;postulantes rechazados&rdquo;</strong>. Toc&aacute; el micr&oacute;fono para hablar.</div>
             </div>
             <div class="asis-inputbar">
                 <input type="text" data-asis-input placeholder="Escrib&iacute; o habl&aacute;&hellip;" aria-label="Tu consulta">

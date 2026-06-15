@@ -23,6 +23,73 @@ final readonly class ReporteRepository
     }
 
     /**
+     * Postulantes estudiantes de una gestión, incluso si todavía no tienen
+     * notas ni asignaciones.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function estudiantesDeGestion(int $gestionId, ?int $carreraId = null): array
+    {
+        $qb = $this->em->createQueryBuilder()
+            ->select('i.id AS insId, i.ci AS ci, i.nombres AS nombres, i.apellidos AS apellidos, i.email AS email, IDENTITY(i.carrera) AS carreraId, c.nombre AS carreraNombre, i.estado AS estado')
+            ->from(Inscripcion::class, 'i')
+            ->leftJoin('i.carrera', 'c')
+            ->where('i.gestion = :gestion')
+            ->andWhere('i.tipo = :tipo')
+            ->setParameter('gestion', $gestionId)
+            ->setParameter('tipo', TipoPostulacion::ESTUDIANTE)
+            ->orderBy('i.apellidos', 'ASC')
+            ->addOrderBy('i.nombres', 'ASC');
+
+        if ($carreraId !== null) {
+            $qb->andWhere('i.carrera = :carrera')->setParameter('carrera', $carreraId);
+        }
+
+        return $qb->getQuery()->getArrayResult();
+    }
+
+    /**
+     * Asignaciones de estudiantes a materias/grupos, con docente si existe.
+     * Esto permite armar filtros aunque todavía no haya notas cargadas.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function asignacionesEstudianteMateria(
+        int $gestionId,
+        ?int $carreraId = null,
+        ?int $materiaId = null,
+        ?int $docenteId = null,
+    ): array {
+        $qb = $this->em->createQueryBuilder()
+            ->select('IDENTITY(ag.inscripcion) AS insId, IDENTITY(ag.materia) AS materiaId, m.nombre AS materiaNombre, g.codigo AS grupoCodigo, IDENTITY(ad.docente) AS docenteId, u.firstName AS firstName, u.lastName AS lastName')
+            ->from(AsignacionGrupo::class, 'ag')
+            ->join('ag.inscripcion', 'i')
+            ->join('ag.materia', 'm')
+            ->join('ag.grupo', 'g')
+            ->leftJoin(AsignacionDocente::class, 'ad', 'WITH', 'ad.gestion = :gestion AND ad.materia = ag.materia AND ad.grupo = ag.grupo')
+            ->leftJoin('ad.docente', 'u')
+            ->where('i.gestion = :gestion')
+            ->andWhere('i.tipo = :tipo')
+            ->setParameter('gestion', $gestionId)
+            ->setParameter('tipo', TipoPostulacion::ESTUDIANTE)
+            ->orderBy('i.apellidos', 'ASC')
+            ->addOrderBy('i.nombres', 'ASC')
+            ->addOrderBy('m.nombre', 'ASC');
+
+        if ($carreraId !== null) {
+            $qb->andWhere('i.carrera = :carrera')->setParameter('carrera', $carreraId);
+        }
+        if ($materiaId !== null) {
+            $qb->andWhere('ag.materia = :materia')->setParameter('materia', $materiaId);
+        }
+        if ($docenteId !== null) {
+            $qb->andWhere('ad.docente = :docente')->setParameter('docente', $docenteId);
+        }
+
+        return $qb->getQuery()->getArrayResult();
+    }
+
+    /**
      * Una fila por examen rendido de los estudiantes de la gestión, con datos
      * del alumno y de la materia. Se agrega luego en PHP por (alumno, materia).
      *
@@ -72,6 +139,38 @@ final readonly class ReporteRepository
         }
 
         return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    /**
+     * Totales de postulaciones por estado para un tipo y una gestión.
+     *
+     * @return list<array{estado: string, total: int|string}>
+     */
+    public function postulacionesPorEstado(int $gestionId, string $tipo): array
+    {
+        return $this->em->createQueryBuilder()
+            ->select('i.estado AS estado, COUNT(i.id) AS total')
+            ->from(Inscripcion::class, 'i')
+            ->where('i.gestion = :gestion')
+            ->andWhere('i.tipo = :tipo')
+            ->setParameter('gestion', $gestionId)
+            ->setParameter('tipo', $tipo)
+            ->groupBy('i.estado')
+            ->getQuery()
+            ->getArrayResult();
+    }
+
+    public function totalPostulaciones(int $gestionId, string $tipo): int
+    {
+        return (int) $this->em->createQueryBuilder()
+            ->select('COUNT(i.id)')
+            ->from(Inscripcion::class, 'i')
+            ->where('i.gestion = :gestion')
+            ->andWhere('i.tipo = :tipo')
+            ->setParameter('gestion', $gestionId)
+            ->setParameter('tipo', $tipo)
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 
     /** @return list<array{carrera: string, total: int|string}> */
