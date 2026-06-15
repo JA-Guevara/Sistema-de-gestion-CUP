@@ -84,6 +84,13 @@ final readonly class LoginUser
         $user->unlockCodeLastSentAt = $now;
 
         $this->users->save($user);
-        $this->lockedMailer->send($user, $user->unlockCode);
+
+        // El correo no debe tumbar el flujo de bloqueo: si el SMTP falla, la cuenta
+        // queda bloqueada igual y el usuario puede reenviar el código desde /auth/unlock.
+        try {
+            $this->lockedMailer->send($user, $user->unlockCode);
+        } catch (\Throwable $e) {
+            error_log(sprintf('[CUP][auth] No se pudo enviar el código de desbloqueo (user %d): %s', $user->id, $e->getMessage()));
+        }
     }
 }

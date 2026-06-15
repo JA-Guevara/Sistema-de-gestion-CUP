@@ -14,6 +14,7 @@ use App\Bitacora\Domain\Catalog\ActionCatalog;
 use App\Bitacora\Domain\Catalog\ModuleCatalog;
 use App\Usuario\Application\DTO\UsuarioActionInput;
 use App\Usuario\Domain\Exception\UsuarioException;
+use Psr\Log\LoggerInterface;
 
 final readonly class ResetUserPassword
 {
@@ -24,6 +25,7 @@ final readonly class ResetUserPassword
         private PasswordResetTokenRepository $tokens,
         private PasswordResetMailer $mailer,
         private RecordLogEntry $audit,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -77,6 +79,12 @@ final readonly class ResetUserPassword
 
     private function notify(User $user, PasswordResetToken $token): void
     {
-        $this->mailer->send($user, $token->token);
+        try {
+            $this->mailer->send($user, $token->token);
+        } catch (\Throwable $e) {
+            $this->logger->error(sprintf('[CUP][usuario] No se pudo enviar el reset al usuario %s: %s', $user->email, $e->getMessage()));
+
+            throw new UsuarioException('Se genero el reset, pero el correo no pudo enviarse. Revisa la configuracion de correo (o reenvia el enlace).');
+        }
     }
 }

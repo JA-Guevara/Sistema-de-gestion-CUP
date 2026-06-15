@@ -9,6 +9,7 @@ use App\Auth\Infrastructure\Mailer\PasswordResetMailer;
 use App\Auth\Infrastructure\Persistence\PasswordResetTokenRepository;
 use App\Auth\Infrastructure\Persistence\UserRepository;
 use App\Auth\UI\Request\ForgotPasswordRequest;
+use Psr\Log\LoggerInterface;
 
 /**
  * Caso de uso: el usuario solicita reset de contraseña.
@@ -25,6 +26,7 @@ final readonly class ForgotPassword
         private UserRepository $users,
         private PasswordResetTokenRepository $tokens,
         private PasswordResetMailer $mailer,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -49,7 +51,12 @@ final readonly class ForgotPassword
 
         $this->tokens->save($token);
 
-        // Envía el email con el link de reset.
-        $this->mailer->send($user, $token->token);
+        // El correo no debe tumbar la respuesta neutral (anti-enumeración): si el
+        // SMTP falla, lo registramos pero no rompemos el flujo.
+        try {
+            $this->mailer->send($user, $token->token);
+        } catch (\Throwable $e) {
+            $this->logger->error(sprintf('[CUP][auth] No se pudo enviar el correo de recuperacion (user %d): %s', $user->id, $e->getMessage()));
+        }
     }
 }

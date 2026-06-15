@@ -22,13 +22,10 @@ final readonly class AccountLockedMailer
     ) {
     }
 
-    /** Remitente configurable por MAIL_FROM / MAIL_FROM_NAME (.env.local). */
+    /** Remitente resuelto de forma segura para SMTP (ver SenderAddress). */
     private function from(): Address
     {
-        $address = (string) ($_ENV['MAIL_FROM'] ?? getenv('MAIL_FROM') ?: 'noreply@cup-ficct.local');
-        $name = (string) ($_ENV['MAIL_FROM_NAME'] ?? getenv('MAIL_FROM_NAME') ?: 'CUP FICCT');
-
-        return new Address($address, $name);
+        return SenderAddress::resolve();
     }
 
     public function send(User $user, string $code): void

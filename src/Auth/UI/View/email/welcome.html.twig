@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Bienvenido al CUP FICCT</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2933;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f5f6f8;padding:32px 0;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="520" cellspacing="0" cellpadding="0" border="0" style="background:#ffffff;border:1px solid #d9dde3;border-radius:8px;padding:32px;">
+                    <tr>
+                        <td>
+                            <h1 style="margin:0 0 16px;font-size:22px;color:#1f2933;">Bienvenido al CUP FICCT</h1>
+
+                            <p style="margin:0 0 16px;line-height:1.5;">
+                                Hola <strong>{{ user.firstName }}</strong>,
+                            </p>
+
+                            <p style="margin:0 0 16px;line-height:1.5;">
+                                Tu cuenta en <strong>CUP FICCT</strong> (Curso Pre-Universitario) fue creada correctamente.
+                                Ya puedes iniciar sesion y empezar tu pre-inscripcion.
+                            </p>
+
+                            <p style="margin:24px 0;text-align:center;">
+                                <a
+                                    href="{{ login_url }}"
+                                    style="display:inline-block;background:#2c5cff;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:20px;font-weight:600;"
+                                >
+                                    Iniciar sesion
+                                </a>
+                            </p>
+
+                            <p style="margin:0 0 16px;line-height:1.5;font-size:13px;color:#5b6573;">
+                                Si vos no creaste esta cuenta, ignora este correo.
+                            </p>
+
+                            <hr style="border:none;border-top:1px solid #d9dde3;margin:24px 0;">
+
+                            <p style="margin:0;font-size:12px;color:#5b6573;line-height:1.5;">
+                                Si el boton no funciona, copia y pega este enlace en tu navegador:<br>
+                                <span style="word-break:break-all;color:#2c5cff;">{{ login_url }}</span>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+
+                <p style="margin:16px 0 0;font-size:12px;color:#5b6573;">
+                    CUP FICCT · Curso Pre-Universitario · Facultad de Ingenieria en Ciencias de la Computacion
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

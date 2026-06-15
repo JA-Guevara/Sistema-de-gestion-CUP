@@ -7,9 +7,11 @@ namespace App\Auth\UI\Controller;
 use App\Auth\Application\UseCase\RegisterUser;
 use App\Auth\Domain\Exception\EmailAlreadyRegistered;
 use App\Auth\Domain\Exception\InvalidRegistrationData;
+use App\Auth\Infrastructure\Mailer\RegistrationMailer;
 use App\Auth\Infrastructure\Security\CsrfManager;
 use App\Auth\UI\Request\RegisterRequest;
 use App\Bitacora\Application\EventLog\AuthEvents;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,6 +26,8 @@ final class RegisterController extends AbstractController
         private readonly RegisterUser $registerUser,
         private readonly CsrfManager $csrf,
         private readonly AuthEvents $authEvents,
+        private readonly RegistrationMailer $registrationMailer,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -64,6 +68,13 @@ final class RegisterController extends AbstractController
             $user = $this->registerUser->execute($input);
 
             $this->authEvents->registroExitoso($user);
+
+            // Correo de bienvenida. No debe tumbar el registro si el SMTP falla.
+            try {
+                $this->registrationMailer->send($user);
+            } catch (\Throwable $e) {
+                $this->logger->error(sprintf('[CUP][auth] No se pudo enviar el correo de bienvenida a %s: %s', $user->email, $e->getMessage()));
+            }
 
             $this->addFlash(
                 'success',
