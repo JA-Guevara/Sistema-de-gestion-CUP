@@ -40,6 +40,17 @@ final readonly class PagoEvents
         );
     }
 
+    public function pagoRegistradoManual(string $ci, float $monto, string $moneda, ?int $actorUserId): void
+    {
+        $this->audit->log(
+            ModuleCatalog::PAGOS,
+            ActionCatalog::PAYMENT,
+            sprintf('Registro MANUALMENTE el pago del arancel de la inscripcion CI %s por %s %s (sin pasarela, accion administrativa).', $ci, number_format($monto, 2), $moneda),
+            entity: sprintf('Inscripcion CI %s', $ci),
+            userId: $actorUserId,
+        );
+    }
+
     public function pagoEstadoActualizado(string $ci, string $estado, ?int $actorUserId): void
     {
         $this->audit->log(

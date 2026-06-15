@@ -3,7 +3,7 @@
 {% block title %}Usuarios{% endblock %}
 
 {% block stylesheets %}<link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">{% endblock %}
-{% block javascripts %}<script src="/assets/gestion/js/gestion-filters.js?v=9" defer></script>{% endblock %}
+{% block javascripts %}<script src="/assets/gestion/js/gestion-filters.js?v=9" defer></script><script src="/assets/gestion/js/gestion-bulk-actions.js?v=9" defer></script>{% endblock %}
 
 {% block app_content %}
     <section class="gestion-head">
@@ -19,11 +19,11 @@
 
     {% include '@gestion/partials/_flash.html.twig' %}
 
-    <section class="gestion-panel">
+    <section class="gestion-panel" data-bulk-root>
         <div class="gestion-panel__header">
             <div>
-                <h2>Historial de usuarios</h2>
-                <p class="gestion-panel__hint">Gestiona accesos, estado operativo y roles asignados a cada cuenta.</p>
+                <h2>Usuarios y roles</h2>
+                <p class="gestion-panel__hint">Gestiona accesos y estado. Selecciona varios usuarios para asignarles un rol en lote (util para admins, coordinadores o docentes cargados por lote). Los estudiantes y docentes ya reciben su rol al confirmar su pre-inscripcion.</p>
             </div>
         </div>
         <form class="gestion-filters" data-gestion-filters data-filter-target="usuarios">
@@ -55,10 +55,34 @@
                 </button>
             </div>
         </form>
+
+        <form id="usuario-role-form" method="post" action="{{ path('usuario_roles_bulk') }}" class="gestion-bulk-actions" data-bulk-actions hidden>
+            <div class="gestion-bulk-actions__info">
+                <span class="gestion-bulk-actions__count"><strong data-bulk-count>0</strong> usuarios seleccionados</span>
+                <button type="button" class="gestion-bulk-actions__clear" data-bulk-clear>Deseleccionar</button>
+            </div>
+            <div class="gestion-bulk-actions__buttons">
+                <label class="gestion-bulk-actions__select">
+                    Rol
+                    <select name="roleId" required>
+                        <option value="">Seleccionar rol</option>
+                        {% for rol in roles %}
+                            <option value="{{ rol.id }}">{{ rol.name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <button type="submit" class="gestion-button gestion-button--primary" data-bulk-submit disabled>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                    Asignar rol
+                </button>
+            </div>
+        </form>
+
         <div class="gestion-table-wrap">
             <table class="gestion-table gestion-table--stack" data-gestion-filter-table="usuarios">
                 <thead>
                     <tr>
+                        <th><input class="gestion-bulk-check" type="checkbox" data-bulk-check-all aria-label="Seleccionar usuarios visibles"></th>
                         <th>Usuario</th>
                         <th>Correo</th>
                         <th>Roles</th>
@@ -71,6 +95,9 @@
                     {% for usuario in usuarios %}
                         {% set estado = usuario.active ? 'ACTIVO' : 'INACTIVO' %}
                         <tr data-filter-row data-filter-texto="{{ usuario.firstName }} {{ usuario.lastName }} {{ usuario.email }}" data-filter-rol="{{ usuario.roleNames() }}" data-filter-estado="{{ estado }}">
+                            <td data-label="Seleccion">
+                                <input class="gestion-bulk-check" type="checkbox" name="usuarios[]" value="{{ usuario.id }}" form="usuario-role-form" data-bulk-item aria-label="Seleccionar {{ usuario.firstName }} {{ usuario.lastName }}">
+                            </td>
                             <td data-label="Usuario">
                                 {{ usuario.firstName }} {{ usuario.lastName }}
                                 <span class="gestion-table__meta">#{{ usuario.id }}</span>
@@ -100,7 +127,7 @@
                             </td>
                         </tr>
                     {% endfor %}
-                    <tr data-filter-empty {{ usuarios ? 'hidden' : '' }}><td colspan="6">Todavia no hay usuarios registrados.</td></tr>
+                    <tr data-filter-empty {{ usuarios ? 'hidden' : '' }}><td colspan="7">Todavia no hay usuarios registrados.</td></tr>
                 </tbody>
             </table>
         </div>

@@ -31,11 +31,11 @@
         <tbody>
             {% for f in horario.franjas %}
                 <tr>
-                    <td>{{ f.dia|lower|capitalize }}</td>
-                    <td>{{ f.horaInicio|date('H:i') }} - {{ f.horaFin|date('H:i') }}</td>
-                    <td class="boleta__left">{{ f.materia.codigo }} - {{ f.materia.nombre }}</td>
-                    <td>{{ f.grupo.codigo }}</td>
-                    <td class="boleta__left">{{ f.aula.codigo }}{% if f.aula.nombre %} - {{ f.aula.nombre }}{% endif %}</td>
+                    <td data-label="Dia">{{ f.dia|lower|capitalize }}</td>
+                    <td data-label="Hora">{{ f.horaInicio|date('H:i') }} - {{ f.horaFin|date('H:i') }}</td>
+                    <td class="boleta__left" data-label="Materia">{{ f.materia.codigo }} - {{ f.materia.nombre }}</td>
+                    <td data-label="Grupo">{{ f.grupo.codigo }}</td>
+                    <td class="boleta__left" data-label="Aula">{{ f.aula.codigo }}{% if f.aula.nombre %} - {{ f.aula.nombre }}{% endif %}</td>
                 </tr>
             {% else %}
                 <tr><td colspan="5">Sin horario publicado.</td></tr>
@@ -82,6 +82,28 @@
         .boleta-modal__bar strong { color: #1e3a8a; }
         .boleta-modal__bar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
         .boleta-modal__scroll { overflow: auto; padding: 28px; }
+
+        /* ---- Celular (solo pantalla): el horario se apila en tarjetas etiqueta:valor.
+               Excluye print para conservar la tabla normal en el documento impreso. ---- */
+        @media screen and (max-width: 600px) {
+            .boleta__data { grid-template-columns: 1fr; gap: 2px; }
+            .boleta__data > div,
+            .boletin-datos > div { flex-direction: column; gap: 2px; }
+            .boleta__data dt,
+            .boletin-datos dt { min-width: 0; }
+            .boleta { padding: 18px; }
+            .boleta-modal { padding: 12px; }
+            .boleta-modal__scroll { padding: 14px; }
+            .boleta__table { min-width: 0; border: 0; font-size: 12.5px; }
+            .boleta__table thead { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); }
+            .boleta__table tbody tr { display: block; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 10px; padding: 2px 12px; }
+            .boleta__table tbody td { display: flex; justify-content: space-between; gap: 14px; text-align: right; border: 0; border-bottom: 1px solid #eef0f3; padding: 8px 0; }
+            .boleta__table tbody td.boleta__left { text-align: right; }
+            .boleta__table tbody td:last-child { border-bottom: 0; }
+            .boleta__table tbody td::before { content: attr(data-label); font-weight: 700; color: #64748b; text-align: left; }
+            .boleta__table tbody td[colspan] { justify-content: center; text-align: center; }
+            .boleta__table tbody td[colspan]::before { content: ""; }
+        }
 
         @media print {
             body * { visibility: hidden !important; }

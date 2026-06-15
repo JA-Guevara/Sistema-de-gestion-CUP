@@ -19,9 +19,16 @@ final readonly class AccountLockedMailer
     public function __construct(
         private MailerInterface $mailer,
         private UrlGeneratorInterface $urls,
-        private string $fromAddress = 'noreply@cup-ficct.local',
-        private string $fromName = 'CUP FICCT',
     ) {
+    }
+
+    /** Remitente configurable por MAIL_FROM / MAIL_FROM_NAME (.env.local). */
+    private function from(): Address
+    {
+        $address = (string) ($_ENV['MAIL_FROM'] ?? getenv('MAIL_FROM') ?: 'noreply@cup-ficct.local');
+        $name = (string) ($_ENV['MAIL_FROM_NAME'] ?? getenv('MAIL_FROM_NAME') ?: 'CUP FICCT');
+
+        return new Address($address, $name);
     }
 
     public function send(User $user, string $code): void
@@ -33,7 +40,7 @@ final readonly class AccountLockedMailer
         );
 
         $email = (new TemplatedEmail())
-            ->from(new Address($this->fromAddress, $this->fromName))
+            ->from($this->from())
             ->to(new Address($user->email, $user->firstName.' '.$user->lastName))
             ->subject('Cuenta bloqueada - Código de desbloqueo - CUP FICCT')
             ->htmlTemplate('@auth/email/account_locked.html.twig')

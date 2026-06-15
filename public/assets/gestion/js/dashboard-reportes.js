@@ -5,6 +5,11 @@
       (carrera/materia/docente server-side; estado/búsqueda client-side).
    Cada vista mantiene su propio estado de filtros y su propio fetch al
    endpoint JSON. El cambio de gestión (compartido) recarga la página.
+
+   Exportar / Imprimir (ambas vistas):
+   - Lista  -> CSV del detalle filtrado + Imprimir / PDF.
+   - Gráficos -> CSV con KPIs + datos de cada gráfico + Imprimir / PDF
+     (la impresión captura los canvas tal como se ven en pantalla).
    ========================================================================= */
 (function () {
     var payloadEl = document.querySelector('[data-rep-payload]');
@@ -229,22 +234,90 @@
     var gsel = document.querySelector('[data-rep-gestion]');
     if (gsel) { gsel.addEventListener('change', function () { window.location = window.location.pathname + '?gestion=' + encodeURIComponent(gsel.value); }); }
 
-    var printBtn = document.querySelector('[data-rep-print]');
-    if (printBtn) { printBtn.addEventListener('click', function () { window.print(); }); }
-
-    var csvBtn = document.querySelector('[data-rep-export="csv"]');
-    if (csvBtn) { csvBtn.addEventListener('click', function () {
-        var rows = [['CI', 'Postulante', 'Carrera', 'Materias', 'Promedio', 'Estado']];
-        listClientFilter(listData.detalle).forEach(function (r) { rows.push([r.ci, r.nombre, r.carrera, r.materias, (r.promedio === null ? '' : r.promedio), cap(r.estado)]); });
-        var csv = rows.map(function (row) { return row.map(function (c) { c = (c == null ? '' : String(c)); return '"' + c.replace(/"/g, '""') + '"'; }).join(','); }).join('\r\n');
-        var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    // =====================================================================
+    // Exportar (CSV, compatible con Excel) / Imprimir (PDF)
+    // =====================================================================
+    function toCsv(rows) {
+        return rows.map(function (row) {
+            return (row || []).map(function (c) { c = (c == null ? '' : String(c)); return '"' + c.replace(/"/g, '""') + '"'; }).join(',');
+        }).join('\r\n');
+    }
+    function downloadCsv(name, rows) {
+        // BOM (﻿) para que Excel respete los acentos UTF-8.
+        var blob = new Blob(['﻿' + toCsv(rows)], { type: 'text/csv;charset=utf-8;' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'reporte_' + (listData.meta.gestionCodigo || 'cup') + '.csv';
+        a.download = name;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(a.href);
+    }
+
+    // Imprimir / PDF — funciona en ambas vistas: la vista oculta del carrusel
+    // no se imprime (CSS @media print), así que se imprime la que se ve.
+    document.querySelectorAll('[data-rep-print]').forEach(function (btn) {
+        btn.addEventListener('click', function () { window.print(); });
+    });
+
+    // Lista: CSV del detalle filtrado.
+    var csvBtn = document.querySelector('[data-rep-export="csv"]');
+    if (csvBtn) { csvBtn.addEventListener('click', function () {
+        var rows = [['CI', 'Postulante', 'Carrera', 'Materias', 'Promedio', 'Estado']];
+        listClientFilter(listData.detalle).forEach(function (r) {
+            rows.push([r.ci, r.nombre, r.carrera, r.materias, (r.promedio === null || r.promedio === undefined ? '' : r.promedio), cap(r.estado)]);
+        });
+        downloadCsv('reporte_detalle_' + (listData.meta.gestionCodigo || 'cup') + '.csv', rows);
+    }); }
+
+    // Reportes (gráficos): CSV con KPIs + los datos detrás de cada gráfico.
+    var chartsCsvBtn = document.querySelector('[data-rep-export="charts"]');
+    if (chartsCsvBtn) { chartsCsvBtn.addEventListener('click', function () {
+        var d = chartsData || initial;
+        var rows = [];
+        rows.push(['CUP FICCT - Dashboard & Reportes']);
+        rows.push(['Gestion', d.meta.gestionCodigo || '']);
+        rows.push([]);
+
+        rows.push(['INDICADORES (KPIs)']);
+        rows.push(['Indicador', 'Valor']);
+        rows.push(['Inscritos', d.kpis.inscritos]);
+        rows.push(['Aprobados', d.kpis.aprobados]);
+        rows.push(['Reprobados', d.kpis.reprobados]);
+        rows.push(['Incompletos', d.kpis.incompletos]);
+        rows.push(['% Aprobacion', d.kpis.pctAprobacion + '%']);
+        rows.push(['Promedio general', d.kpis.promedioGeneral]);
+        rows.push(['Grupos habilitados', d.kpis.grupos]);
+        rows.push(['Docentes', d.kpis.docentes]);
+        rows.push([]);
+
+        rows.push(['ESTADO DE APROBACION']);
+        rows.push(['Estado', 'Cantidad']);
+        rows.push(['Aprobados', d.estadoAprobacion.aprobados]);
+        rows.push(['Reprobados', d.estadoAprobacion.reprobados]);
+        rows.push(['Incompletos', d.estadoAprobacion.incompletos]);
+        rows.push([]);
+
+        rows.push(['PROMEDIO Y RESULTADO POR MATERIA (min. ' + d.meta.notaMinima + ')']);
+        rows.push(['Materia', 'Promedio', 'Aprobados', 'Reprobados']);
+        (d.promedioPorMateria || []).forEach(function (x) { rows.push([x.materia, x.promedio, x.aprobados, x.reprobados]); });
+        rows.push([]);
+
+        rows.push(['INSCRITOS POR CARRERA']);
+        rows.push(['Carrera', 'Inscritos']);
+        (d.inscritosPorCarrera || []).forEach(function (x) { rows.push([x.carrera, x.total]); });
+        rows.push([]);
+
+        rows.push(['TOP GRUPOS POR APROBADOS']);
+        rows.push(['Grupo', 'Aprobados']);
+        (d.topGrupos || []).forEach(function (x) { rows.push([x.grupo, x.aprobados]); });
+        rows.push([]);
+
+        rows.push(['CARGA DOCENTE (grupos por docente)']);
+        rows.push(['Docente', 'Grupos']);
+        (d.docentesPorGrupo || []).forEach(function (x) { rows.push([x.docente, x.grupos]); });
+
+        downloadCsv('reporte_dashboard_' + (d.meta.gestionCodigo || 'cup') + '.csv', rows);
     }); }
 
     // ---- Render inicial ----

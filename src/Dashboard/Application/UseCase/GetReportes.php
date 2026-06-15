@@ -43,6 +43,7 @@ final readonly class GetReportes
                     'ci' => $r['ci'],
                     'nombres' => $r['nombres'],
                     'apellidos' => $r['apellidos'],
+                    'email' => $r['email'] ?? '',
                     'carrera' => $r['carreraNombre'] ?? '—',
                     'materias' => [],
                 ];
@@ -63,11 +64,13 @@ final readonly class GetReportes
 
         foreach ($estudiantes as $insId => $e) {
             $promMaterias = [];
+            $notasStudent = [];
             $completo = count($e['materias']) > 0;
 
             foreach ($e['materias'] as $matId => $valores) {
                 $promMat = (int) round(array_sum($valores) / count($valores));
                 $promMaterias[] = $promMat;
+                $notasStudent[$materiaNombre[$matId]] = $promMat;
                 $matCompleta = count($valores) >= $cantidadExamenes;
                 if (!$matCompleta) {
                     $completo = false;
@@ -108,8 +111,10 @@ final readonly class GetReportes
             $detalle[] = [
                 'ci' => $e['ci'],
                 'nombre' => trim($e['apellidos'] . ' ' . $e['nombres']),
+                'email' => $e['email'],
                 'carrera' => $e['carrera'],
                 'materias' => count($e['materias']),
+                'notas' => $notasStudent,
                 'promedio' => $completo ? $global : null,
                 'estado' => $estado,
             ];
@@ -129,8 +134,8 @@ final readonly class GetReportes
         }
         usort($promedioPorMateria, static fn (array $a, array $b): int => strcmp((string) $a['materia'], (string) $b['materia']));
 
-        // Top grupos por cantidad de aprobados.
-        $grupoAprob = [];
+        // Estadísticas por grupo (completas) + top grupos por aprobados.
+        $grupoStats = [];
         $grupoNombre = [];
         $vistos = [];
         foreach ($this->repo->asignacionEstudianteGrupo($gestionId) as $a) {
@@ -142,14 +147,28 @@ final readonly class GetReportes
                 continue;
             }
             $vistos[$key] = true;
-            if (($estadoPorIns[$insId] ?? null) === 'APROBADO') {
-                $grupoAprob[$grupoId] = ($grupoAprob[$grupoId] ?? 0) + 1;
+            if (!isset($grupoStats[$grupoId])) {
+                $grupoStats[$grupoId] = ['total' => 0, 'aprob' => 0, 'reprob' => 0, 'incomp' => 0];
+            }
+            $grupoStats[$grupoId]['total']++;
+            $est = $estadoPorIns[$insId] ?? 'INCOMPLETO';
+            if ($est === 'APROBADO') {
+                $grupoStats[$grupoId]['aprob']++;
+            } elseif ($est === 'REPROBADO') {
+                $grupoStats[$grupoId]['reprob']++;
+            } else {
+                $grupoStats[$grupoId]['incomp']++;
             }
         }
+
+        $grupos = [];
         $topGrupos = [];
-        foreach ($grupoAprob as $gid => $cnt) {
-            $topGrupos[] = ['grupo' => $grupoNombre[$gid] ?? ('#' . $gid), 'aprobados' => $cnt];
+        foreach ($grupoStats as $gid => $s) {
+            $nombre = $grupoNombre[$gid] ?? ('#' . $gid);
+            $grupos[] = ['grupo' => $nombre, 'total' => $s['total'], 'aprobados' => $s['aprob'], 'reprobados' => $s['reprob'], 'incompletos' => $s['incomp']];
+            $topGrupos[] = ['grupo' => $nombre, 'aprobados' => $s['aprob']];
         }
+        usort($grupos, static fn (array $a, array $b): int => strcmp((string) $a['grupo'], (string) $b['grupo']));
         usort($topGrupos, static fn (array $a, array $b): int => $b['aprobados'] - $a['aprobados']);
         $topGrupos = array_slice($topGrupos, 0, 8);
 
@@ -177,6 +196,7 @@ final readonly class GetReportes
                 'gestionNombre' => $gestion->nombre,
                 'notaMinima' => $notaMinima,
                 'cantidadExamenes' => $cantidadExamenes,
+                'materias' => array_map(static fn (array $m): string => (string) $m['materia'], $promedioPorMateria),
                 'filtros' => ['carrera' => $carreraId, 'materia' => $materiaId, 'docente' => $docenteId],
             ],
             'kpis' => [
@@ -198,6 +218,7 @@ final readonly class GetReportes
             'promedioPorMateria' => $promedioPorMateria,
             'inscritosPorCarrera' => $inscritosPorCarrera,
             'topGrupos' => $topGrupos,
+            'grupos' => $grupos,
             'docentesPorGrupo' => $docentesPorGrupo,
             'detalle' => $detalle,
         ];

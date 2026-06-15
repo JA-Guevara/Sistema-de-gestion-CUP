@@ -82,6 +82,7 @@
                             <th class="gestion-col--center">Estado</th>
                             <th>Fecha</th>
                             <th>Referencia Stripe</th>
+                            <th class="gestion-table__actions-cell">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -93,9 +94,20 @@
                                 <td class="gestion-col--center" data-label="Estado"><span class="gestion-badge gestion-badge--{{ estadoBadge[pago.estado] ?? 'borrador' }}">{{ pago.estado|capitalize }}</span></td>
                                 <td data-label="Fecha">{{ (pago.paidAt ?? pago.createdAt)|date('d/m/Y H:i') }}</td>
                                 <td class="gestion-col--text" data-label="Referencia Stripe"><span class="gestion-table__meta">{{ pago.stripePaymentIntentId ?? pago.stripeSessionId ?? '—' }}</span></td>
+                                <td class="gestion-table__actions" data-label="Acciones">
+                                    {% if pago.estado != 'PAGADO' and (user.hasPermission('pagos.gestionar') or user.hasPermission('inscripciones.gestionar') or user.hasPermission('inscripciones.validar')) %}
+                                        <form method="post" action="{{ path('inscripcion_admin_pagos_registrar', {id: pago.id}) }}" data-confirm="Registrar el pago de {{ pago.inscripcion.apellidos }} {{ pago.inscripcion.nombres }} manualmente? Se confirmara su inscripcion (accion administrativa, sin pasarela).">
+                                            <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
+                                            <input type="hidden" name="gestion" value="{{ gestion.id }}">
+                                            <button class="gestion-button" type="submit">Marcar como pagado</button>
+                                        </form>
+                                    {% else %}
+                                        <span class="gestion-table__meta">—</span>
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% else %}
-                            <tr><td colspan="6">No hay pagos registrados para esta gestion.</td></tr>
+                            <tr><td colspan="7">No hay pagos registrados para esta gestion.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>

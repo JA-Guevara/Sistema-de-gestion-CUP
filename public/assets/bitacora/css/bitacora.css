@@ -580,10 +580,11 @@ select.bitacora-filters__input {
 
     .bitacora-filters__actions {
         grid-column: 1 / -1;
-        max-width: 52px;
+        max-width: none;
         width: 100%;
         justify-self: center;
         justify-content: center;
+        flex-wrap: wrap;
     }
 
     .bitacora-table__desc {
@@ -690,6 +691,21 @@ select.bitacora-filters__input {
 
     .bitacora-table__empty::before {
         content: "";
+    }
+}
+
+/* Celular: la paginacion se compacta y envuelve para no recortarse. */
+@media (max-width: 480px) {
+    .bitacora-pagination {
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 12px;
+    }
+
+    .bitacora-pagination__btn {
+        min-width: 32px;
+        padding: 0 8px;
+        font-size: 12px;
     }
 }
 

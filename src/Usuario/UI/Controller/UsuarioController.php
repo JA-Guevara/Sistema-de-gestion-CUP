@@ -6,6 +6,8 @@ namespace App\Usuario\UI\Controller;
 
 use App\Auth\Entity\User;
 use App\Auth\Infrastructure\Persistence\UserRepository;
+use App\Usuario\Application\DTO\UsuariosRolBulkInput;
+use App\Usuario\Application\UseCase\AssignRoleToUsersBulk;
 use App\Usuario\Application\UseCase\CreateUser;
 use App\Usuario\Application\UseCase\ListRoles;
 use App\Usuario\Application\UseCase\ListUsers;
@@ -32,6 +34,7 @@ final class UsuarioController extends AbstractController
         private readonly ToggleUserState $toggleUserState,
         private readonly ResetUserPassword $resetUserPassword,
         private readonly ListRoles $listRoles,
+        private readonly AssignRoleToUsersBulk $assignRoleToUsersBulk,
         private readonly UserRepository $users,
     ) {
     }
@@ -44,6 +47,25 @@ final class UsuarioController extends AbstractController
             'roles' => $this->listRoles->execute(),
             'user' => $this->requireUser($request),
         ]);
+    }
+
+    #[Route('/roles', name: 'usuario_roles_bulk', methods: ['POST'])]
+    public function rolesBulk(Request $request): RedirectResponse
+    {
+        $this->requireUser($request);
+
+        try {
+            $updated = $this->assignRoleToUsersBulk->execute(new UsuariosRolBulkInput(
+                roleId: (int) $request->request->get('roleId', 0),
+                userIds: array_map('intval', (array) $request->request->all('usuarios')),
+                actorUserId: $this->actorUserId($request),
+            ));
+            $this->addFlash('success', sprintf('Rol asignado a %d usuario(s).', $updated));
+        } catch (UsuarioException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+        }
+
+        return $this->redirectToRoute('usuario_index');
     }
 
     #[Route('/nuevo', name: 'usuario_new', methods: ['GET', 'POST'])]
@@ -146,5 +168,12 @@ final class UsuarioController extends AbstractController
         }
 
         return $user;
+    }
+
+    private function actorUserId(Request $request): ?int
+    {
+        $userId = $request->getSession()->get('auth_user_id');
+
+        return is_int($userId) ? $userId : null;
     }
 }

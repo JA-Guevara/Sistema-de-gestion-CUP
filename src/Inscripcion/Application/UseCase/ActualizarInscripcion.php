@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Inscripcion\Application\UseCase;
 
+use App\Academico\Carrera\Infrastructure\Persistence\CarreraRepository;
 use App\Bitacora\Application\EventLog\InscripcionEvents;
 use App\Inscripcion\Application\DTO\InscripcionEditInput;
 use App\Inscripcion\Domain\Entity\Inscripcion;
@@ -14,6 +15,7 @@ final readonly class ActualizarInscripcion
 {
     public function __construct(
         private InscripcionRepository $inscripciones,
+        private CarreraRepository $carreras,
         private InscripcionEvents $events,
     ) {
     }
@@ -29,7 +31,7 @@ final readonly class ActualizarInscripcion
             'nombres' => $inscripcion->nombres,
             'apellidos' => $inscripcion->apellidos,
             'email' => $inscripcion->email,
-            'carrera' => $inscripcion->carrera->id,
+            'carrera' => $inscripcion->carrera?->id,
         ];
 
         $inscripcion->nombres = trim($input->nombres);
@@ -42,6 +44,14 @@ final readonly class ActualizarInscripcion
         $inscripcion->tituloBachiller = $input->tituloBachiller;
         $inscripcion->turnoPreferencia = $input->turnoPreferencia;
         $inscripcion->otros = $input->otros;
+
+        // La carrera solo aplica a estudiantes; asignarla realmente (antes solo se logueaba).
+        if ($inscripcion->esEstudiante() && $input->carreraId > 0) {
+            $carrera = $this->carreras->findById($input->carreraId);
+            if ($carrera !== null) {
+                $inscripcion->carrera = $carrera;
+            }
+        }
 
         $this->inscripciones->flush();
 

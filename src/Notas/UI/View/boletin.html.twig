@@ -39,13 +39,13 @@
         <tbody>
             {% for fila in boletin.materias %}
                 <tr>
-                    <td class="boleta__left">{{ fila.materia.codigo }} - {{ fila.materia.nombre }}</td>
-                    <td>{{ fila.grupo.codigo }}</td>
+                    <td class="boleta__left" data-label="Materia">{{ fila.materia.codigo }} - {{ fila.materia.nombre }}</td>
+                    <td data-label="Grupo">{{ fila.grupo.codigo }}</td>
                     {% for examen in 1..boletin.cantidadExamenes %}
-                        <td>{{ fila.valores[examen] is not null ? fila.valores[examen] : '-' }}</td>
+                        <td data-label="Examen {{ examen }}">{{ fila.valores[examen] is not null ? fila.valores[examen] : '-' }}</td>
                     {% endfor %}
-                    <td><strong>{{ fila.promedio is not null ? fila.promedio : '-' }}</strong></td>
-                    <td>
+                    <td data-label="Promedio"><strong>{{ fila.promedio is not null ? fila.promedio : '-' }}</strong></td>
+                    <td data-label="Estado">
                         {% if fila.aprobado is null %}
                             <span class="boleta__estado--incompleto">Incompleto</span>
                         {% elseif fila.aprobado %}
@@ -119,7 +119,7 @@
         .boleta-modal__bar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
         .boleta-modal__scroll { overflow: auto; padding: 28px; }
 
-        @media (max-width: 720px) {
+        @media screen and (max-width: 720px) {
             .boleta { padding: 22px; }
             .boleta__head { align-items: flex-start; }
             .boleta__logo { height: 52px; }
@@ -133,12 +133,26 @@
             .boleta__table { min-width: 680px; }
         }
 
-        @media (max-width: 520px) {
+        @media screen and (max-width: 520px) {
             .boleta { padding: 16px; border-radius: 8px; }
             .boleta__head { gap: 12px; }
             .boleta__uni { font-size: 14px; }
             .boleta-modal__bar { align-items: stretch; flex-direction: column; }
             .boleta-modal__bar-actions .gestion-button { flex: 1 1 120px; }
+        }
+
+        /* ---- Celular (solo pantalla): la tabla se apila en tarjetas etiqueta:valor.
+               Excluye print para que el documento impreso conserve la tabla normal. ---- */
+        @media screen and (max-width: 600px) {
+            .boleta__table { min-width: 0; border: 0; font-size: 12.5px; }
+            .boleta__table thead { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); }
+            .boleta__table tbody tr { display: block; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 10px; padding: 2px 12px; }
+            .boleta__table tbody td { display: flex; justify-content: space-between; gap: 14px; text-align: right; border: 0; border-bottom: 1px solid #eef0f3; padding: 8px 0; }
+            .boleta__table tbody td.boleta__left { text-align: right; }
+            .boleta__table tbody td:last-child { border-bottom: 0; }
+            .boleta__table tbody td::before { content: attr(data-label); font-weight: 700; color: #64748b; text-align: left; }
+            .boleta__table tbody td[colspan] { justify-content: center; text-align: center; }
+            .boleta__table tbody td[colspan]::before { content: ""; }
         }
 
         /* ---- Impresion: solo la boleta del modal ---- */

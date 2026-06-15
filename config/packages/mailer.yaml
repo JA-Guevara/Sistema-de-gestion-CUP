@@ -1,3 +1,6 @@
 framework:
     mailer:
-        dsn: '%env(MAILER_DSN)%'
+        # Se arma con 2 valores: MAIL_USER + MAIL_PASSWORD (.env.local).
+        # urlencode escapa el @ y caracteres especiales, así no codificás nada a mano.
+        # Host fijo de Gmail (gratis, sin dominio); si cambiás de proveedor, ajustá el host acá.
+        dsn: 'smtp://%env(urlencode:MAIL_USER)%:%env(urlencode:MAIL_PASSWORD)%@smtp.gmail.com:587'

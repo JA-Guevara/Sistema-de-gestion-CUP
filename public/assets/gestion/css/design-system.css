@@ -490,3 +490,108 @@
         scroll-behavior: auto !important;
     }
 }
+
+/* =========================================================================
+   RED DE SEGURIDAD RESPONSIVE GLOBAL
+   Garantiza que en CUALQUIER ancho (incluido celular 320-480px) ninguna
+   barra de acciones/toolbar se recorte y ningun grid/tabla pierda contenido.
+   Vive aqui porque design-system.css se carga AL FINAL: gana la cascada y
+   aplica en TODAS las paginas, neutralizando incluso estilos inline.
+   ========================================================================= */
+
+/* 1) Toda fila de acciones/toolbar/checks envuelve (nunca se recorta). */
+.gestion-actions,
+.gestion-actions form,
+.gestion-head__actions,
+.gestion-page-actions,
+.gestion-bulk-actions,
+.gestion-bulk-actions__buttons,
+.gestion-inline-form,
+.gestion-table__actions,
+.gestion-table__actions-cell,
+.gestion-checks--days {
+    flex-wrap: wrap;
+}
+
+/* 2) Ningun control de formulario desborda su contenedor. */
+.app-content input,
+.app-content select,
+.app-content textarea {
+    max-width: 100%;
+}
+
+/* 3) URLs/codigos/celdas largas nunca rompen el layout horizontal.
+   (.gestion-table td ya lo trae gestion.css; aqui solo lo que falta.) */
+.app-content pre,
+.app-content code,
+.boleta__table td {
+    overflow-wrap: anywhere;
+}
+
+/* 4) Tablet (<=760px): los grids con columnas FIJAS en linea (style inline)
+   se reacomodan con auto-fit en vez de desbordarse y recortar el boton. */
+@media (max-width: 760px) {
+    [class*="gestion-grid"][style*="grid-template-columns"] {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+    }
+}
+
+/* 5) Celular real (<=480px): todo a UNA columna, sin minimos que desborden. */
+@media (max-width: 480px) {
+    .app-shell__main {
+        padding: 16px 12px 36px;
+    }
+
+    /* Cualquier grid (utilitario o con columnas en linea) colapsa a 1 col. */
+    .gestion-grid,
+    .gestion-grid--two,
+    .gestion-grid--three,
+    .gestion-grid--four,
+    .gestion-grid--inline-action,
+    .gestion-grid--inline-action-2,
+    .gestion-period,
+    .gestion-period-row,
+    .gestion-career,
+    .gestion-career-row,
+    .gestion-filters,
+    [class*="gestion-grid"][style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* El boton "Limpiar" de filtros ocupa su propia fila completa. */
+    .gestion-filters__field--clear {
+        grid-column: 1 / -1;
+    }
+
+    /* Inputs/selects con min-width grande se sueltan a ancho completo. */
+    .gestion-filters input,
+    .gestion-filters select,
+    .gestion-bulk-actions__select select,
+    .gestion-bulk-actions__select input,
+    .gestion-inline-form input,
+    .gestion-inline-form select,
+    .gestion-inline-input {
+        min-width: 0;
+        width: 100%;
+    }
+
+    /* Inputs de las filas de accion pueden encogerse y crecer (no desbordan). */
+    .gestion-actions form input[type="text"],
+    .gestion-actions form select {
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+}
+
+/* 6) Pasos del wizard: en pantallas chicas envuelven en vez de hacer scroll
+   horizontal ilegible (anula el nowrap+scroll del bloque de 820px). */
+@media (max-width: 560px) {
+    .gestion-wizard__steps {
+        flex-wrap: wrap;
+        overflow-x: visible;
+        white-space: normal;
+    }
+    .gestion-wizard__step {
+        white-space: normal;
+    }
+}

@@ -7,6 +7,7 @@ namespace App\Dashboard\UI\Controller;
 use App\Auth\Entity\User;
 use App\Auth\Infrastructure\Persistence\UserRepository;
 use App\Dashboard\Application\UseCase\GetReportes;
+use App\Dashboard\Application\UseCase\InterpretarConsulta;
 use App\Dashboard\Infrastructure\Persistence\ReporteRepository;
 use App\Gestion\Domain\Entity\Gestion;
 use App\Gestion\Infrastructure\Persistence\GestionRepository;
@@ -23,6 +24,7 @@ final class DashboardController extends AbstractController
 
     public function __construct(
         private readonly GetReportes $reportes,
+        private readonly InterpretarConsulta $asistente,
         private readonly ReporteRepository $reporteRepo,
         private readonly GestionRepository $gestiones,
         private readonly UserRepository $users,
@@ -72,6 +74,28 @@ final class DashboardController extends AbstractController
         return new JsonResponse(
             $this->reportes->execute($gestion, $filtros['carrera'], $filtros['materia'], $filtros['docente'])
         );
+    }
+
+    #[Route('/dashboard/asistente', name: 'dashboard_asistente', methods: ['POST'])]
+    public function asistente(Request $request): JsonResponse
+    {
+        $user = $this->currentUser($request);
+        if ($user === null) {
+            return new JsonResponse(['ok' => false, 'respuesta' => 'Tu sesión expiró.'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $gestion = $this->resolveGestion($request);
+        if ($gestion === null) {
+            return new JsonResponse(['ok' => false, 'respuesta' => 'No hay una gestión activa.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $consulta = (string) $request->request->get('consulta', '');
+        if ($consulta === '' && str_contains((string) $request->headers->get('content-type'), 'application/json')) {
+            $body = json_decode($request->getContent(), true);
+            $consulta = is_array($body) ? (string) ($body['consulta'] ?? '') : '';
+        }
+
+        return new JsonResponse($this->asistente->execute($gestion, $consulta));
     }
 
     /** @return array{carreras: list<array<string,mixed>>, materias: list<array<string,mixed>>, docentes: list<array<string,mixed>>} */

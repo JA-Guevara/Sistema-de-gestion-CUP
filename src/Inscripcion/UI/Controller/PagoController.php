@@ -11,6 +11,7 @@ use App\Gestion\Infrastructure\Persistence\GestionRepository;
 use App\Inscripcion\Application\UseCase\ActualizarEstadoPagoStripe;
 use App\Inscripcion\Application\UseCase\ConfirmarPagoStripe;
 use App\Inscripcion\Application\UseCase\IniciarPagoInscripcion;
+use App\Inscripcion\Application\UseCase\RegistrarPagoManual;
 use App\Inscripcion\Domain\Catalog\EstadoPago;
 use App\Inscripcion\Domain\Exception\InscripcionException;
 use App\Inscripcion\Infrastructure\Payment\StripeGateway;
@@ -33,6 +34,7 @@ final class PagoController extends AbstractController
         private readonly IniciarPagoInscripcion $iniciarPago,
         private readonly ActualizarEstadoPagoStripe $actualizarEstadoPago,
         private readonly ConfirmarPagoStripe $confirmarPago,
+        private readonly RegistrarPagoManual $registrarPagoManual,
         private readonly PagoRepository $pagos,
         private readonly GestionRepository $gestiones,
         private readonly StripeGateway $stripe,
@@ -156,7 +158,44 @@ final class PagoController extends AbstractController
             'estadoSeleccionado' => $estado,
             'pasarelaConfigurada' => $this->stripe->isConfigured(),
             'user' => $this->currentUser($request),
+            'csrf_token' => $this->csrf->issue(self::CSRF_INTENTION),
         ]);
+    }
+
+    /**
+     * Registro de pago MANUAL por un administrador (respaldo sin pasarela):
+     * marca el pago como pagado y confirma la inscripcion.
+     */
+    #[Route('/admin/pagos/{id}/registrar', name: 'inscripcion_admin_pagos_registrar', methods: ['POST'], requirements: ['id' => '\d+'], priority: 10)]
+    public function registrarManual(Request $request, int $id): RedirectResponse
+    {
+        if ($this->currentUser($request) === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->csrf->validate(self::CSRF_INTENTION, (string) $request->request->get('_csrf_token', ''))) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToPagos($request);
+        }
+
+        try {
+            $this->registrarPagoManual->execute($id, $this->actorUserId($request));
+            $this->addFlash('success', 'Pago registrado manualmente. La inscripcion fue confirmada.');
+        } catch (InscripcionException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToPagos($request);
+    }
+
+    private function redirectToPagos(Request $request): RedirectResponse
+    {
+        $gestionId = (int) $request->request->get('gestion', 0);
+
+        return $gestionId > 0
+            ? $this->redirectToRoute('inscripcion_admin_pagos', ['gestion' => $gestionId])
+            : $this->redirectToRoute('inscripcion_admin_pagos');
     }
 
     private function currentUser(Request $request): ?User
@@ -164,5 +203,12 @@ final class PagoController extends AbstractController
         $userId = $request->getSession()->get(self::SESSION_USER_KEY);
 
         return is_int($userId) ? $this->users->findById($userId) : null;
+    }
+
+    private function actorUserId(Request $request): ?int
+    {
+        $userId = $request->getSession()->get(self::SESSION_USER_KEY);
+
+        return is_int($userId) ? $userId : null;
     }
 }

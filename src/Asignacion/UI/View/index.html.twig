@@ -3,12 +3,22 @@
 {% block title %}Asignaciones{% endblock %}
 
 {% block stylesheets %}
+    {{ parent() }}
     <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">
-{% endblock %}
-
-{% block javascripts %}
-    <script src="/assets/gestion/js/gestion-filters.js?v=9" defer></script>
-    <script src="/assets/gestion/js/gestion-bulk-actions.js?v=9" defer></script>
+    <style>
+        .adm-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+        .adm-tab{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;border:0;cursor:pointer;background:#f1f5f9;color:#64748b;font-weight:700;font-size:13px;font-family:inherit}
+        .adm-tab:hover{background:#e2e8f0}
+        .adm-tab.is-active{background:#1e3a8a;color:#fff}
+        .adm-tab__dot{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:rgba(148,163,184,.25);font-size:12px}
+        .adm-tab.is-active .adm-tab__dot{background:rgba(255,255,255,.3)}
+        .adm-slide{display:none}
+        .adm-slide.is-active{display:block;animation:adm-fade .18s ease}
+        @keyframes adm-fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+        .adm-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0 0}
+        .adm-nav__pos{color:#64748b;font-weight:700;font-size:13px}
+        .adm-nav button[disabled]{opacity:.4;cursor:not-allowed}
+    </style>
 {% endblock %}
 
 {% block app_content %}
@@ -16,217 +26,194 @@
         <div>
             <p class="gestion-eyebrow">Administracion academica</p>
             <h1 class="app-content__title">Asignaciones</h1>
+            <p class="gestion-help" style="margin:4px 0 0">Gestion activa: <strong>{{ gestion ? gestion.codigo : 'Sin gestion' }}</strong></p>
         </div>
-        <div class="gestion-head__actions">
-            {% if user.hasPermission('asignaciones.gestionar') or user.hasPermission('notas.asignar') %}
-                <a href="{{ path('nota_asignaciones') }}" class="gestion-button">Docentes</a>
-                <a href="{{ path('nota_grupos') }}" class="gestion-button gestion-button--primary">Estudiantes</a>
-            {% endif %}
-            {% if user.hasPermission('academico.ver') or user.hasPermission('academico.gestionar') %}
-                <a href="{{ path('horario_index') }}" class="gestion-button">Horarios</a>
-            {% endif %}
-        </div>
+        {% if user.hasPermission('usuarios.ver') or user.hasPermission('usuarios.gestionar') %}
+            <div class="gestion-head__actions">
+                <a href="{{ path('usuario_index') }}" class="gestion-button">Usuarios y roles</a>
+            </div>
+        {% endif %}
     </section>
 
     {% include '@gestion/partials/_flash.html.twig' %}
 
-    <div class="gestion-dashboard">
-        <section class="gestion-metric">
-            <span class="gestion-metric__label">Gestion activa</span>
-            <strong>{{ gestion ? gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) : 'Sin gestion' }}</strong>
-        </section>
-        <section class="gestion-metric">
-            <span class="gestion-metric__label">Inscritos</span>
-            <strong>{{ stats.inscritos }}</strong>
-        </section>
-        <section class="gestion-metric">
-            <span class="gestion-metric__label">Grupos</span>
-            <strong>{{ stats.grupos }}</strong>
-        </section>
-        <section class="gestion-metric">
-            <span class="gestion-metric__label">Docentes con rol</span>
-            <strong>{{ stats.docentes }}</strong>
-        </section>
+    <div class="adm-carousel" data-adm-carousel="asignacion">
+        {% set slides = [{'key':'docentes','label':'Docentes'}, {'key':'estudiantes','label':'Estudiantes'}, {'key':'horarios','label':'Horarios'}] %}
+        <div class="adm-tabs" role="tablist">
+            {% for s in slides %}
+                <button type="button" class="adm-tab {{ loop.first ? 'is-active' : '' }}" data-adm-go="{{ s.key }}">
+                    <span class="adm-tab__dot">{{ loop.index }}</span> {{ s.label }}
+                </button>
+            {% endfor %}
+        </div>
+
+        {# ============ SLIDE: Docentes ============ #}
+        <div class="adm-slide is-active" data-slide="docentes">
+            <section class="gestion-panel">
+                <div class="gestion-panel__header">
+                    <div>
+                        <h2>Asignacion de docentes</h2>
+                        <p class="gestion-panel__hint">Asigna docentes a cada materia y grupo de la gestion activa (masiva o uno por uno).</p>
+                    </div>
+                    {% if user.hasPermission('asignaciones.gestionar') or user.hasPermission('notas.asignar') %}
+                        <a href="{{ path('nota_asignaciones') }}" class="gestion-button gestion-button--primary">Asignar docentes</a>
+                    {% endif %}
+                </div>
+                <div class="gestion-dashboard">
+                    <section class="gestion-metric">
+                        <span class="gestion-metric__label">Docentes con rol</span>
+                        <strong>{{ stats.docentes }}</strong>
+                    </section>
+                    <section class="gestion-metric">
+                        <span class="gestion-metric__label">Docentes asignados</span>
+                        <strong>{{ stats.asignacionesDocente }}</strong>
+                    </section>
+                    <section class="gestion-metric">
+                        <span class="gestion-metric__label">Materias activas</span>
+                        <strong>{{ materias|length }}</strong>
+                    </section>
+                </div>
+            </section>
+
+            {% if asignacionesDocente is not empty %}
+                <section class="gestion-panel">
+                    <div class="gestion-panel__header">
+                        <div>
+                            <h2>Docentes asignados</h2>
+                            <p class="gestion-panel__hint">Resumen de materia, grupo y docente para la gestion activa.</p>
+                        </div>
+                    </div>
+                    <div class="gestion-table-wrap">
+                        <table class="gestion-table gestion-table--stack">
+                            <thead>
+                                <tr>
+                                    <th>Materia</th>
+                                    <th>Grupo</th>
+                                    <th>Docente</th>
+                                    <th class="gestion-table__actions-cell">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for asignacion in asignacionesDocente %}
+                                    <tr>
+                                        <td data-label="Materia">{{ asignacion.materia.codigo }} - {{ asignacion.materia.nombre }}</td>
+                                        <td data-label="Grupo">{{ asignacion.grupo.codigo }}</td>
+                                        <td data-label="Docente">{{ asignacion.docente.firstName }} {{ asignacion.docente.lastName }}</td>
+                                        <td class="gestion-table__actions-cell" data-label="Acciones">
+                                            <div class="gestion-table__actions">
+                                                <a class="gestion-action-button gestion-action-button--view" href="{{ path('nota_planilla', {materiaId: asignacion.materia.id, grupoId: asignacion.grupo.id}) }}" aria-label="Ver planilla" title="Planilla">
+                                                    <svg viewBox="0 0 24 24"><path d="M9 11h6"/><path d="M9 15h6"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/><path d="M14 3v5h5"/></svg>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            {% endif %}
+        </div>
+
+        {# ============ SLIDE: Estudiantes ============ #}
+        <div class="adm-slide" data-slide="estudiantes">
+            <section class="gestion-panel">
+                <div class="gestion-panel__header">
+                    <div>
+                        <h2>Asignacion de estudiantes</h2>
+                        <p class="gestion-panel__hint">Distribuye a los estudiantes confirmados en grupos por materia (masiva o uno por uno).</p>
+                    </div>
+                    {% if user.hasPermission('asignaciones.gestionar') or user.hasPermission('notas.asignar') %}
+                        <a href="{{ path('nota_grupos') }}" class="gestion-button gestion-button--primary">Asignar estudiantes</a>
+                    {% endif %}
+                </div>
+                <div class="gestion-dashboard">
+                    <section class="gestion-metric">
+                        <span class="gestion-metric__label">Inscritos confirmados</span>
+                        <strong>{{ stats.inscritos }}</strong>
+                    </section>
+                    <section class="gestion-metric">
+                        <span class="gestion-metric__label">Grupos</span>
+                        <strong>{{ stats.grupos }}</strong>
+                    </section>
+                </div>
+            </section>
+        </div>
+
+        {# ============ SLIDE: Horarios ============ #}
+        <div class="adm-slide" data-slide="horarios">
+            <section class="gestion-panel">
+                <div class="gestion-panel__header">
+                    <div>
+                        <h2>Horarios</h2>
+                        <p class="gestion-panel__hint">Gestiona los horarios de clases por materia, grupo y aula de la gestion activa.</p>
+                    </div>
+                    {% if user.hasPermission('academico.ver') or user.hasPermission('academico.gestionar') %}
+                        <a href="{{ path('horario_index') }}" class="gestion-button gestion-button--primary">Gestionar horarios</a>
+                    {% endif %}
+                </div>
+                <div class="gestion-dashboard">
+                    <section class="gestion-metric">
+                        <span class="gestion-metric__label">Materias activas</span>
+                        <strong>{{ materias|length }}</strong>
+                    </section>
+                    <section class="gestion-metric">
+                        <span class="gestion-metric__label">Grupos disponibles</span>
+                        <strong>{{ grupos|length }}</strong>
+                    </section>
+                </div>
+            </section>
+        </div>
+
+        <div class="adm-nav">
+            <button type="button" class="gestion-button" data-adm-prev>&larr; Anterior</button>
+            <span class="adm-nav__pos" data-adm-pos></span>
+            <button type="button" class="gestion-button" data-adm-next>Siguiente &rarr;</button>
+        </div>
     </div>
+{% endblock %}
 
-    {% if user.hasPermission('usuarios.gestionar') or user.hasPermission('asignaciones.gestionar') %}
-        <section class="gestion-panel" data-bulk-root>
-            <div class="gestion-panel__header">
-                <div>
-                    <h2>Asignacion masiva de roles</h2>
-                    <p class="gestion-panel__hint">Selecciona usuarios y aplica el rol necesario. Los usuarios inactivos o que ya tienen el rol se omiten.</p>
-                </div>
-                <a href="{{ path('rol_index') }}" class="gestion-button">Roles y permisos</a>
-            </div>
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        (function () {
+            var root = document.querySelector('[data-adm-carousel]');
+            if (!root) { return; }
+            var storeKey = 'adm-slide-' + (root.getAttribute('data-adm-carousel') || '');
+            var slides = Array.prototype.slice.call(root.querySelectorAll('.adm-slide'));
+            var tabs = Array.prototype.slice.call(root.querySelectorAll('.adm-tab'));
+            var prev = root.querySelector('[data-adm-prev]');
+            var next = root.querySelector('[data-adm-next]');
+            var pos = root.querySelector('[data-adm-pos]');
+            if (!slides.length) { return; }
+            var current = 0;
 
-            <form class="gestion-filters" data-gestion-filters data-filter-target="asignacion-usuarios">
-                <div class="gestion-filters__field">
-                    <label>Buscar</label>
-                    <input data-filter-field="texto" placeholder="Nombre, apellido o correo">
-                </div>
-                <div class="gestion-filters__field">
-                    <label>Rol actual</label>
-                    <select data-filter-field="rol">
-                        <option value="">Todos</option>
-                        {% for role in roles %}
-                            <option value="{{ role.name }}">{{ role.name }}</option>
-                        {% endfor %}
-                        <option value="Sin rol">Sin rol</option>
-                    </select>
-                </div>
-                <div class="gestion-filters__field">
-                    <label>Estado</label>
-                    <select data-filter-field="estado">
-                        <option value="">Todos</option>
-                        <option value="ACTIVO">Activo</option>
-                        <option value="INACTIVO">Inactivo</option>
-                    </select>
-                </div>
-                <div class="gestion-filters__field gestion-filters__field--clear">
-                    <label aria-hidden="true">Limpiar</label>
-                    <button class="gestion-filters__clear" type="button" data-filter-clear aria-label="Limpiar filtros">
-                        <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m6 10 1 10h10l1-10"/><path d="M10 14v3"/><path d="M14 14v3"/></svg>
-                    </button>
-                </div>
-            </form>
+            function indexOfKey(key) {
+                for (var j = 0; j < slides.length; j++) {
+                    if (slides[j].getAttribute('data-slide') === key) { return j; }
+                }
+                return -1;
+            }
 
-            <form id="asignacion-role-form" method="post" action="{{ path('asignacion_roles_bulk') }}" class="gestion-bulk-actions" data-bulk-actions hidden>
-                <div class="gestion-bulk-actions__info">
-                    <span class="gestion-bulk-actions__count"><strong data-bulk-count>0</strong> usuarios seleccionados</span>
-                    <button type="button" class="gestion-bulk-actions__clear" data-bulk-clear>Deseleccionar</button>
-                </div>
-                <div class="gestion-bulk-actions__buttons">
-                    <label class="gestion-bulk-actions__select">
-                        Rol
-                        <select name="roleId" required>
-                            <option value="">Seleccionar rol</option>
-                            {% for role in roles %}
-                                <option value="{{ role.id }}">{{ role.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </label>
-                    <button type="submit" class="gestion-button gestion-button--primary" data-bulk-submit disabled>
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-                        Asignar rol
-                    </button>
-                </div>
-            </form>
+            function show(n) {
+                current = Math.max(0, Math.min(n, slides.length - 1));
+                slides.forEach(function (s, idx) { s.classList.toggle('is-active', idx === current); });
+                tabs.forEach(function (t, idx) { t.classList.toggle('is-active', idx === current); });
+                if (pos) { pos.textContent = (current + 1) + ' / ' + slides.length; }
+                if (prev) { prev.disabled = current === 0; }
+                if (next) { next.disabled = current === slides.length - 1; }
+                try { sessionStorage.setItem(storeKey, slides[current].getAttribute('data-slide')); } catch (e) {}
+            }
 
-            <div class="gestion-table-wrap">
-                <table class="gestion-table gestion-table--stack" data-gestion-filter-table="asignacion-usuarios">
-                    <thead>
-                        <tr>
-                            <th><input class="gestion-bulk-check" type="checkbox" data-bulk-check-all aria-label="Seleccionar usuarios visibles"></th>
-                            <th>Usuario</th>
-                            <th>Correo</th>
-                            <th>Roles</th>
-                            <th class="gestion-col--center">Estado</th>
-                            <th class="gestion-table__actions-cell">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for usuario in users %}
-                            {% set estado = usuario.active ? 'ACTIVO' : 'INACTIVO' %}
-                            <tr data-filter-row data-filter-texto="{{ usuario.firstName }} {{ usuario.lastName }} {{ usuario.email }}" data-filter-rol="{{ usuario.roleNames() }}" data-filter-estado="{{ estado }}">
-                                <td data-label="Seleccion">
-                                    <input class="gestion-bulk-check" type="checkbox" name="usuarios[]" value="{{ usuario.id }}" form="asignacion-role-form" data-bulk-item aria-label="Seleccionar {{ usuario.firstName }} {{ usuario.lastName }}">
-                                </td>
-                                <td data-label="Usuario">
-                                    {{ usuario.firstName }} {{ usuario.lastName }}
-                                    <span class="gestion-table__meta">#{{ usuario.id }}</span>
-                                </td>
-                                <td data-label="Correo">{{ usuario.email }}</td>
-                                <td data-label="Roles">{{ usuario.roleNames() }}</td>
-                                <td class="gestion-col--center" data-label="Estado">
-                                    <span class="gestion-badge gestion-badge--{{ usuario.active ? 'activa' : 'inactiva' }}">{{ usuario.active ? 'Activo' : 'Inactivo' }}</span>
-                                </td>
-                                <td class="gestion-table__actions-cell" data-label="Acciones">
-                                    <div class="gestion-table__actions">
-                                        <a class="gestion-action-button gestion-action-button--view" href="{{ path('usuario_show', {id: usuario.id}) }}" aria-label="Ver usuario" title="Ver">
-                                            <svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
-                                        </a>
-                                        <a class="gestion-action-button gestion-action-button--edit" href="{{ path('usuario_edit', {id: usuario.id}) }}" aria-label="Editar usuario" title="Editar">
-                                            <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        <tr data-filter-empty {{ users ? 'hidden' : '' }}><td colspan="6">Todavia no hay usuarios registrados.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    {% endif %}
+            tabs.forEach(function (t, idx) {
+                t.addEventListener('click', function () { show(idx); root.scrollIntoView({ block: 'nearest' }); });
+            });
+            if (prev) { prev.addEventListener('click', function () { show(current - 1); root.scrollIntoView({ block: 'nearest' }); }); }
+            if (next) { next.addEventListener('click', function () { show(current + 1); root.scrollIntoView({ block: 'nearest' }); }); }
 
-    <section class="gestion-panel">
-        <div class="gestion-panel__header">
-            <div>
-                <h2>Operacion academica</h2>
-                <p class="gestion-panel__hint">Centraliza docentes, grupos de estudiantes y horarios de la gestion activa.</p>
-            </div>
-        </div>
-        <div class="gestion-dashboard">
-            <section class="gestion-metric">
-                <span class="gestion-metric__label">Materias activas</span>
-                <strong>{{ materias|length }}</strong>
-            </section>
-            <section class="gestion-metric">
-                <span class="gestion-metric__label">Docentes asignados</span>
-                <strong>{{ stats.asignacionesDocente }}</strong>
-            </section>
-            <section class="gestion-metric">
-                <span class="gestion-metric__label">Grupos disponibles</span>
-                <strong>{{ grupos|length }}</strong>
-            </section>
-        </div>
-        <div class="gestion-actions">
-            {% if user.hasPermission('asignaciones.gestionar') or user.hasPermission('notas.asignar') %}
-                <a href="{{ path('nota_asignaciones') }}" class="gestion-button">Asignar docentes</a>
-                <a href="{{ path('nota_grupos') }}" class="gestion-button gestion-button--primary">Asignar estudiantes</a>
-            {% endif %}
-            {% if user.hasPermission('academico.ver') or user.hasPermission('academico.gestionar') %}
-                <a href="{{ path('horario_index') }}" class="gestion-button">Gestionar horarios</a>
-            {% endif %}
-        </div>
-    </section>
-
-    {% if asignacionesDocente is not empty %}
-        <section class="gestion-panel">
-            <div class="gestion-panel__header">
-                <div>
-                    <h2>Docentes asignados</h2>
-                    <p class="gestion-panel__hint">Resumen de materia, grupo y docente para la gestion activa.</p>
-                </div>
-            </div>
-            <div class="gestion-table-wrap">
-                <table class="gestion-table gestion-table--stack">
-                    <thead>
-                        <tr>
-                            <th>Materia</th>
-                            <th>Grupo</th>
-                            <th>Docente</th>
-                            <th class="gestion-table__actions-cell">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for asignacion in asignacionesDocente %}
-                            <tr>
-                                <td data-label="Materia">{{ asignacion.materia.codigo }} - {{ asignacion.materia.nombre }}</td>
-                                <td data-label="Grupo">{{ asignacion.grupo.codigo }}</td>
-                                <td data-label="Docente">{{ asignacion.docente.firstName }} {{ asignacion.docente.lastName }}</td>
-                                <td class="gestion-table__actions-cell" data-label="Acciones">
-                                    <div class="gestion-table__actions">
-                                        <a class="gestion-action-button gestion-action-button--view" href="{{ path('nota_planilla', {materiaId: asignacion.materia.id, grupoId: asignacion.grupo.id}) }}" aria-label="Ver planilla" title="Planilla">
-                                            <svg viewBox="0 0 24 24"><path d="M9 11h6"/><path d="M9 15h6"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/><path d="M14 3v5h5"/></svg>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    {% endif %}
+            var saved = -1;
+            try { saved = indexOfKey(sessionStorage.getItem(storeKey)); } catch (e) {}
+            show(saved >= 0 ? saved : 0);
+        }());
+    </script>
 {% endblock %}

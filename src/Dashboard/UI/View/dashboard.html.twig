@@ -5,12 +5,15 @@
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">
-    <link rel="stylesheet" href="/assets/gestion/css/reportes.css?v=2">
+    <link rel="stylesheet" href="/assets/gestion/css/reportes.css?v=6">
 {% endblock %}
 
 {% block javascripts %}
     <script src="/assets/vendor/chartjs/chart.umd.min.js?v=4.4.1" defer></script>
-    <script src="/assets/gestion/js/dashboard-reportes.js?v=2" defer></script>
+    <script src="/assets/gestion/js/dashboard-reportes.js?v=3" defer></script>
+    <script src="/assets/gestion/js/dashboard-asistente.js?v=1" defer></script>
+    <script src="/assets/vendor/sheetjs/xlsx.full.min.js?v=0.18.5" defer></script>
+    <script src="/assets/gestion/js/dashboard-export.js?v=3" defer></script>
 {% endblock %}
 
 {% block app_content %}
@@ -38,6 +41,12 @@
             <p class="gestion-panel__hint gestion-panel__block">No hay ninguna gestión activa o seleccionada. Activá o creá una gestión para ver los reportes.</p>
         </section>
     {% else %}
+        {# ---- Encabezado solo visible en impresión / PDF ---- #}
+        <div class="rep-print-head" aria-hidden="true">
+            <h2>CUP FICCT · Dashboard &amp; Reportes</h2>
+            <p>Gestión {{ gestion.codigo }}{% if filtros.carrera or filtros.materia or filtros.docente %} · con filtros aplicados{% endif %} · Generado el {{ 'now'|date('d/m/Y H:i') }}</p>
+        </div>
+
         {# ---- Carrusel: 2 vistas ---- #}
         <div class="rep-tabs" role="tablist">
             <button type="button" class="rep-tab is-active" data-rep-tab="charts" role="tab" aria-selected="true">
@@ -72,6 +81,9 @@
                     </select>
                 </label>
                 <button type="button" class="gestion-button" data-rep-clear="charts">Limpiar</button>
+                <span class="rep-spacer"></span>
+                <button type="button" class="gestion-button" data-rep-export="charts">Exportar CSV</button>
+                <button type="button" class="gestion-button" data-rep-print>Imprimir / PDF</button>
             </section>
 
             <div class="rep-kpis">
@@ -161,7 +173,37 @@
             </section>
         </div>
 
+        {# ---- Asistente de IA (chat flotante) ---- #}
+        <button type="button" class="asis-launcher" data-asis-launcher aria-label="Abrir asistente de IA" aria-expanded="false">
+            <span class="asis-bot" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 7V4.3"/>
+                    <circle class="asis-bot__led" cx="12" cy="3" r="1.1"/>
+                    <rect x="4" y="7" width="16" height="12" rx="3.5"/>
+                    <circle class="asis-bot__eye" cx="9" cy="13" r="1.5"/>
+                    <circle class="asis-bot__eye" cx="15" cy="13" r="1.5"/>
+                    <path d="M9.5 16.4h5"/>
+                </svg>
+            </span>
+            <span class="asis-launcher__badge" aria-hidden="true">IA</span>
+        </button>
+        <section class="asis-panel" data-asis-panel hidden aria-label="Asistente de reportes">
+            <div class="asis-panel__head">
+                <span class="asis-panel__avatar"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 4.6L18.5 9 14 11l-2 5-2-5L5.5 9l4.6-1.4z"/></svg></span>
+                <span class="asis-panel__title">Asistente de reportes<small>Pedímelo en palabras</small></span>
+                <button type="button" class="asis-panel__close" data-asis-close aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+            </div>
+            <div class="asis-messages" data-asis-messages>
+                <div class="asis-hint">Probá: <strong>&ldquo;reprobados de Matem&aacute;ticas&rdquo;</strong> · <strong>&ldquo;aprobados de Sistemas&rdquo;</strong> · <strong>&ldquo;promedios por materia&rdquo;</strong>. Toc&aacute; el micr&oacute;fono para hablar.</div>
+            </div>
+            <div class="asis-inputbar">
+                <input type="text" data-asis-input placeholder="Escrib&iacute; o habl&aacute;&hellip;" aria-label="Tu consulta">
+                <button type="button" class="asis-btn asis-btn--mic" data-asis-mic aria-label="Hablar"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg></button>
+                <button type="button" class="asis-btn asis-btn--send" data-asis-send aria-label="Enviar"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>
+            </div>
+        </section>
+
         <script type="application/json" data-rep-payload>{{ payload|json_encode|raw }}</script>
-        <script type="application/json" data-rep-config>{{ {'dataUrl': path('dashboard_data')}|json_encode|raw }}</script>
+        <script type="application/json" data-rep-config>{{ {'dataUrl': path('dashboard_data'), 'asistenteUrl': path('dashboard_asistente')}|json_encode|raw }}</script>
     {% endif %}
 {% endblock %}
