@@ -199,7 +199,7 @@
                     {% endif %}
 
                     {% if puedeAsignaciones %}
-                    <a href="{{ path('asignacion_index') }}" class="app-sidebar__item {{ current starts with 'asignacion_' or current starts with 'nota_asignacion' or current starts with 'nota_grupo' ? 'app-sidebar__item--active' : '' }}">
+                    <a href="{{ path('asignacion_index') }}" class="app-sidebar__item {{ current starts with 'asignacion_' ? 'app-sidebar__item--active' : '' }}">
                         <span class="app-sidebar__icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
@@ -270,7 +270,7 @@
                     {% if puedeNotas %}
                     <p class="app-sidebar__section-title">Evaluación</p>
 
-                    <a href="{{ path('nota_index') }}" class="app-sidebar__item {{ current starts with 'nota_' and not (current starts with 'nota_asignacion') and not (current starts with 'nota_grupo') and not (current starts with 'nota_horario') ? 'app-sidebar__item--active' : '' }}">
+                    <a href="{{ path('nota_index') }}" class="app-sidebar__item {{ current starts with 'nota_' and not (current starts with 'nota_horario') ? 'app-sidebar__item--active' : '' }}">
                         <span class="app-sidebar__icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="18" y1="20" x2="18" y2="10"/>

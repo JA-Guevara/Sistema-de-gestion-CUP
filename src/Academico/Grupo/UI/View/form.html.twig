@@ -28,7 +28,7 @@
                     Gestion
                     <select name="gestionId" required>
                         {% for gestion in gestiones %}
-                            <option value="{{ gestion.id }}" {{ grupo.gestion.id == gestion.id ? 'selected' : '' }}>{{ gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}</option>
+                            <option value="{{ gestion.id }}" {{ grupo.gestion.id == gestion.id ? 'selected' : '' }}>{{ gestion.codigo|gestion_label }}</option>
                         {% endfor %}
                     </select>
                 </label>

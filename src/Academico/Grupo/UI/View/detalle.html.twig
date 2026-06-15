@@ -22,7 +22,7 @@
         <div class="gestion-panel__header">
             <div>
                 <h2>{{ grupo.nombre }}</h2>
-                <p class="gestion-panel__hint">{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }} - {{ grupo.estado|lower|capitalize }}</p>
+                <p class="gestion-panel__hint">{{ grupo.gestion.codigo|gestion_label }} - {{ grupo.estado|lower|capitalize }}</p>
             </div>
         </div>
         <div class="gestion-dashboard">

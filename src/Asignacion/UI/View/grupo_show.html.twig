@@ -1,0 +1,86 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Grupo {{ grupo.codigo }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">
+{% endblock %}
+
+{% block app_content %}
+    <section class="gestion-head">
+        <div>
+            <p class="gestion-eyebrow">Asignaciones</p>
+            <h1 class="app-content__title">Grupo {{ grupo.codigo }} &mdash; {{ grupo.nombre }}</h1>
+        </div>
+        <a href="{{ path('asignacion_index') }}" class="gestion-button">Volver</a>
+    </section>
+
+    {% include '@gestion/partials/_flash.html.twig' %}
+
+    <section class="gestion-dashboard">
+        <div class="gestion-metric"><span class="gestion-metric__label">Turno</span><strong>{{ tarjeta and tarjeta.turno ? tarjeta.turno.nombre|capitalize : 'Sin turno' }}</strong></div>
+        <div class="gestion-metric"><span class="gestion-metric__label">Aula</span><strong>{{ tarjeta and tarjeta.aulas is not empty ? tarjeta.aulas|join(', ') : '—' }}</strong></div>
+        <div class="gestion-metric"><span class="gestion-metric__label">Horario</span><strong>{{ tarjeta and tarjeta.horaInicio and tarjeta.horaFin ? tarjeta.horaInicio|date('H:i') ~ ' - ' ~ tarjeta.horaFin|date('H:i') : 'Sin horario' }}</strong></div>
+        <div class="gestion-metric"><span class="gestion-metric__label">Estudiantes</span><strong>{{ tarjeta ? tarjeta.inscritos : 0 }}/{{ grupo.cupo }}</strong></div>
+    </section>
+
+    {% if user.hasPermission('asignaciones.gestionar') or user.hasPermission('notas.asignar') %}
+        <section class="gestion-actions" style="margin-bottom:16px">
+            <a class="gestion-button gestion-button--primary" href="{{ path('asignacion_estudiantes', {grupo: grupo.id}) }}">Asignar estudiantes</a>
+            <a class="gestion-button" href="{{ path('asignacion_docentes', {grupo: grupo.id}) }}">Asignar docentes</a>
+        </section>
+    {% endif %}
+
+    <section class="gestion-panel">
+        <div class="gestion-panel__header">
+            <div>
+                <h2>Materias y docentes</h2>
+                <p class="gestion-panel__hint">Docente responsable de cada materia del grupo.</p>
+            </div>
+        </div>
+        <div class="gestion-table-wrap">
+            <table class="gestion-table gestion-table--stack">
+                <thead>
+                    <tr><th>Materia</th><th>Docente</th></tr>
+                </thead>
+                <tbody>
+                    {% for d in (tarjeta ? tarjeta.docentes : []) %}
+                        <tr>
+                            <td data-label="Materia">{{ d.materia }}</td>
+                            <td data-label="Docente">{{ d.docente }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="2">Todavia no hay docentes asignados a este grupo.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="gestion-panel">
+        <div class="gestion-panel__header">
+            <div>
+                <h2>Estudiantes del grupo</h2>
+                <p class="gestion-panel__hint">Inscritos asignados a este grupo: <strong>{{ roster|length }}</strong>.</p>
+            </div>
+        </div>
+        <div class="gestion-table-wrap">
+            <table class="gestion-table gestion-table--stack">
+                <thead>
+                    <tr><th>CI</th><th>Estudiante</th></tr>
+                </thead>
+                <tbody>
+                    {% for inscripcion in roster %}
+                        <tr>
+                            <td data-label="CI">{{ inscripcion.ci }}</td>
+                            <td data-label="Estudiante">{{ inscripcion.apellidos }} {{ inscripcion.nombres }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="2">Ningun estudiante en este grupo todavia.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}

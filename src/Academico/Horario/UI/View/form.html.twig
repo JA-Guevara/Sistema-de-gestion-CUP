@@ -28,7 +28,7 @@
                     Grupo
                     <select name="grupoId" required>
                         {% for grupo in grupos %}
-                            <option value="{{ grupo.id }}" {{ horario.grupo.id == grupo.id ? 'selected' : '' }}>{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }} / {{ grupo.codigo }}</option>
+                            <option value="{{ grupo.id }}" {{ horario.grupo.id == grupo.id ? 'selected' : '' }}>{{ grupo.gestion.codigo|gestion_label }} / {{ grupo.codigo }}</option>
                         {% endfor %}
                     </select>
                 </label>

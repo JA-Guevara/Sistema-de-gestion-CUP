@@ -60,6 +60,10 @@ class Pago
     #[ORM\Column(length: 255, nullable: true)]
     public ?string $stripePaymentIntentId = null;
 
+    /** Observacion del admin (cuando el estado es OBSERVADO o al editar). */
+    #[ORM\Column(type: 'text', nullable: true)]
+    public ?string $observacion = null;
+
     #[ORM\Column]
     public \DateTimeImmutable $createdAt;
 

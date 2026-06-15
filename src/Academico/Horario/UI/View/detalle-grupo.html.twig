@@ -42,7 +42,7 @@
     <section class="gestion-panel" data-horario-tabs>
         <div class="gestion-panel__header">
             <div>
-                <h2>{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }} / {{ grupo.codigo }}</h2>
+                <h2>{{ grupo.gestion.codigo|gestion_label }} / {{ grupo.codigo }}</h2>
                 <p class="gestion-panel__hint">{{ grupo.nombre }} · {{ horarios|length }} franjas registradas. La asignacion de docentes se controla aparte desde carga docente.</p>
             </div>
         </div>

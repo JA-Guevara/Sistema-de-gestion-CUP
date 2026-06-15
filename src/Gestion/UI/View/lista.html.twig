@@ -90,7 +90,7 @@
                 <tbody>
                     {% for gestion in gestiones %}
                         <tr data-filter-row data-filter-texto="{{ gestion.codigo }} {{ gestion.nombre }}" data-filter-estado="{{ gestion.estado }}" data-filter-vigente="{{ gestion.active ? 'Si' : 'No' }}">
-                            <td data-label="Codigo">{{ gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}</td>
+                            <td data-label="Codigo">{{ gestion.codigo|gestion_label }}</td>
                             <td data-label="Nombre">{{ gestion.nombre }}</td>
                             <td class="gestion-col--center" data-label="Estado"><span class="gestion-badge gestion-badge--{{ gestion.estado|lower|replace({'_': '-'}) }}">{{ gestion.estado|replace({'_': ' '})|lower|capitalize }}</span></td>
                             <td class="gestion-col--center" data-label="Vigente"><span class="gestion-badge gestion-badge--{{ gestion.active ? 'si' : 'no' }}">{{ gestion.active ? 'Si' : 'No' }}</span></td>

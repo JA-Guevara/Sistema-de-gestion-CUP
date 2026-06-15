@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">
 {% endblock %}
 
-{% set estadoBadge = {'PAGADO':'activa','PENDIENTE':'borrador','CANCELADO':'inactiva','FALLIDO':'inactiva','EXPIRADO':'inactiva'} %}
+{% set estadoBadge = {'PAGADO':'activa','PENDIENTE':'borrador','OBSERVADO':'borrador','ANULADO':'inactiva','CANCELADO':'inactiva','FALLIDO':'inactiva','EXPIRADO':'inactiva'} %}
 
 {% block app_content %}
     <div class="gestion-head">
@@ -91,15 +91,24 @@
                                 <td class="gestion-col--text" data-label="Postulante">{{ pago.inscripcion.apellidos }} {{ pago.inscripcion.nombres }}<span class="gestion-table__meta">{{ pago.email }}</span></td>
                                 <td data-label="CI">{{ pago.inscripcion.ci }}</td>
                                 <td class="gestion-col--center" data-label="Monto">{{ pago.montoDecimal|number_format(2, '.', ',') }} {{ pago.currency }}</td>
-                                <td class="gestion-col--center" data-label="Estado"><span class="gestion-badge gestion-badge--{{ estadoBadge[pago.estado] ?? 'borrador' }}">{{ pago.estado|capitalize }}</span></td>
+                                <td class="gestion-col--center" data-label="Estado">
+                                    <span class="gestion-badge gestion-badge--{{ estadoBadge[pago.estado] ?? 'borrador' }}">{{ pago.estado|capitalize }}</span>
+                                    {% if pago.observacion %}<span class="gestion-table__meta">{{ pago.observacion }}</span>{% endif %}
+                                </td>
                                 <td data-label="Fecha">{{ (pago.paidAt ?? pago.createdAt)|date('d/m/Y H:i') }}</td>
                                 <td class="gestion-col--text" data-label="Referencia Stripe"><span class="gestion-table__meta">{{ pago.stripePaymentIntentId ?? pago.stripeSessionId ?? '—' }}</span></td>
                                 <td class="gestion-table__actions" data-label="Acciones">
-                                    {% if pago.estado != 'PAGADO' and (user.hasPermission('pagos.gestionar') or user.hasPermission('inscripciones.gestionar') or user.hasPermission('inscripciones.validar')) %}
-                                        <form method="post" action="{{ path('inscripcion_admin_pagos_registrar', {id: pago.id}) }}" data-confirm="Registrar el pago de {{ pago.inscripcion.apellidos }} {{ pago.inscripcion.nombres }} manualmente? Se confirmara su inscripcion (accion administrativa, sin pasarela).">
+                                    {% if user.hasPermission('pagos.gestionar') or user.hasPermission('inscripciones.gestionar') or user.hasPermission('inscripciones.validar') %}
+                                        <form method="post" action="{{ path('inscripcion_admin_pagos_editar', {id: pago.id}) }}" data-confirm="Cambiar el estado del pago de {{ pago.inscripcion.apellidos }} {{ pago.inscripcion.nombres }}? Si lo marcas Pagado se confirmara su inscripcion (accion administrativa)." style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
                                             <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
                                             <input type="hidden" name="gestion" value="{{ gestion.id }}">
-                                            <button class="gestion-button" type="submit">Marcar como pagado</button>
+                                            <select name="estado" style="min-height:36px;border:1px solid #cbd5e1;border-radius:6px;padding:6px 8px">
+                                                {% for e in estadosEditables %}
+                                                    <option value="{{ e }}" {{ pago.estado == e ? 'selected' : '' }}>{{ e|capitalize }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <input type="text" name="observacion" value="{{ pago.observacion }}" placeholder="Observacion (si Observado)" style="min-height:36px;border:1px solid #cbd5e1;border-radius:6px;padding:6px 8px">
+                                            <button class="gestion-button" type="submit">Guardar</button>
                                         </form>
                                     {% else %}
                                         <span class="gestion-table__meta">—</span>

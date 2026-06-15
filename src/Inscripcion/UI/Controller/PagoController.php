@@ -10,6 +10,7 @@ use App\Auth\Infrastructure\Security\CsrfManager;
 use App\Gestion\Infrastructure\Persistence\GestionRepository;
 use App\Inscripcion\Application\UseCase\ActualizarEstadoPagoStripe;
 use App\Inscripcion\Application\UseCase\ConfirmarPagoStripe;
+use App\Inscripcion\Application\UseCase\EditarEstadoPago;
 use App\Inscripcion\Application\UseCase\IniciarPagoInscripcion;
 use App\Inscripcion\Application\UseCase\RegistrarPagoManual;
 use App\Inscripcion\Domain\Catalog\EstadoPago;
@@ -35,6 +36,7 @@ final class PagoController extends AbstractController
         private readonly ActualizarEstadoPagoStripe $actualizarEstadoPago,
         private readonly ConfirmarPagoStripe $confirmarPago,
         private readonly RegistrarPagoManual $registrarPagoManual,
+        private readonly EditarEstadoPago $editarEstadoPago,
         private readonly PagoRepository $pagos,
         private readonly GestionRepository $gestiones,
         private readonly StripeGateway $stripe,
@@ -155,11 +157,39 @@ final class PagoController extends AbstractController
             'gestion' => $gestion,
             'gestiones' => $gestiones,
             'estados' => EstadoPago::all(),
+            'estadosEditables' => EstadoPago::editablesAdmin(),
             'estadoSeleccionado' => $estado,
             'pasarelaConfigurada' => $this->stripe->isConfigured(),
             'user' => $this->currentUser($request),
             'csrf_token' => $this->csrf->issue(self::CSRF_INTENTION),
         ]);
+    }
+
+    /** Edicion manual del estado de un pago (pendiente/pagado/observado/anulado). */
+    #[Route('/admin/pagos/{id}/editar', name: 'inscripcion_admin_pagos_editar', methods: ['POST'], requirements: ['id' => '\d+'], priority: 10)]
+    public function editarEstado(Request $request, int $id): RedirectResponse
+    {
+        if ($this->currentUser($request) === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->csrf->validate(self::CSRF_INTENTION, (string) $request->request->get('_csrf_token', ''))) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToPagos($request);
+        }
+
+        $estado = (string) $request->request->get('estado', '');
+        $observacion = (string) $request->request->get('observacion', '');
+
+        try {
+            $this->editarEstadoPago->execute($id, $estado, $observacion !== '' ? $observacion : null, $this->actorUserId($request));
+            $this->addFlash('success', 'Estado del pago actualizado.');
+        } catch (InscripcionException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToPagos($request);
     }
 
     /**

@@ -40,8 +40,6 @@ final readonly class PermissionGuard implements EventSubscriberInterface
         'inscripcion_' => ['inscripciones.ver', 'inscripciones.gestionar', 'inscripciones.validar'],
 
         // Asignaciones y notas.
-        'nota_asignacion' => ['asignaciones.gestionar', 'notas.asignar'],
-        'nota_grupo' => ['asignaciones.gestionar', 'notas.asignar'],
         'nota_planilla_importar' => ['notas.gestionar', 'notas.registrar'],
         'nota_planilla_exportar' => ['notas.gestionar', 'notas.registrar'],
         'nota_planilla' => ['notas.gestionar', 'notas.registrar'],
@@ -50,6 +48,8 @@ final readonly class PermissionGuard implements EventSubscriberInterface
         'nota_' => ['notas.ver', 'notas.gestionar', 'notas.registrar'],
 
         'asignacion_roles' => ['asignaciones.gestionar', 'usuarios.gestionar', 'notas.asignar'],
+        'asignacion_estudiante' => ['asignaciones.gestionar', 'notas.asignar'],
+        'asignacion_docente' => ['asignaciones.gestionar', 'notas.asignar'],
         'asignacion_' => ['asignaciones.ver', 'asignaciones.gestionar', 'notas.asignar'],
 
         // Gestion y dashboard.

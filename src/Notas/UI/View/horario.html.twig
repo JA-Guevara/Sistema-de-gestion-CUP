@@ -35,7 +35,7 @@
                     <td data-label="Hora">{{ f.horaInicio|date('H:i') }} - {{ f.horaFin|date('H:i') }}</td>
                     <td class="boleta__left" data-label="Materia">{{ f.materia.codigo }} - {{ f.materia.nombre }}</td>
                     <td data-label="Grupo">{{ f.grupo.codigo }}</td>
-                    <td class="boleta__left" data-label="Aula">{{ f.aula.codigo }}{% if f.aula.nombre %} - {{ f.aula.nombre }}{% endif %}</td>
+                    <td class="boleta__left" data-label="Aula">{{ f.aula.codigo }}</td>
                 </tr>
             {% else %}
                 <tr><td colspan="5">Sin horario publicado.</td></tr>
@@ -164,7 +164,7 @@
                                 <td data-label="Hora">{{ f.horaInicio|date('H:i') }} - {{ f.horaFin|date('H:i') }}</td>
                                 <td class="gestion-col--text" data-label="Materia">{{ f.materia.codigo }} - {{ f.materia.nombre }}</td>
                                 <td class="gestion-col--center" data-label="Grupo">{{ f.grupo.codigo }}</td>
-                                <td class="gestion-col--text" data-label="Aula">{{ f.aula.codigo }}{% if f.aula.nombre %} &middot; {{ f.aula.nombre }}{% endif %}</td>
+                                <td class="gestion-col--text" data-label="Aula">{{ f.aula.codigo }}</td>
                             </tr>
                         {% else %}
                             <tr><td colspan="5">Aun no hay horario publicado para tus materias/grupos. La administracion lo cargara antes del inicio de clases.</td></tr>

@@ -1,0 +1,636 @@
+{
+  "analisis": [
+    {
+      "w_px": 1920,
+      "h_px": 1696,
+      "target_w": 701,
+      "target_h": 619,
+      "tipo": "analisis",
+      "cu": "CU-01",
+      "titulo": "Gestionar Autenticacion y Cuenta",
+      "img": "png/CU-01.png",
+      "actores": [
+        "Postulante",
+        "Docente",
+        "Coordinador Academico",
+        "Autoridad",
+        "Administrador"
+      ],
+      "fronteras": [
+        "frmLogin",
+        "frmForgot",
+        "frmReset",
+        "frmUnlock",
+        "frmRegister"
+      ],
+      "controles": [
+        "LoginController",
+        "SessionController",
+        "ForgotPasswordController",
+        "ResetPasswordController",
+        "UnlockAccountController",
+        "RegisterController",
+        "PerfilController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "User",
+        "PasswordResetToken"
+      ],
+      "fuentes": [
+        "src/Auth/UI/Controller/LoginController.php",
+        "src/Auth/UI/Controller/SessionController.php",
+        "src/Auth/UI/Controller/ForgotPasswordController.php",
+        "src/Auth/UI/Controller/ResetPasswordController.php",
+        "src/Auth/UI/Controller/UnlockAccountController.php",
+        "src/Auth/UI/Controller/RegisterController.php",
+        "src/Perfil/UI/Controller/PerfilController.php",
+        "src/Auth/Application/UseCase/LoginUser.php"
+      ]
+    },
+    {
+      "w_px": 1931,
+      "h_px": 2449,
+      "target_w": 659,
+      "target_h": 835,
+      "tipo": "analisis",
+      "cu": "CU-02",
+      "titulo": "Gestionar Usuarios y Seguridad",
+      "img": "png/CU-02.png",
+      "actores": [
+        "Administrador"
+      ],
+      "fronteras": [
+        "frmUsuarios",
+        "frmRoles"
+      ],
+      "controles": [
+        "UsuarioController",
+        "RoleController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "User",
+        "Role",
+        "Permission"
+      ],
+      "fuentes": [
+        "src/Usuario/UI/Controller/UsuarioController.php",
+        "src/Usuario/UI/Controller/RoleController.php",
+        "src/Auth/Entity/User.php",
+        "src/Usuario/Domain/Entity/Role.php",
+        "src/Usuario/Domain/Entity/Permission.php",
+        "src/Usuario/UI/View/usuarios/form.html.twig",
+        "src/Usuario/UI/View/usuarios/lista.html.twig",
+        "src/Usuario/UI/View/roles/form.html.twig"
+      ]
+    },
+    {
+      "w_px": 2024,
+      "h_px": 2842,
+      "target_w": 595,
+      "target_h": 835,
+      "tipo": "analisis",
+      "cu": "CU-03",
+      "titulo": "Gestionar Estructura Academica",
+      "img": "png/CU-03.png",
+      "actores": [
+        "Administrador"
+      ],
+      "fronteras": [
+        "frmGestionForm",
+        "frmGestionLista",
+        "frmGestionDetalle",
+        "frmCarreraForm"
+      ],
+      "controles": [
+        "GestionController",
+        "CarreraController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Gestion",
+        "ConfiguracionGestion",
+        "Carrera",
+        "CarreraGestion"
+      ],
+      "fuentes": [
+        "src/Gestion/UI/Controller/GestionController.php",
+        "src/Academico/Carrera/UI/Controller/CarreraController.php",
+        "src/Gestion/Domain/Entity/Gestion.php",
+        "src/Gestion/Domain/Entity/ConfiguracionGestion.php",
+        "src/Gestion/Domain/Entity/PeriodoGestion.php",
+        "src/Gestion/Domain/Entity/CarreraGestion.php",
+        "src/Gestion/Domain/Entity/CupoGestion.php",
+        "src/Academico/Carrera/Domain/Entity/Carrera.php"
+      ]
+    },
+    {
+      "w_px": 1926,
+      "h_px": 1816,
+      "target_w": 701,
+      "target_h": 661,
+      "tipo": "analisis",
+      "cu": "CU-04",
+      "titulo": "Gestionar Preinscripcion CUP",
+      "img": "png/CU-04.png",
+      "actores": [
+        "Postulante"
+      ],
+      "fronteras": [
+        "frmInscripcion"
+      ],
+      "controles": [
+        "InscripcionController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Inscripcion",
+        "Documento"
+      ],
+      "fuentes": [
+        "src/Inscripcion/UI/Controller/InscripcionController.php",
+        "src/Inscripcion/Domain/Entity/Inscripcion.php",
+        "src/Inscripcion/Domain/Entity/Documento.php",
+        "src/Inscripcion/Application/UseCase/CrearInscripcion.php",
+        "src/Inscripcion/Application/UseCase/EditarBorrador.php",
+        "src/Inscripcion/Application/UseCase/PresentarInscripcion.php",
+        "src/Inscripcion/Application/UseCase/SubirDocumento.php",
+        "src/Inscripcion/Application/UseCase/EliminarDocumento.php"
+      ]
+    },
+    {
+      "w_px": 2455,
+      "h_px": 3002,
+      "target_w": 683,
+      "target_h": 835,
+      "tipo": "analisis",
+      "cu": "CU-05",
+      "titulo": "Gestionar Validacion Documental",
+      "img": "png/CU-05.png",
+      "actores": [
+        "Coordinador Academico"
+      ],
+      "fronteras": [
+        "frmDetalleInscripcion",
+        "frmCalendarioRevision"
+      ],
+      "controles": [
+        "InscripcionController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Inscripcion",
+        "Documento",
+        "VerificacionDocumento",
+        "CalendarioRevision"
+      ],
+      "fuentes": [
+        "src/Inscripcion/UI/Controller/InscripcionController.php",
+        "src/Inscripcion/Domain/Entity/Inscripcion.php",
+        "src/Inscripcion/Domain/Entity/Documento.php",
+        "src/Inscripcion/Domain/Entity/VerificacionDocumento.php",
+        "src/Inscripcion/Domain/Entity/CalendarioRevision.php",
+        "src/Inscripcion/Application/UseCase/ValidarInscripcion.php",
+        "src/Inscripcion/Application/UseCase/RechazarInscripcion.php",
+        "src/Inscripcion/Application/UseCase/RevisarDocumento.php"
+      ]
+    },
+    {
+      "w_px": 1834,
+      "h_px": 2649,
+      "target_w": 578,
+      "target_h": 835,
+      "tipo": "analisis",
+      "cu": "CU-06",
+      "titulo": "Gestionar Pagos",
+      "img": "png/CU-06.png",
+      "actores": [
+        "Postulante",
+        "Coordinador Académico"
+      ],
+      "fronteras": [
+        "frmAdminPagos",
+        "frmPagoExito"
+      ],
+      "controles": [
+        "PagoController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Pago",
+        "Inscripcion",
+        "EstadoPago"
+      ],
+      "fuentes": [
+        "src/Inscripcion/UI/Controller/PagoController.php",
+        "src/Inscripcion/UI/View/admin_pagos.html.twig",
+        "src/Inscripcion/UI/View/pago_exito.html.twig",
+        "src/Inscripcion/Domain/Entity/Pago.php",
+        "src/Inscripcion/Domain/Entity/Inscripcion.php",
+        "src/Inscripcion/Domain/Catalog/EstadoPago.php",
+        "src/Inscripcion/Application/UseCase/IniciarPagoInscripcion.php",
+        "src/Inscripcion/Application/UseCase/ConfirmarPagoStripe.php"
+      ]
+    },
+    {
+      "w_px": 1900,
+      "h_px": 1856,
+      "target_w": 701,
+      "target_h": 685,
+      "tipo": "analisis",
+      "cu": "CU-07",
+      "titulo": "Gestionar Postulantes",
+      "img": "png/CU-07.png",
+      "actores": [
+        "Coordinador Academico"
+      ],
+      "fronteras": [
+        "frmAdminLista"
+      ],
+      "controles": [
+        "InscripcionController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Inscripcion",
+        "Documento"
+      ],
+      "fuentes": [
+        "src/Inscripcion/UI/Controller/InscripcionController.php",
+        "src/Inscripcion/Domain/Entity/Inscripcion.php",
+        "src/Inscripcion/Domain/Entity/Documento.php",
+        "src/Inscripcion/UI/View/admin_lista.html.twig",
+        "src/Inscripcion/UI/View/admin_detalle.html.twig"
+      ]
+    },
+    {
+      "w_px": 2025,
+      "h_px": 1736,
+      "target_w": 701,
+      "target_h": 601,
+      "tipo": "analisis",
+      "cu": "CU-08",
+      "titulo": "Gestionar Docentes",
+      "img": "png/CU-08.png",
+      "actores": [
+        "Coordinador Academico",
+        "Administrador"
+      ],
+      "fronteras": [
+        "frmAdminDetalle"
+      ],
+      "controles": [
+        "InscripcionController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Inscripcion",
+        "User"
+      ],
+      "fuentes": [
+        "src/Inscripcion/UI/Controller/InscripcionController.php",
+        "src/Inscripcion/Domain/Entity/Inscripcion.php",
+        "src/Inscripcion/Application/UseCase/ValidarInscripcion.php",
+        "src/Inscripcion/Application/UseCase/AgendarEntrevista.php",
+        "src/Inscripcion/Application/UseCase/ConfirmarInscripcion.php",
+        "src/Inscripcion/Application/UseCase/RechazarInscripcion.php",
+        "src/Auth/Entity/User.php",
+        "src/Inscripcion/UI/View/admin_detalle.html.twig"
+      ]
+    },
+    {
+      "w_px": 1916,
+      "h_px": 2522,
+      "target_w": 635,
+      "target_h": 835,
+      "tipo": "analisis",
+      "cu": "CU-09",
+      "titulo": "Gestionar Planificacion Academica",
+      "img": "png/CU-09.png",
+      "actores": [
+        "Coordinador Academico"
+      ],
+      "fronteras": [
+        "frmGrupoGenerador",
+        "frmAsignacionDocente",
+        "frmAsignacionEstudiante",
+        "frmHorarioGenerador"
+      ],
+      "controles": [
+        "GrupoController",
+        "HorarioController",
+        "AsignacionController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Grupo",
+        "AsignacionDocente",
+        "AsignacionGrupo",
+        "Horario"
+      ],
+      "fuentes": [
+        "src/Academico/Grupo/UI/Controller/GrupoController.php",
+        "src/Academico/Horario/UI/Controller/HorarioController.php",
+        "src/Asignacion/UI/Controller/AsignacionController.php",
+        "src/Academico/Grupo/Domain/Entity/Grupo.php",
+        "src/Notas/Domain/Entity/AsignacionDocente.php",
+        "src/Notas/Domain/Entity/AsignacionGrupo.php",
+        "src/Academico/Horario/Domain/Entity/Horario.php",
+        "src/Asignacion/UI/View/index.html.twig"
+      ]
+    },
+    {
+      "w_px": 1901,
+      "h_px": 1689,
+      "target_w": 701,
+      "target_h": 623,
+      "tipo": "analisis",
+      "cu": "CU-10",
+      "titulo": "Gestionar Evaluaciones",
+      "img": "png/CU-10.png",
+      "actores": [
+        "Docente"
+      ],
+      "fronteras": [
+        "frmPlanilla",
+        "frmDocente"
+      ],
+      "controles": [
+        "NotaController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Nota",
+        "AsignacionDocente",
+        "AsignacionGrupo"
+      ],
+      "fuentes": [
+        "src/Notas/UI/Controller/NotaController.php",
+        "src/Notas/Application/UseCase/ListMateriasDocente.php",
+        "src/Notas/Application/UseCase/VerPlanilla.php",
+        "src/Notas/Application/UseCase/GuardarNotas.php",
+        "src/Notas/Application/UseCase/ImportarNotas.php",
+        "src/Notas/Domain/Entity/Nota.php",
+        "src/Notas/Domain/Entity/AsignacionDocente.php",
+        "src/Notas/Domain/Entity/AsignacionGrupo.php"
+      ]
+    },
+    {
+      "w_px": 1839,
+      "h_px": 2482,
+      "target_w": 619,
+      "target_h": 835,
+      "tipo": "analisis",
+      "cu": "CU-11",
+      "titulo": "Consultar Informacion Academica",
+      "img": "png/CU-11.png",
+      "actores": [
+        "Postulante"
+      ],
+      "fronteras": [
+        "frmBoletin",
+        "frmHorario"
+      ],
+      "controles": [
+        "NotaController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Inscripcion",
+        "Nota",
+        "AsignacionGrupo",
+        "Horario"
+      ],
+      "fuentes": [
+        "src/Notas/UI/Controller/NotaController.php",
+        "src/Notas/Domain/Entity/Nota.php",
+        "src/Notas/Domain/Entity/AsignacionGrupo.php",
+        "src/Academico/Horario/Domain/Entity/Horario.php",
+        "src/Inscripcion/Domain/Entity/Inscripcion.php",
+        "src/Notas/Application/UseCase/VerBoletin.php",
+        "src/Notas/Application/UseCase/VerHorarioEstudiante.php",
+        "src/Notas/UI/View/boletin.html.twig"
+      ]
+    },
+    {
+      "w_px": 2359,
+      "h_px": 2322,
+      "target_w": 701,
+      "target_h": 690,
+      "tipo": "analisis",
+      "cu": "CU-12",
+      "titulo": "Consultar Carga Academica",
+      "img": "png/CU-12.png",
+      "actores": [
+        "Docente"
+      ],
+      "fronteras": [
+        "frmMisMaterias"
+      ],
+      "controles": [
+        "NotaController"
+      ],
+      "entidades": [
+        "AsignacionDocente",
+        "Grupo",
+        "Materia",
+        "Horario"
+      ],
+      "fuentes": [
+        "src/Notas/UI/Controller/NotaController.php",
+        "src/Notas/Application/UseCase/ListMateriasDocente.php",
+        "src/Notas/Application/UseCase/ResumenGruposGestion.php",
+        "src/Notas/Domain/Entity/AsignacionDocente.php",
+        "src/Academico/Grupo/Domain/Entity/Grupo.php",
+        "src/Academico/Materia/Domain/Entity/Materia.php",
+        "src/Academico/Horario/Domain/Entity/Horario.php",
+        "src/Notas/UI/View/docente.html.twig"
+      ]
+    },
+    {
+      "w_px": 2552,
+      "h_px": 2722,
+      "target_w": 701,
+      "target_h": 747,
+      "tipo": "analisis",
+      "cu": "CU-13",
+      "titulo": "Ejecutar Admisión Final",
+      "img": "png/CU-13.png",
+      "actores": [
+        "Coordinador Académico"
+      ],
+      "fronteras": [
+        "frmAdmisionResolver"
+      ],
+      "controles": [
+        "InscripcionController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Inscripcion",
+        "Carrera",
+        "CarreraGestion",
+        "User"
+      ],
+      "fuentes": [
+        "src/Inscripcion/UI/Controller/InscripcionController.php",
+        "src/Inscripcion/Application/UseCase/ResolverResultadoAdmision.php",
+        "src/Inscripcion/Domain/Entity/Inscripcion.php",
+        "src/Gestion/Domain/Entity/CarreraGestion.php",
+        "src/Gestion/Domain/Entity/CupoGestion.php",
+        "src/Academico/Carrera/Domain/Entity/Carrera.php",
+        "src/Auth/Entity/User.php",
+        "src/Inscripcion/UI/View/admin_detalle.html.twig"
+      ]
+    },
+    {
+      "w_px": 1932,
+      "h_px": 1616,
+      "target_w": 701,
+      "target_h": 586,
+      "tipo": "analisis",
+      "cu": "CU-14",
+      "titulo": "Consultar Resultados de Admision",
+      "img": "png/CU-14.png",
+      "actores": [
+        "Postulante"
+      ],
+      "fronteras": [
+        "frmDetalleInscripcion"
+      ],
+      "controles": [
+        "InscripcionController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Inscripcion",
+        "Carrera"
+      ],
+      "fuentes": [
+        "src/Inscripcion/UI/Controller/InscripcionController.php",
+        "src/Inscripcion/Domain/Entity/Inscripcion.php",
+        "src/Academico/Carrera/Domain/Entity/Carrera.php",
+        "src/Inscripcion/UI/View/detalle.html.twig",
+        "src/Inscripcion/Application/UseCase/VerInscripcion.php",
+        "src/Inscripcion/Application/UseCase/ResolverResultadoAdmision.php"
+      ]
+    },
+    {
+      "w_px": 1880,
+      "h_px": 3042,
+      "target_w": 516,
+      "target_h": 835,
+      "tipo": "analisis",
+      "cu": "CU-15",
+      "titulo": "Gestionar Reportes e Indicadores",
+      "img": "png/CU-15.png",
+      "actores": [
+        "Autoridad",
+        "Coordinador Academico"
+      ],
+      "fronteras": [
+        "frmDashboard"
+      ],
+      "controles": [
+        "DashboardController",
+        "ExportController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Gestion",
+        "Nota",
+        "Inscripcion",
+        "Grupo"
+      ],
+      "fuentes": [
+        "src/Dashboard/UI/Controller/DashboardController.php",
+        "src/Dashboard/UI/Controller/ExportController.php",
+        "src/Dashboard/Application/UseCase/GetReportes.php",
+        "src/Dashboard/Application/UseCase/GetDashboardData.php",
+        "src/Dashboard/Application/UseCase/ExportarReportes.php",
+        "src/Dashboard/Application/UseCase/InterpretarConsulta.php",
+        "src/Dashboard/Infrastructure/Persistence/ReporteRepository.php",
+        "src/Dashboard/UI/View/dashboard.html.twig"
+      ]
+    },
+    {
+      "w_px": 1765,
+      "h_px": 863,
+      "target_w": 701,
+      "target_h": 343,
+      "tipo": "analisis",
+      "cu": "CU-16",
+      "titulo": "Gestionar Auditoria del Sistema",
+      "img": "png/CU-16.png",
+      "actores": [
+        "Administrador"
+      ],
+      "fronteras": [
+        "frmFiltrosBitacora"
+      ],
+      "controles": [
+        "BitacoraController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "LogEntry"
+      ],
+      "fuentes": [
+        "src/Bitacora/Domain/Entity/LogEntry.php",
+        "src/Bitacora/UI/Controller/BitacoraController.php",
+        "src/Bitacora/Application/UseCase/QueryLog.php",
+        "src/Bitacora/Application/UseCase/RecordLogEntry.php",
+        "src/Bitacora/UI/View/_filtros.html.twig",
+        "src/Bitacora/UI/View/lista.html.twig"
+      ]
+    }
+  ],
+  "arquitectura": {
+    "w_px": 3000,
+    "h_px": 1908,
+    "target_w": 701,
+    "target_h": 446,
+    "tipo": "arquitectura",
+    "titulo": "Arquitectura Lógica SIGECUP-FICCT (Symfony 7.4 + Hexagonal)",
+    "img": "png/ARQUITECTURA.png",
+    "modulos": [
+      "Auth (Autenticación)",
+      "Academico (Carrera, Materia, Aula, Grupo, Horario, Turno - catálogo académico)",
+      "Inscripcion (Preinscripción, documentos, estados, pagos, entrevistas)",
+      "Usuario (Gestión de usuarios, roles, permisos)",
+      "Perfil (Datos personales, cambio de contraseña)",
+      "Notas (Calificaciones, planillas, boletines, importación masiva)",
+      "Gestion (Periodos, carreras/gestion, cupos, configuración)",
+      "Asignacion (Asignación docente-grupo, estudiante-grupo)",
+      "Dashboard (Reportes, gráficos, exportación Excel/PDF)",
+      "Bitacora (Auditoría, log centralizado por módulo/acción)",
+      "Home (Landing, redirecciones post-login)"
+    ],
+    "capas": [
+      "Capa de Presentación (UI / Controllers + Vistas)",
+      "Capa de Aplicación (Use Cases / Application Layer)",
+      "Capa de Dominio (Entities + Business Rules)",
+      "Capa de Infraestructura (Persistence, Payment, Mailer)",
+      "Framework / Runtime (Symfony 7.4 + PHP 8.2)",
+      "Datos / Servicios Externos"
+    ]
+  },
+  "despliegue": {
+    "w_px": 3160,
+    "h_px": 2240,
+    "target_w": 701,
+    "target_h": 497,
+    "tipo": "despliegue",
+    "titulo": "Diagrama de Despliegue SIGECUP-FICCT (UML Enterprise Architect)",
+    "img": "png/DESPLIEGUE.png",
+    "nodos": [
+      "«device» Cliente Web (Dispositivos Finales)",
+      "«network» Internet HTTPS/TLS",
+      "«executionEnvironment» Vercel Serverless Platform",
+      "«database» Neon PostgreSQL (AWS us-east-1)",
+      "«server» Stripe API (Pagos)",
+      "«server» Google SMTP (Correos)"
+    ]
+  }
+}

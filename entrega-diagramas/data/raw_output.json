@@ -1,0 +1,2533 @@
+{
+  "summary": "Extrae datos fieles al codigo para 16 diagramas de analisis de clases + arquitectura + despliegue del sistema SIGECUP-FICCT",
+  "agentCount": 18,
+  "logs": [],
+  "result": {
+    "analisis": [
+      {
+        "cu": "CU-01",
+        "titulo": "Gestionar Autenticacion y Cuenta",
+        "actores": [
+          "Postulante",
+          "Docente",
+          "Coordinador Academico",
+          "Autoridad",
+          "Administrador"
+        ],
+        "fronteras": [
+          {
+            "nombre": "frmLogin",
+            "atributos": [
+              "email",
+              "password",
+              "_csrf_token"
+            ],
+            "metodos": [
+              "iniciarSesion()"
+            ]
+          },
+          {
+            "nombre": "frmForgot",
+            "atributos": [
+              "email",
+              "_csrf_token"
+            ],
+            "metodos": [
+              "solicitarRecuperacion()"
+            ]
+          },
+          {
+            "nombre": "frmReset",
+            "atributos": [
+              "password",
+              "passwordConfirmation",
+              "token",
+              "_csrf_token"
+            ],
+            "metodos": [
+              "cambiarContrasena()"
+            ]
+          },
+          {
+            "nombre": "frmUnlock",
+            "atributos": [
+              "code",
+              "_csrf_token"
+            ],
+            "metodos": [
+              "desbloquear()",
+              "reenviarCodigo()"
+            ]
+          },
+          {
+            "nombre": "frmRegister",
+            "atributos": [
+              "firstName",
+              "lastName",
+              "email",
+              "password",
+              "_csrf_token"
+            ],
+            "metodos": [
+              "registrarse()"
+            ]
+          }
+        ],
+        "controles": [
+          {
+            "nombre": "LoginController",
+            "metodos": [
+              "login()",
+              "logout()"
+            ]
+          },
+          {
+            "nombre": "SessionController",
+            "metodos": [
+              "logout()"
+            ]
+          },
+          {
+            "nombre": "ForgotPasswordController",
+            "metodos": [
+              "forgot()"
+            ]
+          },
+          {
+            "nombre": "ResetPasswordController",
+            "metodos": [
+              "reset()"
+            ]
+          },
+          {
+            "nombre": "UnlockAccountController",
+            "metodos": [
+              "unlock()",
+              "resend()"
+            ]
+          },
+          {
+            "nombre": "RegisterController",
+            "metodos": [
+              "register()"
+            ]
+          },
+          {
+            "nombre": "PerfilController",
+            "metodos": [
+              "index()",
+              "update()",
+              "password()"
+            ]
+          },
+          {
+            "nombre": "Casos de Uso",
+            "metodos": [
+              "loginUser()",
+              "solicitarRecuperacion()",
+              "restablecerContrasena()",
+              "desbloquearCuenta()",
+              "registrarUsuario()",
+              "cambiarContrasena()",
+              "actualizarPerfil()",
+              "resendUnlockCode()"
+            ]
+          }
+        ],
+        "entidades": [
+          {
+            "nombre": "User",
+            "atributos": [
+              "- id: ?int",
+              "- email: string",
+              "- firstName: string",
+              "- lastName: string",
+              "- passwordHash: string",
+              "- currentSessionId: ?string",
+              "- lastLoginAt: ?DateTimeImmutable",
+              "- failedLoginAttempts: int",
+              "- locked: bool",
+              "- active: bool",
+              "- unlockCode: ?string",
+              "- unlockCodeExpiresAt: ?DateTimeImmutable",
+              "- createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ roles(): array",
+              "+ syncRoles(array): void",
+              "+ roleNames(): string",
+              "+ hasRole(string): bool",
+              "+ hasPermission(string): bool",
+              "+ activate(): void",
+              "+ deactivate(): void",
+              "+ touch(): void"
+            ]
+          },
+          {
+            "nombre": "PasswordResetToken",
+            "atributos": [
+              "- id: ?int",
+              "- userId: int",
+              "- token: string",
+              "- expiresAt: DateTimeImmutable",
+              "- usedAt: ?DateTimeImmutable",
+              "- createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ isExpired(): bool",
+              "+ isUsed(): bool"
+            ]
+          }
+        ],
+        "fuentes": [
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\UI\\Controller\\LoginController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\UI\\Controller\\SessionController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\UI\\Controller\\ForgotPasswordController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\UI\\Controller\\ResetPasswordController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\UI\\Controller\\UnlockAccountController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\UI\\Controller\\RegisterController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Perfil\\UI\\Controller\\PerfilController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\Application\\UseCase\\LoginUser.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\Application\\UseCase\\ForgotPassword.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\Application\\UseCase\\ResetPassword.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\Application\\UseCase\\UnlockAccount.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\Application\\UseCase\\RegisterUser.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\Application\\UseCase\\ResendUnlockCode.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Perfil\\Application\\UseCase\\ChangePassword.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Perfil\\Application\\UseCase\\UpdatePerfil.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\Entity\\User.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\Entity\\PasswordResetToken.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\UI\\View\\login.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\UI\\View\\forgot.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\UI\\View\\reset.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\UI\\View\\unlock.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\UI\\View\\register.html.twig"
+        ]
+      },
+      {
+        "cu": "CU-02",
+        "titulo": "Gestionar Usuarios y Seguridad",
+        "actores": [
+          "Administrador"
+        ],
+        "fronteras": [
+          {
+            "nombre": "frmUsuarios",
+            "atributos": [
+              "firstName",
+              "lastName",
+              "email",
+              "password",
+              "active",
+              "roles[]"
+            ],
+            "metodos": [
+              "crearUsuario()",
+              "editarUsuario()",
+              "buscarPorTexto()",
+              "filtrarPorRol()",
+              "filtrarPorEstado()",
+              "asignarRolMasivo()",
+              "activarUsuario()",
+              "desactivarUsuario()",
+              "resetearContrasena()"
+            ]
+          },
+          {
+            "nombre": "frmRoles",
+            "atributos": [
+              "name",
+              "active",
+              "description",
+              "permissions[]"
+            ],
+            "metodos": [
+              "crearRol()",
+              "editarRol()",
+              "buscarPorTexto()",
+              "filtrarPorEstado()",
+              "activarRol()",
+              "desactivarRol()"
+            ]
+          }
+        ],
+        "controles": [
+          {
+            "nombre": "UsuarioController",
+            "metodos": [
+              "+ index()",
+              "+ rolesBulk()",
+              "+ new()",
+              "+ show()",
+              "+ edit()",
+              "+ toggle()",
+              "+ resetPassword()"
+            ]
+          },
+          {
+            "nombre": "RoleController",
+            "metodos": [
+              "+ index()",
+              "+ new()",
+              "+ show()",
+              "+ edit()",
+              "+ toggle()"
+            ]
+          },
+          {
+            "nombre": "Casos de Uso",
+            "metodos": [
+              "+ listUsers()",
+              "+ showUser()",
+              "+ createUser()",
+              "+ updateUser()",
+              "+ toggleUserState()",
+              "+ resetUserPassword()",
+              "+ assignRoleToUsersBulk()",
+              "+ listRoles()",
+              "+ showRole()",
+              "+ createRole()",
+              "+ updateRole()",
+              "+ toggleRoleState()",
+              "+ listPermissions()"
+            ]
+          }
+        ],
+        "entidades": [
+          {
+            "nombre": "User",
+            "atributos": [
+              "+ id: ?int",
+              "+ email: string",
+              "+ firstName: string",
+              "+ lastName: string",
+              "+ passwordHash: string",
+              "+ currentSessionId: ?string",
+              "+ lastLoginAt: ?DateTimeImmutable",
+              "+ failedLoginAttempts: int",
+              "+ locked: bool",
+              "+ active: bool",
+              "+ unlockCode: ?string",
+              "+ unlockCodeExpiresAt: ?DateTimeImmutable",
+              "+ unlockCodeLastSentAt: ?DateTimeImmutable",
+              "+ createdAt: DateTimeImmutable",
+              "+ updatedAt: ?DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ roles(): array",
+              "+ syncRoles(array): void",
+              "+ roleNames(): string",
+              "+ hasRole(string): bool",
+              "+ hasPermission(string): bool",
+              "+ activate(): void",
+              "+ deactivate(): void",
+              "+ touch(): void"
+            ]
+          },
+          {
+            "nombre": "Role",
+            "atributos": [
+              "+ id: ?int",
+              "+ name: string",
+              "+ description: ?string",
+              "+ active: bool",
+              "+ createdAt: DateTimeImmutable",
+              "+ updatedAt: ?DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ configure(string, ?string, bool): void",
+              "+ syncPermissions(array): void",
+              "+ permissions(): array",
+              "+ permissionIds(): array",
+              "+ hasPermission(string): bool",
+              "+ activate(): void",
+              "+ deactivate(): void",
+              "+ touch(): void"
+            ]
+          },
+          {
+            "nombre": "Permission",
+            "atributos": [
+              "+ id: ?int",
+              "+ code: string",
+              "+ module: string",
+              "+ action: string",
+              "+ description: string",
+              "+ active: bool",
+              "+ createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ configure(string, string, string, string): void"
+            ]
+          }
+        ],
+        "fuentes": [
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Usuario\\UI\\Controller\\UsuarioController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Usuario\\UI\\Controller\\RoleController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\Entity\\User.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Usuario\\Domain\\Entity\\Role.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Usuario\\Domain\\Entity\\Permission.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Usuario\\UI\\View\\usuarios\\form.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Usuario\\UI\\View\\usuarios\\lista.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Usuario\\UI\\View\\roles\\form.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Usuario\\UI\\View\\roles\\lista.html.twig"
+        ]
+      },
+      {
+        "cu": "CU-03",
+        "titulo": "Gestionar Estructura Academica",
+        "actores": [
+          "Administrador"
+        ],
+        "fronteras": [
+          {
+            "nombre": "frmGestionForm",
+            "metodos": [
+              "crearGestion()",
+              "editarGestion()",
+              "guardarGestion()"
+            ],
+            "atributos": [
+              "codigo",
+              "nombre",
+              "descripcion",
+              "cupoTotal",
+              "maxEstudiantesPorGrupo",
+              "maxGruposPorDocente",
+              "notaMinimaAprobacion",
+              "cantidadExamenes",
+              "permiteReinscripcion",
+              "permiteCambioGrupo"
+            ]
+          },
+          {
+            "nombre": "frmGestionLista",
+            "metodos": [
+              "listarGestiones()",
+              "filtrarEstado()",
+              "filtrarVigencia()",
+              "verDetalles()"
+            ],
+            "atributos": [
+              "codigo",
+              "nombre",
+              "estado",
+              "vigente",
+              "cupoTotal"
+            ]
+          },
+          {
+            "nombre": "frmGestionDetalle",
+            "metodos": [
+              "activarGestion()",
+              "abrirInscripcion()",
+              "cerrarInscripcion()",
+              "editarGestion()"
+            ],
+            "atributos": [
+              "codigo",
+              "nombre",
+              "estado",
+              "cupoTotal",
+              "vigente"
+            ]
+          },
+          {
+            "nombre": "frmCarreraForm",
+            "metodos": [
+              "crearCarrera()",
+              "editarCarrera()",
+              "guardarCarrera()"
+            ],
+            "atributos": [
+              "codigo",
+              "nombre",
+              "descripcion",
+              "facultad",
+              "modalidad"
+            ]
+          }
+        ],
+        "controles": [
+          {
+            "nombre": "GestionController",
+            "metodos": [
+              "index()",
+              "new()",
+              "show()",
+              "edit()",
+              "activate()",
+              "openInscription()",
+              "closeInscription()"
+            ]
+          },
+          {
+            "nombre": "CarreraController",
+            "metodos": [
+              "index()",
+              "new()",
+              "edit()",
+              "activate()",
+              "deactivate()"
+            ]
+          },
+          {
+            "nombre": "Casos de Uso",
+            "metodos": [
+              "createGestion()",
+              "updateGestion()",
+              "activateGestion()",
+              "openInscription()",
+              "closeInscription()",
+              "listGestiones()",
+              "showGestion()",
+              "getGestionDashboard()",
+              "createCarrera()",
+              "updateCarrera()",
+              "activateCarrera()",
+              "deactivateCarrera()",
+              "listCarreras()"
+            ]
+          }
+        ],
+        "entidades": [
+          {
+            "nombre": "Gestion",
+            "atributos": [
+              "- id: ?int",
+              "- codigo: string",
+              "- nombre: string",
+              "- descripcion: ?string",
+              "- estado: string",
+              "- fechaActivacion: ?DateTimeImmutable",
+              "- fechaFinalizacion: ?DateTimeImmutable",
+              "- creadoPor: ?int",
+              "- activadoPor: ?int",
+              "- createdAt: DateTimeImmutable",
+              "- updatedAt: ?DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ rename(codigo, nombre, descripcion): void",
+              "+ configure(configuracion): void",
+              "+ activate(actorUserId): void",
+              "+ openInscription(): void",
+              "+ closeInscription(): void",
+              "+ isActive(): bool",
+              "+ addHistory(historial): void"
+            ]
+          },
+          {
+            "nombre": "ConfiguracionGestion",
+            "atributos": [
+              "- id: ?int",
+              "- cupoTotal: int",
+              "- maxEstudiantesPorGrupo: int",
+              "- maxGruposPorDocente: int",
+              "- notaMinimaAprobacion: int",
+              "- cantidadExamenes: int",
+              "- permiteReinscripcion: bool",
+              "- permiteCambioGrupo: bool",
+              "- generarBitacora: bool"
+            ],
+            "metodos": [
+              "+ create(...): self",
+              "+ updateValues(...): void"
+            ]
+          },
+          {
+            "nombre": "Carrera",
+            "atributos": [
+              "- id: ?int",
+              "- codigo: string",
+              "- nombre: string",
+              "- descripcion: ?string",
+              "- facultad: ?string",
+              "- modalidad: ?string",
+              "- estado: string",
+              "- createdAt: DateTimeImmutable",
+              "- updatedAt: ?DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ rename(codigo, nombre, descripcion): void",
+              "+ configure(facultad, modalidad): void",
+              "+ activate(): void",
+              "+ deactivate(): void",
+              "+ isActive(): bool"
+            ]
+          },
+          {
+            "nombre": "CarreraGestion",
+            "atributos": [
+              "- id: ?int",
+              "- habilitada: bool",
+              "- cupoCarrera: int"
+            ],
+            "metodos": [
+              "+ create(catalogCarrera, habilitada, cupoCarrera): self"
+            ]
+          }
+        ],
+        "fuentes": [
+          "src/Gestion/UI/Controller/GestionController.php",
+          "src/Academico/Carrera/UI/Controller/CarreraController.php",
+          "src/Gestion/Domain/Entity/Gestion.php",
+          "src/Gestion/Domain/Entity/ConfiguracionGestion.php",
+          "src/Gestion/Domain/Entity/PeriodoGestion.php",
+          "src/Gestion/Domain/Entity/CarreraGestion.php",
+          "src/Gestion/Domain/Entity/CupoGestion.php",
+          "src/Academico/Carrera/Domain/Entity/Carrera.php",
+          "src/Gestion/UI/View/form.html.twig",
+          "src/Gestion/UI/View/lista.html.twig",
+          "src/Gestion/UI/View/detalle.html.twig"
+        ]
+      },
+      {
+        "cu": "CU-04",
+        "titulo": "Gestionar Preinscripcion CUP",
+        "actores": [
+          "Postulante"
+        ],
+        "fronteras": [
+          {
+            "nombre": "frmInscripcion",
+            "metodos": [
+              "seleccionarTipo()",
+              "completarDatosPersonales()",
+              "seleccionarCarrera()",
+              "subirDocumento()",
+              "presentar()",
+              "guardarBorrador()"
+            ],
+            "atributos": [
+              "tipo",
+              "ci",
+              "nombres",
+              "apellidos",
+              "fechaNacimiento",
+              "sexo",
+              "email",
+              "telefono",
+              "ciudad",
+              "direccion",
+              "carrera",
+              "carreraSegunda",
+              "turnoPreferencia",
+              "modalidad",
+              "tituloBachiller",
+              "otros"
+            ]
+          }
+        ],
+        "controles": [
+          {
+            "nombre": "InscripcionController",
+            "metodos": [
+              "+formulario():",
+              "+ver():",
+              "+editarBorrador():",
+              "+presentar():",
+              "+subirDocumento():",
+              "+eliminarBorrador():"
+            ]
+          },
+          {
+            "nombre": "Casos de Uso",
+            "metodos": [
+              "+crearInscripcion()",
+              "+editarBorrador()",
+              "+presentarInscripcion()",
+              "+subirDocumento()",
+              "+eliminarDocumento()",
+              "+verInscripcion()"
+            ]
+          }
+        ],
+        "entidades": [
+          {
+            "nombre": "Inscripcion",
+            "atributos": [
+              "- id: ?int",
+              "- user: User",
+              "- gestion: Gestion",
+              "- tipo: string",
+              "- modalidad: string",
+              "- ci: string",
+              "- nombres: string",
+              "- apellidos: string",
+              "- fechaNacimiento: DateTimeImmutable",
+              "- sexo: string",
+              "- email: string",
+              "- direccion: ?string",
+              "- telefono: ?string",
+              "- ciudad: ?string",
+              "- carrera: ?Carrera",
+              "- carreraSegunda: ?Carrera",
+              "- turnoPreferencia: ?string",
+              "- tituloBachiller: bool",
+              "- otros: ?string",
+              "- documentos: Collection<Documento>",
+              "- estado: string",
+              "- createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+presentar()",
+              "+isBorrador(): bool",
+              "+isPresentada(): bool",
+              "+puedeEditarse(): bool",
+              "+agendarRevision(fecha)",
+              "+validar(actorUserId)",
+              "+resumenDocumentos(): array"
+            ]
+          },
+          {
+            "nombre": "Documento",
+            "atributos": [
+              "- id: ?int",
+              "- inscripcion: Inscripcion",
+              "- nombre: string",
+              "- archivoRuta: string",
+              "- archivoExtension: string",
+              "- archivoTamanio: int",
+              "- estado: string",
+              "- observacion: ?string",
+              "- createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+revisar(estado, observacion)",
+              "+isAprobado(): bool",
+              "+isObservado(): bool"
+            ]
+          }
+        ],
+        "fuentes": [
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\UI\\Controller\\InscripcionController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Domain\\Entity\\Inscripcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Domain\\Entity\\Documento.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\CrearInscripcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\EditarBorrador.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\PresentarInscripcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\SubirDocumento.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\EliminarDocumento.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\VerInscripcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\UI\\View\\formulario.html.twig"
+        ]
+      },
+      {
+        "cu": "CU-05",
+        "titulo": "Gestionar Validacion Documental",
+        "actores": [
+          "Coordinador Academico"
+        ],
+        "fronteras": [
+          {
+            "nombre": "frmDetalleInscripcion",
+            "metodos": [
+              "guardarActa()",
+              "revisarDocumento()",
+              "validarInscripcion()",
+              "rechazarInscripcion()",
+              "agendar()",
+              "confirmar()",
+              "resolver()"
+            ],
+            "atributos": [
+              "estado[PRESENTADA|VALIDADA|RECHAZADA|CONFIRMADA]",
+              "fecha: date",
+              "motivo: text",
+              "observacion: text",
+              "resultado: select"
+            ]
+          },
+          {
+            "nombre": "frmCalendarioRevision",
+            "metodos": [
+              "generarDias()",
+              "agregarDia()",
+              "eliminarDia()",
+              "toggleDia()"
+            ],
+            "atributos": [
+              "desde: date",
+              "hasta: date",
+              "fecha: date",
+              "capacidad: number",
+              "soloLaborables: checkbox"
+            ]
+          }
+        ],
+        "controles": [
+          {
+            "nombre": "InscripcionController",
+            "metodos": [
+              "+ adminDetalle()",
+              "+ validar()",
+              "+ rechazar()",
+              "+ revisarDocumento()",
+              "+ guardarActa()",
+              "+ agendar()",
+              "+ validarBulk()",
+              "+ rechazarBulk()",
+              "+ calendario()",
+              "+ calendarioAgregar()",
+              "+ calendarioGenerar()",
+              "+ calendarioEliminar()",
+              "+ calendarioToggle()"
+            ]
+          },
+          {
+            "nombre": "Casos de Uso",
+            "metodos": [
+              "+ validarInscripcion()",
+              "+ rechazarInscripcion()",
+              "+ revisarDocumento()",
+              "+ validarInscripcionesBulk()",
+              "+ rechazarInscripcionesBulk()",
+              "+ guardarActaRecepcion()",
+              "+ agendarRevision()",
+              "+ agregarDiaRevision()",
+              "+ generarDiasRevision()",
+              "+ eliminarDiaRevision()",
+              "+ toggleDiaRevision()"
+            ]
+          }
+        ],
+        "entidades": [
+          {
+            "nombre": "Inscripcion",
+            "atributos": [
+              "+ id: ?int",
+              "+ user: User",
+              "+ gestion: Gestion",
+              "+ tipo: string",
+              "+ modalidad: string",
+              "+ ci: string",
+              "+ nombres: string",
+              "+ apellidos: string",
+              "+ fechaNacimiento: DateTimeImmutable",
+              "+ email: string",
+              "+ estado: string",
+              "+ fechaPresentacionDocs: ?DateTimeImmutable",
+              "+ fechaEntrevista: ?DateTimeImmutable",
+              "+ validadaPor: ?int",
+              "+ confirmadaPor: ?int",
+              "+ motivoRechazo: ?string",
+              "+ documentos: Collection<Documento>",
+              "+ verificaciones: Collection<VerificacionDocumento>"
+            ],
+            "metodos": [
+              "+ validar()",
+              "+ rechazar()",
+              "+ agendarRevision()",
+              "+ actaConforme(): bool",
+              "+ resumenActa(): array",
+              "+ resumenDocumentos(): array",
+              "+ todosAprobados(): bool",
+              "+ verificacionPorCodigo(): ?VerificacionDocumento",
+              "+ isPresentada(): bool",
+              "+ isValidada(): bool"
+            ]
+          },
+          {
+            "nombre": "Documento",
+            "atributos": [
+              "+ id: ?int",
+              "+ inscripcion: Inscripcion",
+              "+ nombre: string",
+              "+ archivoRuta: string",
+              "+ archivoExtension: string",
+              "+ archivoTamanio: int",
+              "+ estado: string",
+              "+ observacion: ?string",
+              "+ createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ revisar()",
+              "+ isAprobado(): bool",
+              "+ isObservado(): bool"
+            ]
+          },
+          {
+            "nombre": "VerificacionDocumento",
+            "atributos": [
+              "+ id: ?int",
+              "+ inscripcion: Inscripcion",
+              "+ requisitoCodigo: string",
+              "+ estado: string",
+              "+ observacion: ?string",
+              "+ verificadoPor: ?int",
+              "+ verificadoAt: ?DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ registrar()",
+              "+ isEntregado(): bool",
+              "+ isObservado(): bool",
+              "+ isFalta(): bool"
+            ]
+          },
+          {
+            "nombre": "CalendarioRevision",
+            "atributos": [
+              "+ id: ?int",
+              "+ gestion: Gestion",
+              "+ fecha: DateTimeImmutable",
+              "+ capacidad: int",
+              "+ agendados: int",
+              "+ habilitado: bool"
+            ],
+            "metodos": [
+              "+ disponibles(): int",
+              "+ tieneCupo(): bool"
+            ]
+          }
+        ],
+        "fuentes": [
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\UI\\Controller\\InscripcionController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Domain\\Entity\\Inscripcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Domain\\Entity\\Documento.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Domain\\Entity\\VerificacionDocumento.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Domain\\Entity\\CalendarioRevision.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\ValidarInscripcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\RechazarInscripcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\RevisarDocumento.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\GuardarActaRecepcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\AgendarRevision.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\ValidarInscripcionesBulk.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\RechazarInscripcionesBulk.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\AgregarDiaRevision.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\GenerarDiasRevision.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\EliminarDiaRevision.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\ToggleDiaRevision.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\UI\\View\\admin_detalle.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\UI\\View\\calendario.html.twig"
+        ]
+      },
+      {
+        "cu": "CU-06",
+        "titulo": "Gestionar Pagos",
+        "actores": [
+          "Postulante",
+          "Coordinador Académico"
+        ],
+        "fronteras": [
+          {
+            "nombre": "frmAdminPagos",
+            "metodos": [
+              "filtrarPorGestion()",
+              "filtrarPorEstado()",
+              "editarEstado()",
+              "guardarObservacion()"
+            ],
+            "atributos": [
+              "gestionSelect",
+              "estadoSelect",
+              "montoInput",
+              "observacionInput",
+              "btnGuardar"
+            ]
+          },
+          {
+            "nombre": "frmPagoExito",
+            "metodos": [
+              "mostrarConfirmacion()",
+              "irAMisPostulaciones()",
+              "verMiInscripcion()"
+            ],
+            "atributos": [
+              "pagadoFlag",
+              "montoDecimal",
+              "currency"
+            ]
+          }
+        ],
+        "controles": [
+          {
+            "nombre": "PagoController",
+            "metodos": [
+              "iniciar()",
+              "exito()",
+              "cancelado()",
+              "adminPagos()",
+              "editarEstado()",
+              "registrarManual()"
+            ]
+          },
+          {
+            "nombre": "Casos de Uso",
+            "metodos": [
+              "iniciarPagoInscripcion()",
+              "confirmarPagoStripe()",
+              "actualizarEstadoPagoStripe()",
+              "editarEstadoPago()",
+              "registrarPagoManual()"
+            ]
+          }
+        ],
+        "entidades": [
+          {
+            "nombre": "Pago",
+            "atributos": [
+              "+ id: ?int",
+              "+ inscripcion: Inscripcion",
+              "+ userId: int",
+              "+ email: string",
+              "+ amount: int",
+              "+ currency: string",
+              "+ estado: string",
+              "+ provider: string",
+              "+ stripeSessionId: ?string",
+              "+ stripePaymentIntentId: ?string",
+              "+ observacion: ?string",
+              "+ createdAt: DateTimeImmutable",
+              "+ paidAt: ?DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ isPagado(): bool",
+              "+ isPendiente(): bool",
+              "+ marcarPagado(?string): void",
+              "+ marcarCancelado(): void",
+              "+ marcarFallido(): void",
+              "+ marcarExpirado(): void",
+              "+ marcarEstado(string): void",
+              "+ montoDecimal(): float"
+            ]
+          },
+          {
+            "nombre": "Inscripcion",
+            "atributos": [
+              "+ id: ?int",
+              "+ user: User",
+              "+ gestion: Gestion",
+              "+ tipo: string",
+              "+ modalidad: string",
+              "+ ci: string",
+              "+ nombres: string",
+              "+ apellidos: string",
+              "+ email: string",
+              "+ estado: string",
+              "+ createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ esEstudiante(): bool",
+              "+ isConfirmada(): bool",
+              "+ isValidada(): bool",
+              "+ confirmar(?int): void",
+              "+ validar(?int): void"
+            ]
+          },
+          {
+            "nombre": "EstadoPago",
+            "atributos": [
+              "- PENDIENTE: string",
+              "- PAGADO: string",
+              "- OBSERVADO: string",
+              "- ANULADO: string",
+              "- CANCELADO: string",
+              "- FALLIDO: string",
+              "- EXPIRADO: string"
+            ],
+            "metodos": [
+              "+ all(): array",
+              "+ editablesAdmin(): array",
+              "+ isEditableAdmin(string): bool",
+              "+ label(string): string"
+            ]
+          }
+        ],
+        "fuentes": [
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\UI\\Controller\\PagoController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\UI\\View\\admin_pagos.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\UI\\View\\pago_exito.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Domain\\Entity\\Pago.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Domain\\Entity\\Inscripcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Domain\\Catalog\\EstadoPago.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\IniciarPagoInscripcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\ConfirmarPagoStripe.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\ActualizarEstadoPagoStripe.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\EditarEstadoPago.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\RegistrarPagoManual.php"
+        ]
+      },
+      {
+        "cu": "CU-07",
+        "titulo": "Gestionar Postulantes",
+        "actores": [
+          "Coordinador Academico"
+        ],
+        "fronteras": [
+          {
+            "nombre": "frmAdminLista",
+            "metodos": [
+              "listar()",
+              "filtrar()",
+              "seleccionar()",
+              "aprobarMasivo()",
+              "rechazarMasivo()"
+            ],
+            "atributos": [
+              "_csrf_token",
+              "gestion",
+              "tipo",
+              "estado",
+              "texto",
+              "motivo"
+            ]
+          }
+        ],
+        "controles": [
+          {
+            "nombre": "InscripcionController",
+            "metodos": [
+              "adminList()",
+              "buscar()",
+              "adminDetalle()",
+              "editar()",
+              "eliminar()",
+              "adminAnular()",
+              "adminRechazarAnulacion()"
+            ]
+          },
+          {
+            "nombre": "Casos de Uso",
+            "metodos": [
+              "listInscripciones()",
+              "buscarPostulante()",
+              "verInscripcion()",
+              "actualizarInscripcion()",
+              "eliminarInscripcion()",
+              "anularInscripcion()",
+              "rechazarSolicitudAnulacion()"
+            ]
+          }
+        ],
+        "entidades": [
+          {
+            "nombre": "Inscripcion",
+            "atributos": [
+              "- id: ?int",
+              "- user: User",
+              "- gestion: Gestion",
+              "- tipo: string",
+              "- modalidad: string",
+              "- ci: string",
+              "- nombres: string",
+              "- apellidos: string",
+              "- fechaNacimiento: DateTimeImmutable",
+              "- sexo: string",
+              "- direccion: ?string",
+              "- telefono: ?string",
+              "- email: string",
+              "- ciudad: ?string",
+              "- carrera: ?Carrera",
+              "- carreraSegunda: ?Carrera",
+              "- estado: string",
+              "- fechaPresentacionDocs: ?DateTimeImmutable",
+              "- fechaEntrevista: ?DateTimeImmutable",
+              "- validadaPor: ?int",
+              "- confirmadaPor: ?int",
+              "- motivoRechazo: ?string",
+              "- anulacionSolicitada: bool",
+              "- motivoAnulacion: ?string",
+              "- documentos: Collection<Documento>",
+              "- verificaciones: Collection<VerificacionDocumento>"
+            ],
+            "metodos": [
+              "+ presentar(): void",
+              "+ validar(actorUserId): void",
+              "+ rechazar(motivo, actorUserId): void",
+              "+ confirmar(actorUserId): void",
+              "+ anular(): void",
+              "+ solicitarAnulacion(motivo): void",
+              "+ rechazarSolicitudAnulacion(): void",
+              "+ isBorrador(): bool",
+              "+ isPresentada(): bool",
+              "+ isValidada(): bool",
+              "+ isConfirmada(): bool",
+              "+ isRechazada(): bool",
+              "+ isAnulada(): bool",
+              "+ todosAprobados(): bool",
+              "+ resumenDocumentos(): array"
+            ]
+          },
+          {
+            "nombre": "Documento",
+            "atributos": [
+              "- id: ?int",
+              "- inscripcion: Inscripcion",
+              "- nombre: string",
+              "- archivoRuta: string",
+              "- archivoExtension: string",
+              "- archivoTamanio: int",
+              "- estado: string",
+              "- observacion: ?string",
+              "- createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ revisar(estado, observacion): void",
+              "+ isAprobado(): bool",
+              "+ isObservado(): bool"
+            ]
+          }
+        ],
+        "fuentes": [
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\UI\\Controller\\InscripcionController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Domain\\Entity\\Inscripcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Domain\\Entity\\Documento.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\UI\\View\\admin_lista.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\UI\\View\\admin_detalle.html.twig"
+        ]
+      },
+      {
+        "cu": "CU-08",
+        "titulo": "Gestionar Docentes",
+        "actores": [
+          "Coordinador Academico",
+          "Administrador"
+        ],
+        "fronteras": [
+          {
+            "nombre": "frmAdminDetalle",
+            "metodos": [
+              "agendarRevisionDocumentos()",
+              "validarDocumentacion()",
+              "agendarEntrevista()",
+              "resolverResultadoEntrevista()",
+              "confirmarContratacion()",
+              "rechazarDocente()",
+              "guardarActa()",
+              "subirDocumento()"
+            ],
+            "atributos": [
+              "fecha",
+              "resultado",
+              "motivo",
+              "nombreDocumento",
+              "archivo",
+              "estado",
+              "observacion"
+            ]
+          }
+        ],
+        "controles": [
+          {
+            "nombre": "InscripcionController",
+            "metodos": [
+              "agendar()",
+              "validar()",
+              "entrevista()",
+              "resolver()",
+              "confirmar()",
+              "rechazar()",
+              "guardarActa()",
+              "subirDocumento()"
+            ]
+          },
+          {
+            "nombre": "Casos de Uso",
+            "metodos": [
+              "validarInscripcion()",
+              "agendarEntrevista()",
+              "confirmarInscripcion()",
+              "rechazarInscripcion()"
+            ]
+          }
+        ],
+        "entidades": [
+          {
+            "nombre": "Inscripcion",
+            "atributos": [
+              "- id: int",
+              "- user: User",
+              "- tipo: string (DOCENTE|ESTUDIANTE)",
+              "- ci: string",
+              "- nombres: string",
+              "- apellidos: string",
+              "- email: string",
+              "- docenteProfesion: string",
+              "- docenteMaestria: bool",
+              "- docenteDiplomado: bool",
+              "- docenteExperiencia: string",
+              "- fechaPresentacionDocs: DateTimeImmutable",
+              "- fechaEntrevista: DateTimeImmutable",
+              "- estado: string",
+              "- validadaPor: int",
+              "- confirmadaPor: int",
+              "- motivoRechazo: string",
+              "- documentos: Collection",
+              "- verificaciones: Collection"
+            ],
+            "metodos": [
+              "+ esDocente(): bool",
+              "+ agendarEntrevista(fecha): void",
+              "+ validar(actorUserId): void",
+              "+ confirmar(actorUserId): void",
+              "+ rechazar(motivo, actorUserId): void",
+              "+ resumenActa(): array",
+              "+ actaConforme(): bool",
+              "+ isValidada(): bool",
+              "+ isConfirmada(): bool"
+            ]
+          },
+          {
+            "nombre": "User",
+            "atributos": [
+              "- id: int",
+              "- email: string",
+              "- firstName: string",
+              "- lastName: string",
+              "- roles: Collection<Role>",
+              "- active: bool"
+            ],
+            "metodos": [
+              "+ roles(): array",
+              "+ syncRoles(roles): void",
+              "+ hasRole(name): bool"
+            ]
+          }
+        ],
+        "fuentes": [
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\UI\\Controller\\InscripcionController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Domain\\Entity\\Inscripcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\ValidarInscripcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\AgendarEntrevista.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\ConfirmarInscripcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\RechazarInscripcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\Entity\\User.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\UI\\View\\admin_detalle.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Domain\\Catalog\\TipoPostulacion.php"
+        ]
+      },
+      {
+        "cu": "CU-09",
+        "titulo": "Gestionar Planificacion Academica",
+        "actores": [
+          "Coordinador Academico"
+        ],
+        "fronteras": [
+          {
+            "nombre": "frmGrupoGenerador",
+            "atributos": [
+              "gestionId",
+              "totalInscritos",
+              "codigo",
+              "nombre",
+              "cupo",
+              "inscritosEstimados",
+              "turnoId"
+            ],
+            "metodos": [
+              "generarGrupos()",
+              "crearGrupoManual()",
+              "actualizarEstado()",
+              "filtrarPorGestion()"
+            ]
+          },
+          {
+            "nombre": "frmAsignacionDocente",
+            "atributos": [
+              "docenteId",
+              "grupoId",
+              "materiasSeleccionadas[]",
+              "csrfToken"
+            ],
+            "metodos": [
+              "seleccionarDocente()",
+              "asignarMateria()",
+              "asignarMasivo()",
+              "quitarAsignacion()"
+            ]
+          },
+          {
+            "nombre": "frmAsignacionEstudiante",
+            "atributos": [
+              "grupoId",
+              "turnoFiltro",
+              "inscripcionesSeleccionadas[]",
+              "csrfToken"
+            ],
+            "metodos": [
+              "seleccionarGrupo()",
+              "matricularEstudiantes()",
+              "quitarEstudiante()",
+              "filtrarPorTurno()"
+            ]
+          },
+          {
+            "nombre": "frmHorarioGenerador",
+            "atributos": [
+              "grupoId",
+              "turno",
+              "horaInicio",
+              "horaFin",
+              "duracionMinutos",
+              "descansoMinutos",
+              "materiasIncluidas[]",
+              "aulasAsignadas[]"
+            ],
+            "metodos": [
+              "seleccionarTurno()",
+              "asignarAulas()",
+              "generarHorarioMasivo()",
+              "generarMultiGrupo()"
+            ]
+          }
+        ],
+        "controles": [
+          {
+            "nombre": "GrupoController",
+            "metodos": [
+              "index()",
+              "new()",
+              "show()",
+              "edit()",
+              "toggle()",
+              "bulkState()",
+              "generate()"
+            ]
+          },
+          {
+            "nombre": "HorarioController",
+            "metodos": [
+              "index()",
+              "generarMultiGrupo()",
+              "showGrupo()",
+              "deleteMateria()",
+              "deleteGrupo()",
+              "deleteGrupos()",
+              "generarMasivo()",
+              "show()",
+              "edit()",
+              "delete()"
+            ]
+          },
+          {
+            "nombre": "AsignacionController",
+            "metodos": [
+              "index()",
+              "verGrupo()",
+              "estudiantes()",
+              "quitarEstudiante()",
+              "docentes()",
+              "docentesMasivo()",
+              "quitarDocente()"
+            ]
+          },
+          {
+            "nombre": "Casos de Uso",
+            "metodos": [
+              "generateGrupos()",
+              "createGrupo()",
+              "listGrupos()",
+              "asignarEstudianteAGrupo()",
+              "asignarDocenteAGrupo()",
+              "asignarDocenteMasivo()",
+              "generarHorarioMasivo()",
+              "generarHorarioMultiGrupo()"
+            ]
+          }
+        ],
+        "entidades": [
+          {
+            "nombre": "Grupo",
+            "atributos": [
+              "- id: ?int",
+              "- gestion: Gestion",
+              "- turno: ?Turno",
+              "- codigo: string",
+              "- nombre: string",
+              "- cupo: int",
+              "- inscritosEstimados: int",
+              "- estado: string",
+              "- createdAt: DateTimeImmutable",
+              "- updatedAt: ?DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ configure()",
+              "+ close()",
+              "+ open()",
+              "+ isOpen()"
+            ]
+          },
+          {
+            "nombre": "AsignacionDocente",
+            "atributos": [
+              "- id: ?int",
+              "- gestion: Gestion",
+              "- materia: Materia",
+              "- grupo: Grupo",
+              "- docente: User",
+              "- createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ assign()"
+            ]
+          },
+          {
+            "nombre": "AsignacionGrupo",
+            "atributos": [
+              "- id: ?int",
+              "- inscripcion: Inscripcion",
+              "- materia: Materia",
+              "- grupo: Grupo",
+              "- createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ assign()"
+            ]
+          },
+          {
+            "nombre": "Horario",
+            "atributos": [
+              "- id: ?int",
+              "- grupo: Grupo",
+              "- materia: Materia",
+              "- aula: Aula",
+              "- dia: string",
+              "- horaInicio: DateTimeImmutable",
+              "- horaFin: DateTimeImmutable",
+              "- createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ configure()"
+            ]
+          }
+        ],
+        "fuentes": [
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Academico\\Grupo\\UI\\Controller\\GrupoController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Academico\\Horario\\UI\\Controller\\HorarioController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Asignacion\\UI\\Controller\\AsignacionController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Academico\\Grupo\\Domain\\Entity\\Grupo.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\Domain\\Entity\\AsignacionDocente.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\Domain\\Entity\\AsignacionGrupo.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Academico\\Horario\\Domain\\Entity\\Horario.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Asignacion\\UI\\View\\index.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Asignacion\\UI\\View\\docentes.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Asignacion\\UI\\View\\estudiantes.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Academico\\Grupo\\UI\\View\\lista.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Academico\\Horario\\UI\\View\\lista.html.twig"
+        ]
+      },
+      {
+        "cu": "CU-10",
+        "titulo": "Gestionar Evaluaciones",
+        "actores": [
+          "Docente"
+        ],
+        "fronteras": [
+          {
+            "nombre": "frmPlanilla",
+            "atributos": [
+              "nota[][examen]",
+              "archivo"
+            ],
+            "metodos": [
+              "guardarNotas()",
+              "importarNotas()",
+              "exportarNotas()",
+              "cargarPlanilla()"
+            ]
+          },
+          {
+            "nombre": "frmDocente",
+            "atributos": [
+              "materiaId",
+              "grupoId"
+            ],
+            "metodos": [
+              "cargarNotas()"
+            ]
+          }
+        ],
+        "controles": [
+          {
+            "nombre": "NotaController",
+            "metodos": [
+              "+ index()",
+              "+ misMaterias()",
+              "+ planilla()",
+              "+ guardar()",
+              "+ exportarNotas()",
+              "+ importarNotas()",
+              "+ boletin()",
+              "+ miHorario()"
+            ]
+          },
+          {
+            "nombre": "Casos de Uso",
+            "metodos": [
+              "+ listMateriasDocente()",
+              "+ verPlanilla()",
+              "+ guardarNotas()",
+              "+ importarNotas()"
+            ]
+          }
+        ],
+        "entidades": [
+          {
+            "nombre": "Nota",
+            "atributos": [
+              "+ id: ?int",
+              "+ inscripcion: Inscripcion",
+              "+ materia: Materia",
+              "+ numeroExamen: int",
+              "+ valor: int",
+              "+ observacion: ?string",
+              "+ registradaPor: ?User",
+              "+ createdAt: DateTimeImmutable",
+              "+ updatedAt: ?DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ setValor(int, ?string, ?User): void"
+            ]
+          },
+          {
+            "nombre": "AsignacionDocente",
+            "atributos": [
+              "+ id: ?int",
+              "+ gestion: Gestion",
+              "+ materia: Materia",
+              "+ grupo: Grupo",
+              "+ docente: User",
+              "+ createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ assign(Gestion, Materia, Grupo, User): void"
+            ]
+          },
+          {
+            "nombre": "AsignacionGrupo",
+            "atributos": [
+              "+ id: ?int",
+              "+ inscripcion: Inscripcion",
+              "+ materia: Materia",
+              "+ grupo: Grupo",
+              "+ createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ assign(Inscripcion, Materia, Grupo): void"
+            ]
+          }
+        ],
+        "fuentes": [
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\UI\\Controller\\NotaController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\Application\\UseCase\\ListMateriasDocente.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\Application\\UseCase\\VerPlanilla.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\Application\\UseCase\\GuardarNotas.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\Application\\UseCase\\ImportarNotas.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\Domain\\Entity\\Nota.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\Domain\\Entity\\AsignacionDocente.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\Domain\\Entity\\AsignacionGrupo.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\UI\\View\\planilla.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\UI\\View\\docente.html.twig"
+        ]
+      },
+      {
+        "cu": "CU-11",
+        "titulo": "Consultar Informacion Academica",
+        "actores": [
+          "Postulante"
+        ],
+        "fronteras": [
+          {
+            "nombre": "frmBoletin",
+            "metodos": [
+              "+ verImprimirBoleta()",
+              "+ descargarBoletin()"
+            ],
+            "atributos": [
+              "- ci",
+              "- apellidos",
+              "- nombres",
+              "- carrera",
+              "- gestion",
+              "- modalidad",
+              "- telefono",
+              "- email",
+              "- listaMateriasGruposNotas",
+              "- promedioPorMateria",
+              "- estadoAprobacion"
+            ]
+          },
+          {
+            "nombre": "frmHorario",
+            "metodos": [
+              "+ verImprimirHorario()",
+              "+ descargarHorario()"
+            ],
+            "atributos": [
+              "- ci",
+              "- apellidos",
+              "- nombres",
+              "- carrera",
+              "- gestion",
+              "- modalidad",
+              "- franjasDiaHoraAula"
+            ]
+          }
+        ],
+        "controles": [
+          {
+            "nombre": "NotaController",
+            "metodos": [
+              "+ boletin()",
+              "+ miHorario()",
+              "+ index()"
+            ]
+          },
+          {
+            "nombre": "Casos de Uso",
+            "metodos": [
+              "+ verBoletin()",
+              "+ verHorarioEstudiante()"
+            ]
+          }
+        ],
+        "entidades": [
+          {
+            "nombre": "Inscripcion",
+            "atributos": [
+              "- id: ?int",
+              "- user: User",
+              "- gestion: Gestion",
+              "- tipo: string",
+              "- modalidad: string",
+              "- ci: string",
+              "- nombres: string",
+              "- apellidos: string",
+              "- fechaNacimiento: DateTimeImmutable",
+              "- sexo: string",
+              "- email: string",
+              "- carrera: ?Carrera",
+              "- estado: string"
+            ],
+            "metodos": [
+              "+ esEstudiante(): bool",
+              "+ isConfirmada(): bool"
+            ]
+          },
+          {
+            "nombre": "Nota",
+            "atributos": [
+              "- id: ?int",
+              "- inscripcion: Inscripcion",
+              "- materia: Materia",
+              "- numeroExamen: int",
+              "- valor: int",
+              "- observacion: ?string",
+              "- registradaPor: ?User",
+              "- createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ setValor(): void"
+            ]
+          },
+          {
+            "nombre": "AsignacionGrupo",
+            "atributos": [
+              "- id: ?int",
+              "- inscripcion: Inscripcion",
+              "- materia: Materia",
+              "- grupo: Grupo",
+              "- createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ assign(): void"
+            ]
+          },
+          {
+            "nombre": "Horario",
+            "atributos": [
+              "- id: ?int",
+              "- grupo: Grupo",
+              "- materia: Materia",
+              "- aula: Aula",
+              "- dia: string",
+              "- horaInicio: DateTimeImmutable",
+              "- horaFin: DateTimeImmutable",
+              "- createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ configure(): void"
+            ]
+          }
+        ],
+        "fuentes": [
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\UI\\Controller\\NotaController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\Domain\\Entity\\Nota.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\Domain\\Entity\\AsignacionGrupo.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Academico\\Horario\\Domain\\Entity\\Horario.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Domain\\Entity\\Inscripcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\Application\\UseCase\\VerBoletin.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\Application\\UseCase\\VerHorarioEstudiante.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\UI\\View\\boletin.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\UI\\View\\horario.html.twig"
+        ]
+      },
+      {
+        "cu": "CU-12",
+        "titulo": "Consultar Carga Academica",
+        "actores": [
+          "Docente"
+        ],
+        "fronteras": [
+          {
+            "nombre": "frmMisMaterias",
+            "metodos": [
+              "verMisMaterias()",
+              "accederPlanilla()"
+            ],
+            "atributos": [
+              "materiasCodigo",
+              "materiasNombre",
+              "gruposCodigo",
+              "gruposNombre",
+              "botonesCargaNotas"
+            ]
+          }
+        ],
+        "controles": [
+          {
+            "nombre": "NotaController",
+            "metodos": [
+              "misMaterias()",
+              "index()",
+              "boletin()",
+              "miHorario()"
+            ]
+          }
+        ],
+        "entidades": [
+          {
+            "nombre": "AsignacionDocente",
+            "atributos": [
+              "- id: ?int",
+              "- gestion: Gestion",
+              "- materia: Materia",
+              "- grupo: Grupo",
+              "- docente: User",
+              "- createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ assign(Gestion, Materia, Grupo, User): void"
+            ]
+          },
+          {
+            "nombre": "Grupo",
+            "atributos": [
+              "- id: ?int",
+              "- gestion: Gestion",
+              "- turno: ?Turno",
+              "- codigo: string",
+              "- nombre: string",
+              "- cupo: int",
+              "- estado: string",
+              "- createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ configure(Gestion, string, string, int, int): void",
+              "+ isOpen(): bool"
+            ]
+          },
+          {
+            "nombre": "Materia",
+            "atributos": [
+              "- id: ?int",
+              "- codigo: string",
+              "- nombre: string",
+              "- descripcion: ?string",
+              "- estado: string",
+              "- createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ rename(string, string, ?string): void",
+              "+ isActive(): bool"
+            ]
+          },
+          {
+            "nombre": "Horario",
+            "atributos": [
+              "- id: ?int",
+              "- grupo: Grupo",
+              "- materia: Materia",
+              "- aula: Aula",
+              "- dia: string",
+              "- horaInicio: DateTimeImmutable",
+              "- horaFin: DateTimeImmutable",
+              "- createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ configure(Grupo, Materia, Aula, string, DateTimeImmutable, DateTimeImmutable): void"
+            ]
+          }
+        ],
+        "fuentes": [
+          "src/Notas/UI/Controller/NotaController.php",
+          "src/Notas/Application/UseCase/ListMateriasDocente.php",
+          "src/Notas/Application/UseCase/ResumenGruposGestion.php",
+          "src/Notas/Domain/Entity/AsignacionDocente.php",
+          "src/Academico/Grupo/Domain/Entity/Grupo.php",
+          "src/Academico/Materia/Domain/Entity/Materia.php",
+          "src/Academico/Horario/Domain/Entity/Horario.php",
+          "src/Notas/UI/View/docente.html.twig"
+        ]
+      },
+      {
+        "cu": "CU-13",
+        "titulo": "Ejecutar Admisión Final",
+        "actores": [
+          "Coordinador Académico"
+        ],
+        "fronteras": [
+          {
+            "nombre": "frmAdmisionResolver",
+            "atributos": [
+              "resultado: select (APROBADO|DESCARTADO|RECHAZADO)",
+              "motivo: text input (opcional)"
+            ],
+            "metodos": [
+              "+ guardarResultado()",
+              "+ confirmarAccion()"
+            ]
+          }
+        ],
+        "controles": [
+          {
+            "nombre": "InscripcionController",
+            "metodos": [
+              "+ resolver(Request, int): RedirectResponse",
+              "+ validar(Request, int): RedirectResponse",
+              "+ rechazar(Request, int): RedirectResponse",
+              "+ confirmar(Request, int): RedirectResponse",
+              "+ adminDetalle(Request, int): Response",
+              "+ agendar(Request, int): RedirectResponse"
+            ]
+          },
+          {
+            "nombre": "Casos de Uso",
+            "metodos": [
+              "+ resolverResultadoAdmision()",
+              "+ confirmarInscripcion()",
+              "+ rechazarInscripcion()",
+              "+ validarInscripcion()",
+              "+ agendarEntrevista()"
+            ]
+          }
+        ],
+        "entidades": [
+          {
+            "nombre": "Inscripcion",
+            "atributos": [
+              "- id: ?int",
+              "- user: User",
+              "- gestion: Gestion",
+              "- tipo: string (ESTUDIANTE|DOCENTE)",
+              "- estado: string",
+              "- carrera: ?Carrera",
+              "- carreraSegunda: ?Carrera",
+              "- validadaPor: ?int",
+              "- confirmadaPor: ?int",
+              "- motivoRechazo: ?string",
+              "- fechaPresentacionDocs: ?DateTimeImmutable",
+              "- fechaEntrevista: ?DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ validar(int|null): void",
+              "+ rechazar(string|null, int|null): void",
+              "+ confirmar(int|null): void",
+              "+ isValidada(): bool",
+              "+ isConfirmada(): bool",
+              "+ isRechazada(): bool",
+              "+ actaConforme(): bool",
+              "+ esEstudiante(): bool",
+              "+ esDocente(): bool"
+            ]
+          },
+          {
+            "nombre": "Carrera",
+            "atributos": [
+              "- id: ?int",
+              "- codigo: string",
+              "- nombre: string",
+              "- descripcion: ?string",
+              "- facultad: ?string",
+              "- estado: string",
+              "- createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ rename(string, string, string|null): void",
+              "+ isActive(): bool"
+            ]
+          },
+          {
+            "nombre": "CarreraGestion",
+            "atributos": [
+              "- id: ?int",
+              "- gestion: Gestion",
+              "- carrera: Carrera",
+              "- habilitada: bool",
+              "- cupoCarrera: int"
+            ],
+            "metodos": [
+              "+ create(Carrera, bool, int): self"
+            ]
+          },
+          {
+            "nombre": "User",
+            "atributos": [
+              "- id: ?int",
+              "- email: string",
+              "- firstName: string",
+              "- lastName: string",
+              "- active: bool",
+              "- locked: bool",
+              "- roles: Collection<Role>"
+            ],
+            "metodos": [
+              "+ roles(): array",
+              "+ syncRoles(array): void"
+            ]
+          }
+        ],
+        "fuentes": [
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\UI\\Controller\\InscripcionController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\ResolverResultadoAdmision.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Domain\\Entity\\Inscripcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Gestion\\Domain\\Entity\\CarreraGestion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Gestion\\Domain\\Entity\\CupoGestion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Academico\\Carrera\\Domain\\Entity\\Carrera.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Auth\\Entity\\User.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\UI\\View\\admin_detalle.html.twig"
+        ]
+      },
+      {
+        "cu": "CU-14",
+        "titulo": "Consultar Resultados de Admision",
+        "actores": [
+          "Postulante"
+        ],
+        "fronteras": [
+          {
+            "nombre": "frmDetalleInscripcion",
+            "atributos": [
+              "nombres",
+              "apellidos",
+              "ci",
+              "email",
+              "fechaNacimiento",
+              "sexo",
+              "ciudad",
+              "telefono",
+              "carrera",
+              "carreraSegunda",
+              "estado",
+              "motivoRechazo",
+              "fechaPresentacionDocs",
+              "fechaEntrevista"
+            ],
+            "metodos": [
+              "verDetalles()",
+              "consultarResultado()",
+              "descargarConstancia()"
+            ]
+          }
+        ],
+        "controles": [
+          {
+            "nombre": "InscripcionController",
+            "metodos": [
+              "+ver()",
+              "+index()"
+            ]
+          },
+          {
+            "nombre": "Casos de Uso",
+            "metodos": [
+              "+verInscripcion()",
+              "+resolverResultadoAdmision()"
+            ]
+          }
+        ],
+        "entidades": [
+          {
+            "nombre": "Inscripcion",
+            "atributos": [
+              "- id: ?int",
+              "- user: User",
+              "- gestion: Gestion",
+              "- tipo: string",
+              "- ci: string",
+              "- nombres: string",
+              "- apellidos: string",
+              "- email: string",
+              "- fechaNacimiento: DateTimeImmutable",
+              "- sexo: string",
+              "- ciudad: ?string",
+              "- telefono: ?string",
+              "- carrera: ?Carrera",
+              "- estado: string",
+              "- motivoRechazo: ?string",
+              "- fechaPresentacionDocs: ?DateTimeImmutable",
+              "- fechaEntrevista: ?DateTimeImmutable",
+              "- confirmadaPor: ?int"
+            ],
+            "metodos": [
+              "+isConfirmada(): bool",
+              "+isRechazada(): bool",
+              "+isValidada(): bool",
+              "+isAnulada(): bool",
+              "+esEstudiante(): bool",
+              "+esDocente(): bool"
+            ]
+          },
+          {
+            "nombre": "Carrera",
+            "atributos": [
+              "- id: ?int",
+              "- codigo: string",
+              "- nombre: string",
+              "- descripcion: ?string",
+              "- facultad: ?string",
+              "- modalidad: ?string",
+              "- estado: string"
+            ],
+            "metodos": [
+              "+isActive(): bool"
+            ]
+          }
+        ],
+        "fuentes": [
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\UI\\Controller\\InscripcionController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Domain\\Entity\\Inscripcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Academico\\Carrera\\Domain\\Entity\\Carrera.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\UI\\View\\detalle.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\VerInscripcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Application\\UseCase\\ResolverResultadoAdmision.php"
+        ]
+      },
+      {
+        "cu": "CU-15",
+        "titulo": "Gestionar Reportes e Indicadores",
+        "actores": [
+          "Autoridad",
+          "Coordinador Academico"
+        ],
+        "fronteras": [
+          {
+            "nombre": "frmDashboard",
+            "metodos": [
+              "visualizarReportes()",
+              "visualizarDetalle()",
+              "visualizarDocentes()",
+              "filtrarCarrera()",
+              "filtrarMateria()",
+              "filtrarDocente()",
+              "limpiarFiltros()",
+              "exportarCSV()",
+              "exportarExcel()",
+              "imprimirPDF()",
+              "consultarAsistente()"
+            ],
+            "atributos": [
+              "gestion",
+              "carrera",
+              "materia",
+              "docente",
+              "estado",
+              "texto"
+            ]
+          }
+        ],
+        "controles": [
+          {
+            "nombre": "DashboardController",
+            "metodos": [
+              "+ index()",
+              "+ data()",
+              "+ asistente()"
+            ]
+          },
+          {
+            "nombre": "ExportController",
+            "metodos": [
+              "+ export()"
+            ]
+          },
+          {
+            "nombre": "Casos de Uso",
+            "metodos": [
+              "+ getReportes()",
+              "+ getDashboardData()",
+              "+ exportarReportes()",
+              "+ interpretarConsulta()"
+            ]
+          }
+        ],
+        "entidades": [
+          {
+            "nombre": "Gestion",
+            "atributos": [
+              "- id: ?int",
+              "- codigo: string",
+              "- nombre: string",
+              "- estado: string",
+              "- fechaActivacion: ?DateTimeImmutable",
+              "- fechaFinalizacion: ?DateTimeImmutable",
+              "- configuracion: ?ConfiguracionGestion",
+              "- periodos: Collection",
+              "- carreras: Collection",
+              "- cupos: Collection",
+              "- historial: Collection"
+            ],
+            "metodos": [
+              "+ rename()",
+              "+ activate()",
+              "+ finalize()"
+            ]
+          },
+          {
+            "nombre": "Nota",
+            "atributos": [
+              "- id: ?int",
+              "- inscripcion: Inscripcion",
+              "- materia: Materia",
+              "- numeroExamen: int",
+              "- valor: int",
+              "- observacion: ?string",
+              "- registradaPor: ?User",
+              "- createdAt: DateTimeImmutable",
+              "- updatedAt: ?DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ setValor()"
+            ]
+          },
+          {
+            "nombre": "Inscripcion",
+            "atributos": [
+              "- id: ?int",
+              "- user: User",
+              "- gestion: Gestion",
+              "- tipo: string",
+              "- modalidad: string",
+              "- ci: string",
+              "- nombres: string",
+              "- apellidos: string",
+              "- email: string",
+              "- carrera: ?Carrera",
+              "- carreraSegunda: ?Carrera",
+              "- fechaNacimiento: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ updateDatosPersonales()",
+              "+ seleccionarCarrera()",
+              "+ completarDatos()"
+            ]
+          },
+          {
+            "nombre": "Grupo",
+            "atributos": [
+              "- id: ?int",
+              "- gestion: Gestion",
+              "- turno: ?Turno",
+              "- codigo: string",
+              "- nombre: string",
+              "- cupo: int",
+              "- inscritosEstimados: int",
+              "- estado: string",
+              "- createdAt: DateTimeImmutable",
+              "- updatedAt: ?DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ configure()",
+              "+ abrir()",
+              "+ cerrar()"
+            ]
+          }
+        ],
+        "fuentes": [
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Dashboard\\UI\\Controller\\DashboardController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Dashboard\\UI\\Controller\\ExportController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Dashboard\\Application\\UseCase\\GetReportes.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Dashboard\\Application\\UseCase\\GetDashboardData.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Dashboard\\Application\\UseCase\\ExportarReportes.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Dashboard\\Application\\UseCase\\InterpretarConsulta.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Dashboard\\Infrastructure\\Persistence\\ReporteRepository.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Dashboard\\UI\\View\\dashboard.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Gestion\\Domain\\Entity\\Gestion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Notas\\Domain\\Entity\\Nota.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Inscripcion\\Domain\\Entity\\Inscripcion.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Academico\\Grupo\\Domain\\Entity\\Grupo.php"
+        ]
+      },
+      {
+        "cu": "CU-16",
+        "titulo": "Gestionar Auditoria del Sistema",
+        "actores": [
+          "Administrador"
+        ],
+        "fronteras": [
+          {
+            "nombre": "frmFiltrosBitacora",
+            "atributos": [
+              "- usuario: select",
+              "- accion: select",
+              "- modulo: select",
+              "- desde: date",
+              "- hasta: date"
+            ],
+            "metodos": [
+              "+ filtrar()",
+              "+ limpiarFiltros()"
+            ]
+          }
+        ],
+        "controles": [
+          {
+            "nombre": "BitacoraController",
+            "metodos": [
+              "+ index()"
+            ]
+          },
+          {
+            "nombre": "Casos de Uso",
+            "metodos": [
+              "+ queryLog()"
+            ]
+          }
+        ],
+        "entidades": [
+          {
+            "nombre": "LogEntry",
+            "atributos": [
+              "- id: ?int",
+              "- userId: ?int",
+              "- userLabel: string",
+              "- action: string",
+              "- module: string",
+              "- description: string",
+              "- level: string",
+              "- ip: ?string",
+              "- userAgent: ?string",
+              "- metadata: ?array",
+              "- createdAt: DateTimeImmutable"
+            ],
+            "metodos": [
+              "+ __construct()"
+            ]
+          }
+        ],
+        "fuentes": [
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Bitacora\\Domain\\Entity\\LogEntry.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Bitacora\\UI\\Controller\\BitacoraController.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Bitacora\\Application\\UseCase\\QueryLog.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Bitacora\\Application\\UseCase\\RecordLogEntry.php",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Bitacora\\UI\\View\\_filtros.html.twig",
+          "D:\\Uagrm\\Sistema-de-gestion-CUP\\src\\Bitacora\\UI\\View\\lista.html.twig"
+        ]
+      }
+    ],
+    "arquitectura": {
+      "titulo": "Arquitectura Lógica SIGECUP-FICCT (Symfony 7.4 + Hexagonal)",
+      "capas": [
+        {
+          "nombre": "Capa de Presentación (UI / Controllers + Vistas)",
+          "componentes": [
+            "Symfony Controllers (routing #[Route])",
+            "Twig Templates (.html.twig) - plantillas por módulo",
+            "Bootstrap CSS framework",
+            "Stimulus.js (onclick, form handling)",
+            "Chart.js (visualizaciones en Dashboard)",
+            "SheetJS/XLSX.js (exportación de reportes)"
+          ],
+          "detalle": "Controladores por módulo (Auth, Inscripcion, Gestion, Academico, Dashboard, etc). Cada módulo expone UI/Controller y UI/View (rutas Twig). DTO de Request/Response para validación de entrada. Assets en public/assets/{modulo}/{css,js}. Diseño responsive con design-system.css (cascada global)."
+        },
+        {
+          "nombre": "Capa de Aplicación (Use Cases / Application Layer)",
+          "componentes": [
+            "Use Cases (Application/UseCase/*.php)",
+            "DTOs de entrada (Application/DTO/*Input.php)",
+            "Orquestación de lógica de negocio",
+            "Consultas a Repositorios",
+            "Llamadas a servicios de infraestructura"
+          ],
+          "detalle": "Casos de uso específicos por contexto (LoginUser, CrearInscripcion, GenerarHorario, GuardarNotas, etc). Reciben DTOs tipados, orquestan Domain + Infrastructure. Sin dependencias a HTTP/DB. Manejan excepciones de dominio."
+        },
+        {
+          "nombre": "Capa de Dominio (Entities + Business Rules)",
+          "componentes": [
+            "Entidades (Domain/Entity/*.php) - User, Inscripcion, Nota, etc",
+            "Catálogos/Enums (Domain/Catalog/*.php) - EstadoInscripcion, EstadoPago, etc",
+            "Excepciones de dominio (Domain/Exception/*.php)",
+            "Servicios de dominio (Domain/*.php)",
+            "Políticas de seguridad a nivel de dominio"
+          ],
+          "detalle": "Objetos de valor y entidades con lógica pura. Mapping ORM con atributos Doctrine #[ORM\\*]. Validaciones de reglas de negocio (ej. PasswordPolicy, PlanillaAccessPolicy). Sin dependencias a BD/HTTP."
+        },
+        {
+          "nombre": "Capa de Infraestructura (Persistence, Payment, Mailer)",
+          "componentes": [
+            "Repositories Doctrine ORM (Infrastructure/Persistence/*.php)",
+            "StripeGateway (Payment Stripe Checkout)",
+            "Mailers (SMTP Gmail) - RegistrationMailer, PasswordResetMailer, etc",
+            "Console Commands (Infrastructure/Console/*.php)",
+            "Security/CSRF - CsrfManager, SessionGuard, PermissionGuard"
+          ],
+          "detalle": "Adaptadores ORM a PostgreSQL Neon. Stripe SDK encapsulado en StripeGateway (Checkout Session, Webhook verification). Mailer vía symfony/mailer con SMTP Gmail urlencode. CSRF por intención (tokens únicos por acción). Auditoría centralizada en Bitacora."
+        },
+        {
+          "nombre": "Framework / Runtime (Symfony 7.4 + PHP 8.2)",
+          "componentes": [
+            "Symfony 7.4 (Framework Bundle, DependencyInjection, Console)",
+            "Doctrine 3.6 ORM + Migrations",
+            "Twig 3.x (Templating Engine)",
+            "Symfony Http Foundation (Session, Request/Response)",
+            "PHP 8.2 (strict_types, attributes, readonly classes)"
+          ],
+          "detalle": "Kernel.php bootstrap. Service container autowiring. Session storage en filesystem (cache_dir/sessions). Attribute-based routing y ORM mapping. Config en config/packages/*.yaml."
+        },
+        {
+          "nombre": "Datos / Servicios Externos",
+          "componentes": [
+            "PostgreSQL 17 (Neon Cloud) - BD relacional",
+            "Stripe API (Checkout Hosted) - pago de arancel en USD/BOB",
+            "Gmail SMTP - envío de correos (transaccionales)",
+            "Sistema de archivos local - uploads/avatars, documentos"
+          ],
+          "detalle": "BD PostgreSQL 17 con DSN en .env (DATABASE_URL). Stripe Webhook en /stripe/webhook (StripeWebhookController). Mailer síncronoconfigurable en mailer.yaml con MAIL_USER+MAIL_PASSWORD. Almacenamiento de archivos en public/uploads/."
+        }
+      ],
+      "modulos": [
+        "Auth (Autenticación)",
+        "Academico (Carrera, Materia, Aula, Grupo, Horario, Turno - catálogo académico)",
+        "Inscripcion (Preinscripción, documentos, estados, pagos, entrevistas)",
+        "Usuario (Gestión de usuarios, roles, permisos)",
+        "Perfil (Datos personales, cambio de contraseña)",
+        "Notas (Calificaciones, planillas, boletines, importación masiva)",
+        "Gestion (Periodos, carreras/gestion, cupos, configuración)",
+        "Asignacion (Asignación docente-grupo, estudiante-grupo)",
+        "Dashboard (Reportes, gráficos, exportación Excel/PDF)",
+        "Bitacora (Auditoría, log centralizado por módulo/acción)",
+        "Home (Landing, redirecciones post-login)"
+      ],
+      "notas": "DECISIONES ARQUITECTÓNICAS:\n- Hexagonal: Domain aislado sin dependencias externas. Application orquesta. Infrastructure adapta ORM/Stripe/Mailer.\n- ORM Mappings: auto_mapping=false (control explícito). Atributos Doctrine #[ORM\\*] en Entity. Naming strategy underscore.\n- CSRF: CsrfManager por intención, hidden _csrf_token en cada form (no global). Validación en LoginController, etc.\n- Mailer: Síncrono (no queue). DSN smtp:// con urlencode de MAIL_USER/PASSWORD. Host Gmail fijo (cambiar en mailer.yaml si otro proveedor).\n- Stripe: SDK stripe/stripe-php v20.2. StripeGateway encapsula. Checkout Session → redirect a success_url. Webhook para confirmar pago.\n- DB: PostgreSQL 17 (Neon), explicit mappings en doctrine.yaml (Auth, Bitacora, Gestion, Carrera, Materia, Aula, Turno, Grupo, Horario, Inscripcion, Usuario, Notas).\n- Assets: Bootstrap CSS + custom design-system.css (cascada última gana). Chart.js + SheetJS en public/assets/vendor/. JS modular por módulo.\n- No incluye: dompdf, PhpSpreadsheet (no en composer.json). Exportación vía JavaScript (SheetJS) + backend JSON.\n- Bounded Contexts: 11 módulos independientes, cada uno Domain/Application/Infrastructure/UI (excluir Auth que mezcla Entity en raíz).\n- Reportes: Dashboard/UI/Controller → GetReportes/ExportarReportes en Application/UseCase. Datos por módulo (Notas, Bitacora, Gestion)."
+    },
+    "despliegue": {
+      "titulo": "Diagrama de Despliegue SIGECUP-FICCT (UML Enterprise Architect)",
+      "nodos": [
+        {
+          "nombre": "Cliente Web (Dispositivos Finales)",
+          "estereotipo": "device",
+          "contenido": [
+            "Navegador Chrome/Firefox/Edge",
+            "Postulante",
+            "Docente",
+            "Coordinador",
+            "Autoridad",
+            "Administrador"
+          ]
+        },
+        {
+          "nombre": "Internet HTTPS/TLS",
+          "estereotipo": "network",
+          "contenido": [
+            "Protocolo HTTPS",
+            "Encriptación TLS 1.2+"
+          ]
+        },
+        {
+          "nombre": "Vercel Serverless Platform",
+          "estereotipo": "executionEnvironment",
+          "contenido": [
+            "vercel-php@0.9.0",
+            "PHP 8.2 Runtime",
+            "Symfony 7.4 Application",
+            "Twig Template Engine",
+            "api/index.php (Punto de entrada)",
+            "Enrutamiento (assets, favicon, aplicación)",
+            "Manejo de sesiones HTTP",
+            "CSRF Protection (CsrfManager)"
+          ]
+        },
+        {
+          "nombre": "Neon PostgreSQL (AWS us-east-1)",
+          "estereotipo": "database",
+          "contenido": [
+            "PostgreSQL 17",
+            "Endpoint: ep-purple-thunder-apyxaqz0-pooler.c-7.us-east-1.aws.neon.tech",
+            "Pooling de conexiones",
+            "Doctrine ORM (Mapeo de 9 entidades)",
+            "Auth, Bitacora, Gestion, Carrera, Materia, Aula, Turno, Grupo, Horario, Inscripcion, Usuario, Notas",
+            "Soporte SSL/TLS requerido"
+          ]
+        },
+        {
+          "nombre": "Stripe API (Pagos)",
+          "estereotipo": "server",
+          "contenido": [
+            "Stripe Checkout Session",
+            "Confirmación de pago (charge.succeeded)",
+            "Webhook POST /stripe/webhook",
+            "Actualización estado de Pago",
+            "Moneda: USD (conversión BOB a USD)",
+            "Arancel inscripción: 100.00 BOB"
+          ]
+        },
+        {
+          "nombre": "Google SMTP (Correos)",
+          "estereotipo": "server",
+          "contenido": [
+            "SMTP: smtp.gmail.com:587",
+            "Autenticación: jaguevarac126@ficct.uagrm.edu.bo",
+            "App Password (no contraseña de Gmail)",
+            "Remitente: no-reply@cup-ficct.local",
+            "Symfony Mailer (mailer.yaml)",
+            "Notificaciones de admisión/rechazo"
+          ]
+        }
+      ],
+      "conexiones": [
+        {
+          "origen": "Cliente Web (Dispositivos Finales)",
+          "destino": "Vercel Serverless Platform",
+          "etiqueta": "HTTPS/TLS - Solicitud HTTP(S) al sitio"
+        },
+        {
+          "origen": "Vercel Serverless Platform",
+          "destino": "Cliente Web (Dispositivos Finales)",
+          "etiqueta": "HTTPS/TLS - Respuesta HTML/JSON"
+        },
+        {
+          "origen": "Vercel Serverless Platform",
+          "destino": "Neon PostgreSQL (AWS us-east-1)",
+          "etiqueta": "TCP/IP + SSL - Consultas Doctrine ORM"
+        },
+        {
+          "origen": "Neon PostgreSQL (AWS us-east-1)",
+          "destino": "Vercel Serverless Platform",
+          "etiqueta": "TCP/IP + SSL - Resultados de base de datos"
+        },
+        {
+          "origen": "Vercel Serverless Platform",
+          "destino": "Stripe API (Pagos)",
+          "etiqueta": "HTTPS REST API - Crear/Confirmar sesión de pago"
+        },
+        {
+          "origen": "Stripe API (Pagos)",
+          "destino": "Cliente Web (Dispositivos Finales)",
+          "etiqueta": "HTTPS - Redirigir a formulario de pago"
+        },
+        {
+          "origen": "Stripe API (Pagos)",
+          "destino": "Vercel Serverless Platform",
+          "etiqueta": "HTTPS POST /stripe/webhook - Notificación de evento"
+        },
+        {
+          "origen": "Vercel Serverless Platform",
+          "destino": "Google SMTP (Correos)",
+          "etiqueta": "SMTP/TLS:587 - Envío de correos"
+        }
+      ],
+      "notas": "INFRAESTRUCTURA REAL (según repositorio):\n- Plataforma: Vercel con runtime vercel-php@0.9.0 (NO Upsun/AWS como menciona la documentación del proyecto)\n- Base de datos: Neon PostgreSQL en AWS us-east-1 (managed database service)\n- Servicios externos: Stripe Checkout para pagos del arancel de inscripción (USD); Google SMTP para notificaciones\n- Punto de entrada: api/index.php (función serverless Vercel)\n- Runtime: PHP 8.2 con Symfony 7.4, Twig templates, Doctrine ORM v3.6\n- Autenticación: CsrfManager por intención (sin csrf_protection global)\n- Base de datos: 9 módulos mapeados (Auth, Bitacora, Gestion, Carrera, Materia, Aula, Turno, Grupo, Horario, Inscripcion, Usuario, Notas)\n- PostgreSQL pooling en Neon para optimizar conexiones en arquitectura serverless\n- Webhook Stripe en POST /stripe/webhook (sin sesión, sin CSRF; validación por firma HMAC)\n- Mailer: SMTP Gmail + urlencode de credenciales en mailer.yaml\n- Roles de usuario: Postulante, Docente, Coordinador, Autoridad, Administrador (enforced by PermissionGuard)\n- DISCREPANCIA: El proyecto documenta Upsun/AWS como plataforma planeada, pero el repositorio real se despliega en Vercel + Neon"
+    },
+    "resumen": "Extraidos 16/16 CU + arquitectura + despliegue"
+  }
+}

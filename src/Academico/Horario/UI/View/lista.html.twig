@@ -129,7 +129,7 @@
                         <select name="grupoId" required>
                             <option value="">Seleccione un grupo</option>
                             {% for grupo in grupos %}
-                                <option value="{{ grupo.id }}">{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }} / {{ grupo.codigo }}</option>
+                                <option value="{{ grupo.id }}">{{ grupo.gestion.codigo|gestion_label }} / {{ grupo.codigo }}</option>
                             {% endfor %}
                         </select>
                     </label>
@@ -214,7 +214,7 @@
                                 {% for grupo in grupos %}
                                     <tr>
                                         <td data-label="Incluir"><input type="checkbox" name="grupos[]" value="{{ grupo.id }}"></td>
-                                        <td data-label="Grupo">{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }} / {{ grupo.codigo }}</td>
+                                        <td data-label="Grupo">{{ grupo.gestion.codigo|gestion_label }} / {{ grupo.codigo }}</td>
                                         <td data-label="Aula">
                                             <select name="aula_grupo_{{ grupo.id }}">
                                                 <option value="">Seleccione un aula</option>
@@ -251,7 +251,7 @@
                 <select data-filter-field="grupo">
                     <option value="">Todos</option>
                     {% for grupo in grupos %}
-                        <option value="{{ grupo.codigo }}">{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }} / {{ grupo.codigo }}</option>
+                        <option value="{{ grupo.codigo }}">{{ grupo.gestion.codigo|gestion_label }} / {{ grupo.codigo }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -293,7 +293,7 @@
                             <td data-label="Seleccionar"><input class="gestion-bulk-check" type="checkbox" name="ids[]" value="{{ fila.grupo.id }}" form="horario-bulk-form" data-bulk-item aria-label="Seleccionar horario del grupo {{ fila.grupo.codigo }}"></td>
                             <td data-label="Grupo">
                                 {{ fila.grupo.codigo }}
-                                <span class="gestion-table__meta">{{ fila.grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}</span>
+                                <span class="gestion-table__meta">{{ fila.grupo.gestion.codigo|gestion_label }}</span>
                             </td>
                             <td data-label="Materias">{{ fila.materias }}</td>
                             <td data-label="Dias">{{ fila.dias|join(', ')|title }}</td>

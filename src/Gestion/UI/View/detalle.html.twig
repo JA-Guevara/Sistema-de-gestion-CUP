@@ -1,6 +1,6 @@
 {% extends 'app_base.html.twig' %}
 
-{% block title %}{{ gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}{% endblock %}
+{% block title %}{{ gestion.codigo|gestion_label }}{% endblock %}
 
 {% block stylesheets %}
     <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">
@@ -23,7 +23,7 @@
     <section class="gestion-dashboard">
         <article class="gestion-metric">
             <span class="gestion-metric__label">Codigo</span>
-            <strong>{{ gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}</strong>
+            <strong>{{ gestion.codigo|gestion_label }}</strong>
         </article>
         <article class="gestion-metric">
             <span class="gestion-metric__label">Estado</span>

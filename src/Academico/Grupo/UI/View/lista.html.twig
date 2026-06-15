@@ -47,7 +47,7 @@
                     Gestion
                     <select name="gestionId" required>
                         {% for gestion in gestiones %}
-                            <option value="{{ gestion.id }}">{{ gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }} - {{ gestion.nombre|replace({'Curso Preuniversitario 2026-I': 'Curso Preuniversitario CUP 1-2026'}) }}</option>
+                            <option value="{{ gestion.id }}">{{ gestion.codigo|gestion_label }} - {{ gestion.nombre|replace({'Curso Preuniversitario 2026-I': 'Curso Preuniversitario CUP 1-2026'}) }}</option>
                         {% endfor %}
                     </select>
                 </label>
@@ -70,7 +70,7 @@
                     Gestion
                     <select name="gestionId" required>
                         {% for gestion in gestiones %}
-                            <option value="{{ gestion.id }}">{{ gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}</option>
+                            <option value="{{ gestion.id }}">{{ gestion.codigo|gestion_label }}</option>
                         {% endfor %}
                     </select>
                 </label>
@@ -105,7 +105,7 @@
                 <select data-filter-field="gestion">
                     <option value="">Todas</option>
                     {% for gestion in gestiones %}
-                        <option value="{{ gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}">{{ gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}</option>
+                        <option value="{{ gestion.codigo|gestion_label }}">{{ gestion.codigo|gestion_label }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -159,11 +159,11 @@
                 </thead>
                 <tbody>
                     {% for grupo in grupos %}
-                        <tr data-filter-row data-filter-gestion="{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}" data-filter-texto="{{ grupo.codigo }} {{ grupo.nombre }}" data-filter-estado="{{ grupo.estado }}">
+                        <tr data-filter-row data-filter-gestion="{{ grupo.gestion.codigo|gestion_label }}" data-filter-texto="{{ grupo.codigo }} {{ grupo.nombre }}" data-filter-estado="{{ grupo.estado }}">
                             <td data-label="Seleccionar"><input class="gestion-bulk-check" type="checkbox" name="ids[]" value="{{ grupo.id }}" form="grupo-bulk-form" data-bulk-item aria-label="Seleccionar grupo {{ grupo.codigo }}"></td>
                             <td data-label="Grupo">
                                 {{ grupo.codigo }}
-                                <span class="gestion-table__meta">{{ grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }}</span>
+                                <span class="gestion-table__meta">{{ grupo.gestion.codigo|gestion_label }}</span>
                             </td>
                             <td data-label="Nombre">{{ grupo.nombre }}</td>
                             <td class="gestion-col--num" data-label="Cupo">{{ grupo.cupo }}</td>

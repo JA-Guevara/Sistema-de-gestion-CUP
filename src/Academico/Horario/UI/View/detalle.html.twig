@@ -23,7 +23,7 @@
         <div class="gestion-panel__header">
             <div>
                 <h2>{{ horario.grupo.codigo }} / {{ horario.materia.nombre }}</h2>
-                <p class="gestion-panel__hint">{{ horario.grupo.gestion.codigo|replace({'CUP-2026-I': 'CUP 1-2026', 'CUP 2026-I': 'CUP 1-2026'}) }} - {{ horario.dia }} - {{ horario.horaInicio|date('H:i') }} a {{ horario.horaFin|date('H:i') }}</p>
+                <p class="gestion-panel__hint">{{ horario.grupo.gestion.codigo|gestion_label }} - {{ horario.dia }} - {{ horario.horaInicio|date('H:i') }} a {{ horario.horaFin|date('H:i') }}</p>
             </div>
         </div>
         <div class="gestion-dashboard">

@@ -94,6 +94,28 @@ final readonly class AsignacionDocenteRepository
         return array_map(static fn (array $row): int => (int) $row['materiaId'], $rows);
     }
 
+    /**
+     * Ids de los GRUPOS DISTINTOS en los que dicta un docente en una gestion.
+     * El mismo grupo con varias materias cuenta una sola vez (regla de carga:
+     * maximo 4 grupos por docente).
+     *
+     * @return list<int>
+     */
+    public function grupoIdsByDocente(int $docenteId, int $gestionId): array
+    {
+        $rows = $this->entityManager->createQueryBuilder()
+            ->select('DISTINCT IDENTITY(a.grupo) AS grupoId')
+            ->from(AsignacionDocente::class, 'a')
+            ->where('a.docente = :docenteId')
+            ->andWhere('a.gestion = :gestionId')
+            ->setParameter('docenteId', $docenteId)
+            ->setParameter('gestionId', $gestionId)
+            ->getQuery()
+            ->getScalarResult();
+
+        return array_map(static fn (array $row): int => (int) $row['grupoId'], $rows);
+    }
+
     public function isDocenteDeMateriaGrupo(int $docenteId, int $materiaId, int $grupoId, int $gestionId): bool
     {
         return $this->entityManager

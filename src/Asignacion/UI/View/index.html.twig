@@ -6,18 +6,29 @@
     {{ parent() }}
     <link rel="stylesheet" href="/assets/gestion/css/gestion.css?v=17">
     <style>
-        .adm-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
-        .adm-tab{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;border:0;cursor:pointer;background:#f1f5f9;color:#64748b;font-weight:700;font-size:13px;font-family:inherit}
-        .adm-tab:hover{background:#e2e8f0}
-        .adm-tab.is-active{background:#1e3a8a;color:#fff}
-        .adm-tab__dot{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:rgba(148,163,184,.25);font-size:12px}
-        .adm-tab.is-active .adm-tab__dot{background:rgba(255,255,255,.3)}
-        .adm-slide{display:none}
-        .adm-slide.is-active{display:block;animation:adm-fade .18s ease}
-        @keyframes adm-fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-        .adm-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0 0}
-        .adm-nav__pos{color:#64748b;font-weight:700;font-size:13px}
-        .adm-nav button[disabled]{opacity:.4;cursor:not-allowed}
+        .asg-toolbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin:0 0 16px}
+        .asg-toolbar label{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:13px;color:#475569}
+        .asg-toolbar select{min-width:200px}
+        .asg-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:800;background:#eef2ff;color:#3730a3}
+        .asg-badge--closed{background:#fef2f2;color:#b91c1c}
+        .asg-cap{font-variant-numeric:tabular-nums;font-weight:800}
+        .asg-cap--full{color:#b91c1c}
+        /* Accesos directos: 2 botones distintos en la parte superior */
+        .asg-launch{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:0 0 20px}
+        .asg-launch__btn{display:flex;align-items:center;gap:14px;padding:18px;border-radius:16px;border:1px solid #e2e8f0;background:#fff;text-decoration:none;box-shadow:0 1px 2px rgba(15,23,42,.05);transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease}
+        .asg-launch__btn:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(15,23,42,.10)}
+        .asg-launch__btn--doc{border-left:5px solid #6366f1}
+        .asg-launch__btn--est{border-left:5px solid #10b981}
+        .asg-launch__icon{flex:0 0 auto;width:48px;height:48px;display:grid;place-items:center;border-radius:13px}
+        .asg-launch__btn--doc .asg-launch__icon{background:#eef2ff;color:#4338ca}
+        .asg-launch__btn--est .asg-launch__icon{background:#ecfdf5;color:#047857}
+        .asg-launch__icon svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        .asg-launch__text{display:flex;flex-direction:column;gap:2px;min-width:0}
+        .asg-launch__text strong{font-size:16px;color:#0f172a}
+        .asg-launch__text small{font-size:12.5px;color:#64748b}
+        .asg-launch__go{margin-left:auto;color:#cbd5e1;flex:0 0 auto}
+        .asg-launch__go svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+        .asg-launch__btn:hover .asg-launch__go{color:#64748b}
     </style>
 {% endblock %}
 
@@ -26,194 +37,114 @@
         <div>
             <p class="gestion-eyebrow">Administracion academica</p>
             <h1 class="app-content__title">Asignaciones</h1>
-            <p class="gestion-help" style="margin:4px 0 0">Gestion activa: <strong>{{ gestion ? gestion.codigo : 'Sin gestion' }}</strong></p>
+            <p class="gestion-help" style="margin:4px 0 0">Gestion activa: <strong>{{ gestion ? gestion.codigo|gestion_label : 'Sin gestion' }}</strong></p>
         </div>
-        {% if user.hasPermission('usuarios.ver') or user.hasPermission('usuarios.gestionar') %}
-            <div class="gestion-head__actions">
-                <a href="{{ path('usuario_index') }}" class="gestion-button">Usuarios y roles</a>
-            </div>
-        {% endif %}
     </section>
 
     {% include '@gestion/partials/_flash.html.twig' %}
 
-    <div class="adm-carousel" data-adm-carousel="asignacion">
-        {% set slides = [{'key':'docentes','label':'Docentes'}, {'key':'estudiantes','label':'Estudiantes'}, {'key':'horarios','label':'Horarios'}] %}
-        <div class="adm-tabs" role="tablist">
-            {% for s in slides %}
-                <button type="button" class="adm-tab {{ loop.first ? 'is-active' : '' }}" data-adm-go="{{ s.key }}">
-                    <span class="adm-tab__dot">{{ loop.index }}</span> {{ s.label }}
-                </button>
-            {% endfor %}
-        </div>
-
-        {# ============ SLIDE: Docentes ============ #}
-        <div class="adm-slide is-active" data-slide="docentes">
-            <section class="gestion-panel">
-                <div class="gestion-panel__header">
-                    <div>
-                        <h2>Asignacion de docentes</h2>
-                        <p class="gestion-panel__hint">Asigna docentes a cada materia y grupo de la gestion activa (masiva o uno por uno).</p>
-                    </div>
-                    {% if user.hasPermission('asignaciones.gestionar') or user.hasPermission('notas.asignar') %}
-                        <a href="{{ path('nota_asignaciones') }}" class="gestion-button gestion-button--primary">Asignar docentes</a>
-                    {% endif %}
-                </div>
-                <div class="gestion-dashboard">
-                    <section class="gestion-metric">
-                        <span class="gestion-metric__label">Docentes con rol</span>
-                        <strong>{{ stats.docentes }}</strong>
-                    </section>
-                    <section class="gestion-metric">
-                        <span class="gestion-metric__label">Docentes asignados</span>
-                        <strong>{{ stats.asignacionesDocente }}</strong>
-                    </section>
-                    <section class="gestion-metric">
-                        <span class="gestion-metric__label">Materias activas</span>
-                        <strong>{{ materias|length }}</strong>
-                    </section>
-                </div>
+    {% if gestion is null %}
+        <section class="gestion-panel">
+            <p class="gestion-panel__hint">No hay una gestion CUP activa. Activa una gestion para administrar asignaciones.</p>
+        </section>
+    {% else %}
+        {% if user.hasPermission('asignaciones.gestionar') or user.hasPermission('notas.asignar') %}
+            <section class="asg-launch">
+                <a class="asg-launch__btn asg-launch__btn--doc" href="{{ path('asignacion_docentes') }}">
+                    <span class="asg-launch__icon">
+                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </span>
+                    <span class="asg-launch__text">
+                        <strong>Asignar docentes</strong>
+                        <small>Materias a docentes &middot; individual o masivo</small>
+                    </span>
+                    <span class="asg-launch__go"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></span>
+                </a>
+                <a class="asg-launch__btn asg-launch__btn--est" href="{{ path('asignacion_estudiantes') }}">
+                    <span class="asg-launch__icon">
+                        <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                    </span>
+                    <span class="asg-launch__text">
+                        <strong>Asignar estudiantes</strong>
+                        <small>Matricula en grupos completos &middot; individual o masivo</small>
+                    </span>
+                    <span class="asg-launch__go"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></span>
+                </a>
             </section>
+        {% endif %}
 
-            {% if asignacionesDocente is not empty %}
-                <section class="gestion-panel">
-                    <div class="gestion-panel__header">
-                        <div>
-                            <h2>Docentes asignados</h2>
-                            <p class="gestion-panel__hint">Resumen de materia, grupo y docente para la gestion activa.</p>
-                        </div>
-                    </div>
-                    <div class="gestion-table-wrap">
-                        <table class="gestion-table gestion-table--stack">
-                            <thead>
-                                <tr>
-                                    <th>Materia</th>
-                                    <th>Grupo</th>
-                                    <th>Docente</th>
-                                    <th class="gestion-table__actions-cell">Acciones</th>
+        <section class="gestion-dashboard">
+            <div class="gestion-metric"><span class="gestion-metric__label">Grupos</span><strong>{{ stats.grupos }}</strong></div>
+            <div class="gestion-metric"><span class="gestion-metric__label">Estudiantes inscritos</span><strong>{{ stats.inscritos }}</strong></div>
+            <div class="gestion-metric"><span class="gestion-metric__label">Docentes con rol</span><strong>{{ stats.docentes }}</strong></div>
+            <div class="gestion-metric"><span class="gestion-metric__label">Materias con docente</span><strong>{{ stats.docentesAsignados }}</strong></div>
+        </section>
+
+        <section class="gestion-panel">
+            <div class="gestion-panel__header">
+                <div>
+                    <h2>Grupos de la gestion</h2>
+                    <p class="gestion-panel__hint">Listado de grupos con su turno, aula, horario, estudiantes y docentes. Asigna estudiantes y docentes desde cada fila.</p>
+                </div>
+            </div>
+
+            <div class="asg-toolbar">
+                <label>Filtrar por turno
+                    <select data-turno-filter="grupos">
+                        <option value="">Todos los turnos</option>
+                        {% for turno in turnos %}
+                            <option value="{{ turno.id }}">{{ turno.nombre|capitalize }}</option>
+                        {% endfor %}
+                        <option value="sin-turno">Sin turno</option>
+                    </select>
+                </label>
+            </div>
+
+            {% if tarjetas is empty %}
+                <p class="gestion-panel__hint">No hay grupos en esta gestion. Crea grupos en el modulo Grupos.</p>
+            {% else %}
+                <div class="gestion-table-wrap">
+                    <table class="gestion-table gestion-table--stack">
+                        <thead>
+                            <tr>
+                                <th>Grupo</th>
+                                <th>Turno</th>
+                                <th>Aula</th>
+                                <th>Horario</th>
+                                <th class="gestion-col--num">Estudiantes</th>
+                                <th class="gestion-col--num">Docentes</th>
+                                <th class="gestion-col--center">Estado</th>
+                                <th class="gestion-table__actions-cell">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody data-turno-target="grupos">
+                            {% for t in tarjetas %}
+                                <tr data-turno-item data-turno="{{ t.turno ? t.turno.id : 'sin-turno' }}">
+                                    <td data-label="Grupo"><strong>{{ t.grupo.codigo }}</strong>{% if t.grupo.nombre %} <small style="color:#64748b">{{ t.grupo.nombre }}</small>{% endif %}</td>
+                                    <td data-label="Turno">{{ t.turno ? t.turno.nombre|capitalize : 'Sin turno' }}</td>
+                                    <td data-label="Aula">{{ t.aulas is not empty ? t.aulas|join(', ') : '—' }}</td>
+                                    <td data-label="Horario">{% if t.horaInicio and t.horaFin %}{{ t.horaInicio|date('H:i') }} - {{ t.horaFin|date('H:i') }}{% if t.dias is not empty %} <small style="color:#64748b">{{ t.dias|map(d => d|capitalize)|join(', ') }}</small>{% endif %}{% else %}Sin horario{% endif %}</td>
+                                    <td class="gestion-col--num" data-label="Estudiantes"><span class="asg-cap {{ t.disponibles == 0 ? 'asg-cap--full' : '' }}">{{ t.inscritos }}/{{ t.cupo }}</span></td>
+                                    <td class="gestion-col--num" data-label="Docentes">{{ t.docentes|length }} / {{ materias|length }}</td>
+                                    <td class="gestion-col--center" data-label="Estado"><span class="asg-badge {{ t.grupo.isOpen ? '' : 'asg-badge--closed' }}">{{ t.grupo.isOpen ? 'Abierto' : 'Cerrado' }}</span></td>
+                                    <td class="gestion-table__actions" data-label="Acciones" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                                        <a class="gestion-button" href="{{ path('asignacion_grupo_show', {id: t.grupo.id}) }}">Ver</a>
+                                        {% if user.hasPermission('asignaciones.gestionar') or user.hasPermission('notas.asignar') %}
+                                            <a class="gestion-button gestion-button--primary" href="{{ path('asignacion_estudiantes', {grupo: t.grupo.id}) }}">Estudiantes</a>
+                                            <a class="gestion-button" href="{{ path('asignacion_docentes', {grupo: t.grupo.id}) }}">Docentes</a>
+                                        {% endif %}
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {% for asignacion in asignacionesDocente %}
-                                    <tr>
-                                        <td data-label="Materia">{{ asignacion.materia.codigo }} - {{ asignacion.materia.nombre }}</td>
-                                        <td data-label="Grupo">{{ asignacion.grupo.codigo }}</td>
-                                        <td data-label="Docente">{{ asignacion.docente.firstName }} {{ asignacion.docente.lastName }}</td>
-                                        <td class="gestion-table__actions-cell" data-label="Acciones">
-                                            <div class="gestion-table__actions">
-                                                <a class="gestion-action-button gestion-action-button--view" href="{{ path('nota_planilla', {materiaId: asignacion.materia.id, grupoId: asignacion.grupo.id}) }}" aria-label="Ver planilla" title="Planilla">
-                                                    <svg viewBox="0 0 24 24"><path d="M9 11h6"/><path d="M9 15h6"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/><path d="M14 3v5h5"/></svg>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             {% endif %}
-        </div>
-
-        {# ============ SLIDE: Estudiantes ============ #}
-        <div class="adm-slide" data-slide="estudiantes">
-            <section class="gestion-panel">
-                <div class="gestion-panel__header">
-                    <div>
-                        <h2>Asignacion de estudiantes</h2>
-                        <p class="gestion-panel__hint">Distribuye a los estudiantes confirmados en grupos por materia (masiva o uno por uno).</p>
-                    </div>
-                    {% if user.hasPermission('asignaciones.gestionar') or user.hasPermission('notas.asignar') %}
-                        <a href="{{ path('nota_grupos') }}" class="gestion-button gestion-button--primary">Asignar estudiantes</a>
-                    {% endif %}
-                </div>
-                <div class="gestion-dashboard">
-                    <section class="gestion-metric">
-                        <span class="gestion-metric__label">Inscritos confirmados</span>
-                        <strong>{{ stats.inscritos }}</strong>
-                    </section>
-                    <section class="gestion-metric">
-                        <span class="gestion-metric__label">Grupos</span>
-                        <strong>{{ stats.grupos }}</strong>
-                    </section>
-                </div>
-            </section>
-        </div>
-
-        {# ============ SLIDE: Horarios ============ #}
-        <div class="adm-slide" data-slide="horarios">
-            <section class="gestion-panel">
-                <div class="gestion-panel__header">
-                    <div>
-                        <h2>Horarios</h2>
-                        <p class="gestion-panel__hint">Gestiona los horarios de clases por materia, grupo y aula de la gestion activa.</p>
-                    </div>
-                    {% if user.hasPermission('academico.ver') or user.hasPermission('academico.gestionar') %}
-                        <a href="{{ path('horario_index') }}" class="gestion-button gestion-button--primary">Gestionar horarios</a>
-                    {% endif %}
-                </div>
-                <div class="gestion-dashboard">
-                    <section class="gestion-metric">
-                        <span class="gestion-metric__label">Materias activas</span>
-                        <strong>{{ materias|length }}</strong>
-                    </section>
-                    <section class="gestion-metric">
-                        <span class="gestion-metric__label">Grupos disponibles</span>
-                        <strong>{{ grupos|length }}</strong>
-                    </section>
-                </div>
-            </section>
-        </div>
-
-        <div class="adm-nav">
-            <button type="button" class="gestion-button" data-adm-prev>&larr; Anterior</button>
-            <span class="adm-nav__pos" data-adm-pos></span>
-            <button type="button" class="gestion-button" data-adm-next>Siguiente &rarr;</button>
-        </div>
-    </div>
+        </section>
+    {% endif %}
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
-    <script>
-        (function () {
-            var root = document.querySelector('[data-adm-carousel]');
-            if (!root) { return; }
-            var storeKey = 'adm-slide-' + (root.getAttribute('data-adm-carousel') || '');
-            var slides = Array.prototype.slice.call(root.querySelectorAll('.adm-slide'));
-            var tabs = Array.prototype.slice.call(root.querySelectorAll('.adm-tab'));
-            var prev = root.querySelector('[data-adm-prev]');
-            var next = root.querySelector('[data-adm-next]');
-            var pos = root.querySelector('[data-adm-pos]');
-            if (!slides.length) { return; }
-            var current = 0;
-
-            function indexOfKey(key) {
-                for (var j = 0; j < slides.length; j++) {
-                    if (slides[j].getAttribute('data-slide') === key) { return j; }
-                }
-                return -1;
-            }
-
-            function show(n) {
-                current = Math.max(0, Math.min(n, slides.length - 1));
-                slides.forEach(function (s, idx) { s.classList.toggle('is-active', idx === current); });
-                tabs.forEach(function (t, idx) { t.classList.toggle('is-active', idx === current); });
-                if (pos) { pos.textContent = (current + 1) + ' / ' + slides.length; }
-                if (prev) { prev.disabled = current === 0; }
-                if (next) { next.disabled = current === slides.length - 1; }
-                try { sessionStorage.setItem(storeKey, slides[current].getAttribute('data-slide')); } catch (e) {}
-            }
-
-            tabs.forEach(function (t, idx) {
-                t.addEventListener('click', function () { show(idx); root.scrollIntoView({ block: 'nearest' }); });
-            });
-            if (prev) { prev.addEventListener('click', function () { show(current - 1); root.scrollIntoView({ block: 'nearest' }); }); }
-            if (next) { next.addEventListener('click', function () { show(current + 1); root.scrollIntoView({ block: 'nearest' }); }); }
-
-            var saved = -1;
-            try { saved = indexOfKey(sessionStorage.getItem(storeKey)); } catch (e) {}
-            show(saved >= 0 ? saved : 0);
-        }());
-    </script>
+    <script src="/assets/gestion/js/asignacion-turno.js?v=1" defer></script>
 {% endblock %}
