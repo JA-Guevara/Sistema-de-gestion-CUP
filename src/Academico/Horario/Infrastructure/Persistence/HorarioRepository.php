@@ -42,7 +42,9 @@ final readonly class HorarioRepository
             ->where('h.dia = :dia')
             ->andWhere('h.horaInicio < :horaFin')
             ->andWhere('h.horaFin > :horaInicio')
-            ->andWhere('IDENTITY(h.grupo) = :grupoId OR IDENTITY(h.aula) = :aulaId')
+            // Parentesis obligatorios: sin ellos, AND>OR hace que la rama de aula
+            // pierda los filtros de dia/hora y rompe la deteccion de solapamiento.
+            ->andWhere('(IDENTITY(h.grupo) = :grupoId OR IDENTITY(h.aula) = :aulaId)')
             ->setParameter('dia', mb_strtoupper(trim($dia)))
             ->setParameter('horaInicio', $horaInicio)
             ->setParameter('horaFin', $horaFin)

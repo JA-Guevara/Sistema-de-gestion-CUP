@@ -220,6 +220,19 @@ final readonly class GetReportes
             'topGrupos' => $topGrupos,
             'grupos' => $grupos,
             'docentesPorGrupo' => $docentesPorGrupo,
+            'docentes' => [
+                'totalDocentes' => $this->repo->totalDocentes($gestionId),
+                'entrevistasAgendadas' => $this->repo->entrevistasDocentesAgendadas($gestionId),
+                'postulaciones' => array_map(static fn (array $p): array => [
+                    'estado' => (string) $p['estado'],
+                    'total' => (int) $p['total'],
+                ], $this->repo->postulacionesDocentesPorEstado($gestionId)),
+                'carga' => array_map(static fn (array $d): array => [
+                    'docente' => trim(((string) $d['lastName']) . ' ' . ((string) $d['firstName'])),
+                    'materias' => (int) $d['materias'],
+                    'grupos' => (int) $d['grupos'],
+                ], $this->repo->cargaDocentes($gestionId, $docenteId)),
+            ],
             'detalle' => $detalle,
         ];
     }

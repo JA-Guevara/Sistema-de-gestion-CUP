@@ -42,7 +42,7 @@
         </div>
         <div class="gestion-head__actions">
             <span class="gestion-badge gestion-badge--{{ estadoClass[inscripcion.estado] ?? 'borrador' }}">{{ inscripcion.estado|lower|capitalize }}</span>
-            <a class="gestion-button" href="{{ path('inscripcion_edit', {id: inscripcion.id}) }}">Editar</a>
+            <a class="gestion-button" href="{{ path('inscripcion_admin') }}">Volver</a>
         </div>
     </div>
 
@@ -182,8 +182,10 @@
             <section class="gestion-panel">
                 <div class="gestion-panel__header">
                     <div>
-                        <h2>Admision</h2>
-                        <p class="gestion-panel__hint">Agenda la revision de documentos, valida o rechaza la postulacion.</p>
+                        <h2>Revision de admision</h2>
+                        <p class="gestion-panel__hint">
+                            Primero se revisan los documentos. Si es estudiante, la aprobacion habilita la pasarela de pago; si es docente, habilita la entrevista antes de aprobar o descartar.
+                        </p>
                     </div>
                 </div>
                 <div style="padding:0 18px 18px;display:grid;gap:14px">
@@ -196,16 +198,24 @@
 
                     {% if inscripcion.estado == 'RECHAZADA' %}
                         <p class="gestion-panel__hint" style="padding:0;color:#9b1c1c">Motivo del rechazo: {{ inscripcion.motivoRechazo ?? '—' }}</p>
+                        {% if inscripcion.fechaPresentacionDocs or inscripcion.fechaEntrevista %}
+                            <p class="gestion-panel__hint" style="padding:0">
+                                {% if inscripcion.fechaPresentacionDocs %}Revision de documentos: <strong>{{ inscripcion.fechaPresentacionDocs|date('d/m/Y H:i') }}</strong>{% endif %}
+                                {%- if inscripcion.fechaEntrevista %} &middot; Entrevista: <strong>{{ inscripcion.fechaEntrevista|date('d/m/Y H:i') }}</strong>{% endif %}
+                            </p>
+                        {% endif %}
                     {% elseif inscripcion.estado in ['PRESENTADA', 'VALIDADA'] %}
+                        {% if inscripcion.estado == 'PRESENTADA' %}
                         <form method="post" action="{{ path('inscripcion_admin_agendar', {id: inscripcion.id}) }}" class="gestion-form">
                             <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
                             <div class="gestion-grid" style="grid-template-columns:1fr auto;align-items:end">
                                 <label>Fecha y hora de revision de documentos
-                                    <input type="datetime-local" name="fecha" required>
+                                    <input type="datetime-local" name="fecha" required value="{{ inscripcion.fechaPresentacionDocs ? inscripcion.fechaPresentacionDocs|date('Y-m-d\\TH:i') : '' }}">
                                 </label>
-                                <button class="gestion-button" type="submit" style="align-self:end">Agendar</button>
+                                <button class="gestion-button" type="submit" style="align-self:end">{{ inscripcion.fechaPresentacionDocs ? 'Reprogramar' : 'Agendar' }}</button>
                             </div>
                         </form>
+                        {% endif %}
 
                         {% if inscripcion.estado == 'PRESENTADA' %}
                             <p class="gestion-panel__hint" style="padding:0">
@@ -220,26 +230,28 @@
                                 {% if todosOk %}
                                     <form method="post" action="{{ path('inscripcion_admin_validar', {id: inscripcion.id}) }}" data-confirm="Aprobar la postulacion? Se habilitara el {{ inscripcion.tipo == 'DOCENTE' ? 'proceso de entrevista' : 'pago (billetera)' }} del postulante.">
                                         <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
-                                        <button class="gestion-button gestion-button--primary" type="submit">Aprobar postulacion</button>
+                                        <button class="gestion-button gestion-button--primary" type="submit">
+                                            {{ inscripcion.tipo == 'DOCENTE' ? 'Aprobar documentos y habilitar entrevista' : 'Aprobar documentos y habilitar pago' }}
+                                        </button>
                                     </form>
                                 {% else %}
                                     <button class="gestion-button" type="button" disabled title="Completa el acta de recepcion">Aprobar postulacion</button>
-                                    <span class="gestion-panel__hint" style="padding:0">Marca como "Entregado" todos los requisitos obligatorios del acta de recepcion (pestaña Acta) para poder aprobar y habilitar el pago.</span>
+                                    <span class="gestion-panel__hint" style="padding:0">Marca como "Entregado" todos los requisitos obligatorios del acta de recepcion (pestaña Acta) para poder aprobar y continuar con {{ inscripcion.tipo == 'DOCENTE' ? 'la entrevista' : 'el pago' }}.</span>
                                 {% endif %}
                             {% endif %}
-                            <form method="post" action="{{ path('inscripcion_admin_rechazar', {id: inscripcion.id}) }}" data-confirm="Rechazar esta postulacion?" style="display:flex;gap:8px;align-items:center">
+                            <form method="post" action="{{ path('inscripcion_admin_rechazar', {id: inscripcion.id}) }}" data-confirm="Descartar esta postulacion?" style="display:flex;gap:8px;align-items:center">
                                 <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
                                 <input type="text" name="motivo" placeholder="Motivo (opcional)" style="min-height:40px;border:1px solid #cbd5e1;border-radius:6px;padding:8px 10px">
-                                <button class="gestion-button gestion-button--danger" type="submit">Rechazar</button>
+                                <button class="gestion-button gestion-button--danger" type="submit">Descartar</button>
                             </form>
                         </div>
                         {% if inscripcion.estado == 'VALIDADA' %}
                             <p class="gestion-panel__hint" style="padding:0;color:#166534">
                                 &#10003; Documentacion aprobada.
                                 {% if inscripcion.tipo == 'DOCENTE' %}
-                                    Agenda la entrevista y confirma (contrata) al docente.
+                                    Ahora agenda la entrevista. Despues de la entrevista registra si fue aprobado o descartado.
                                 {% else %}
-                                    Se habilito la <strong>billetera de pago</strong> para el estudiante; tambien puedes confirmar manualmente (pago presencial).
+                                    Se habilito la <strong>pasarela de pago</strong> para el estudiante. La confirmacion normal se realiza cuando el pago queda registrado.
                                 {% endif %}
                             </p>
 
@@ -248,25 +260,49 @@
                                     <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
                                     <div class="gestion-grid" style="grid-template-columns:1fr auto;align-items:end">
                                         <label>Fecha y hora de entrevista
-                                            <input type="datetime-local" name="fecha" required>
+                                            <input type="datetime-local" name="fecha" required value="{{ inscripcion.fechaEntrevista ? inscripcion.fechaEntrevista|date('Y-m-d\\TH:i') : '' }}">
                                         </label>
-                                        <button class="gestion-button" type="submit" style="align-self:end">Agendar entrevista</button>
+                                        <button class="gestion-button" type="submit" style="align-self:end">{{ inscripcion.fechaEntrevista ? 'Reprogramar entrevista' : 'Agendar entrevista' }}</button>
                                     </div>
                                 </form>
                                 {% if inscripcion.fechaEntrevista %}
                                     <p class="gestion-panel__hint" style="padding:0">Entrevista agendada: <strong>{{ inscripcion.fechaEntrevista|date('d/m/Y H:i') }}</strong>.</p>
+                                    <form method="post" action="{{ path('inscripcion_admin_resolver', {id: inscripcion.id}) }}" class="gestion-form" data-confirm="Guardar la respuesta final de esta postulacion?">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
+                                        <div class="gestion-grid" style="grid-template-columns:1fr 1fr auto;align-items:end">
+                                            <label>Respuesta de entrevista
+                                                <select name="resultado" required>
+                                                    <option value="">Selecciona una respuesta</option>
+                                                    <option value="APROBADO">Aprobado / contratar docente</option>
+                                                    <option value="DESCARTADO">Descartado</option>
+                                                </select>
+                                            </label>
+                                            <label>Motivo u observacion
+                                                <input type="text" name="motivo" placeholder="Opcional si aprueba; recomendado si descarta">
+                                            </label>
+                                            <button class="gestion-button gestion-button--primary" type="submit">Guardar respuesta</button>
+                                        </div>
+                                    </form>
+                                {% else %}
+                                    <p class="gestion-panel__hint" style="padding:0;color:#92400e">Pendiente: agenda la entrevista antes de aprobar o descartar al docente.</p>
                                 {% endif %}
+                            {% else %}
+                                <div class="gestion-actions" style="margin-top:0">
+                                    <form method="post" action="{{ path('inscripcion_admin_confirmar', {id: inscripcion.id}) }}" data-confirm="Confirmar manualmente la inscripcion? Usa esta opcion solo si el pago fue recibido fuera de la pasarela.">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
+                                        <button class="gestion-button gestion-button--primary" type="submit">Registrar pago presencial y confirmar</button>
+                                    </form>
+                                </div>
                             {% endif %}
-
-                            <div class="gestion-actions" style="margin-top:0">
-                                <form method="post" action="{{ path('inscripcion_admin_confirmar', {id: inscripcion.id}) }}" data-confirm="Confirmar la postulacion? Se asignara el rol {{ inscripcion.tipo == 'DOCENTE' ? 'Docente' : 'Estudiante' }} al usuario.">
-                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
-                                    <button class="gestion-button gestion-button--primary" type="submit">{{ inscripcion.tipo == 'DOCENTE' ? 'Confirmar (contratar docente)' : 'Confirmar inscripcion (pago presencial)' }}</button>
-                                </form>
-                            </div>
                         {% endif %}
                     {% elseif inscripcion.estado == 'CONFIRMADA' %}
-                        <p class="gestion-panel__hint" style="padding:0;color:#166534">Postulacion confirmada. Ya puede entrar a las asignaciones.</p>
+                        <p class="gestion-panel__hint" style="padding:0;color:#166534">Postulacion aprobada y confirmada. Ya puede entrar a las asignaciones.</p>
+                        {% if inscripcion.fechaPresentacionDocs or inscripcion.fechaEntrevista %}
+                            <p class="gestion-panel__hint" style="padding:0">
+                                {% if inscripcion.fechaPresentacionDocs %}Revision de documentos: <strong>{{ inscripcion.fechaPresentacionDocs|date('d/m/Y H:i') }}</strong>{% endif %}
+                                {%- if inscripcion.fechaEntrevista %} &middot; Entrevista: <strong>{{ inscripcion.fechaEntrevista|date('d/m/Y H:i') }}</strong>{% endif %}
+                            </p>
+                        {% endif %}
                     {% elseif inscripcion.estado == 'ANULADA' %}
                         <p class="gestion-panel__hint" style="padding:0;color:#9b1c1c">Postulacion anulada.</p>
                     {% else %}

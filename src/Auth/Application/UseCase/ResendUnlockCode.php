@@ -31,14 +31,14 @@ final readonly class ResendUnlockCode
     /**
      * @throws UnlockCodeRequestedTooSoon
      */
-    public function execute(string $email): void
+    public function execute(string $email): bool
     {
         $normalized = mb_strtolower(trim($email));
         $user = $this->users->findByEmail($normalized);
 
         // Anti-enumeración: respuesta silenciosa si no existe o no está bloqueada.
         if ($user === null || !$user->locked) {
-            return;
+            return false;
         }
 
         $now = new \DateTimeImmutable();
@@ -59,9 +59,13 @@ final readonly class ResendUnlockCode
         // Generar código nuevo y reenviar.
         $user->unlockCode = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         $user->unlockCodeExpiresAt = $now->modify(sprintf('+%d minutes', self::CODE_TTL_MINUTES));
-        $user->unlockCodeLastSentAt = $now;
+        $user->unlockCodeLastSentAt = null;
 
         $this->users->save($user);
         $this->mailer->send($user, $user->unlockCode);
+        $user->unlockCodeLastSentAt = $now;
+        $this->users->save($user);
+
+        return true;
     }
 }

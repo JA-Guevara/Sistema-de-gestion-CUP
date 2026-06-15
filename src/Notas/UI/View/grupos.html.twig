@@ -74,6 +74,14 @@
             <h2>Seleccionar materia y grupo &mdash; {{ gestion.nombre }}</h2>
             <form method="get" action="{{ path('nota_grupos') }}" class="gestion-form">
                 <div class="gestion-grid">
+                    <label>Turno (filtro)
+                        <select data-turno-filter="estudiantes">
+                            <option value="">Todos los turnos</option>
+                            {% for turno in turnos %}
+                                <option value="{{ turno.id }}">{{ turno.nombre|capitalize }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
                     <label>Materia
                         <select name="materia" required>
                             <option value="">Seleccionar materia</option>
@@ -83,10 +91,10 @@
                         </select>
                     </label>
                     <label>Grupo
-                        <select name="grupo" required>
+                        <select name="grupo" required data-grupo-select="estudiantes">
                             <option value="">Seleccionar grupo</option>
                             {% for grupo in grupos %}
-                                <option value="{{ grupo.id }}" {{ grupo.id == grupoSel ? 'selected' : '' }}>{{ grupo.codigo }} - {{ grupo.nombre }}</option>
+                                <option value="{{ grupo.id }}" data-turno="{{ grupo.turno ? grupo.turno.id : '' }}" {{ grupo.id == grupoSel ? 'selected' : '' }}>{{ grupo.codigo }} - {{ grupo.nombre }}{{ grupo.turno ? ' · ' ~ grupo.turno.nombre|capitalize : '' }}</option>
                             {% endfor %}
                         </select>
                     </label>
@@ -96,6 +104,26 @@
                     </div>
                 </div>
             </form>
+            <script>
+                (function () {
+                    document.querySelectorAll('[data-turno-filter]').forEach(function (tf) {
+                        var key = tf.getAttribute('data-turno-filter');
+                        var gs = document.querySelector('[data-grupo-select="' + key + '"]');
+                        if (!gs) { return; }
+                        tf.addEventListener('change', function () {
+                            var t = tf.value;
+                            Array.prototype.forEach.call(gs.options, function (o) {
+                                if (!o.value) { return; }
+                                var match = !t || o.getAttribute('data-turno') === t;
+                                o.hidden = !match;
+                                o.disabled = !match;
+                            });
+                            var cur = gs.options[gs.selectedIndex];
+                            if (cur && cur.value && cur.hidden) { gs.value = ''; }
+                        });
+                    });
+                }());
+            </script>
         </section>
 
         {% if materiaSel > 0 and grupoSel > 0 %}

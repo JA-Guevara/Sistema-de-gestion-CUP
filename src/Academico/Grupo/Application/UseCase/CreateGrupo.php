@@ -8,6 +8,7 @@ use App\Academico\Grupo\Application\DTO\GrupoInput;
 use App\Academico\Grupo\Domain\Entity\Grupo;
 use App\Academico\Grupo\Domain\Exception\GrupoException;
 use App\Academico\Grupo\Infrastructure\Persistence\GrupoRepository;
+use App\Academico\Turno\Infrastructure\Persistence\TurnoRepository;
 use App\Bitacora\Application\UseCase\RecordLogEntry;
 use App\Bitacora\Domain\Catalog\ActionCatalog;
 use App\Bitacora\Domain\Catalog\ModuleCatalog;
@@ -16,7 +17,7 @@ use App\Gestion\Infrastructure\Persistence\GestionRepository;
 
 final readonly class CreateGrupo
 {
-    public function __construct(private GrupoRepository $grupos, private GestionRepository $gestiones, private RecordLogEntry $audit)
+    public function __construct(private GrupoRepository $grupos, private GestionRepository $gestiones, private TurnoRepository $turnos, private RecordLogEntry $audit)
     {
     }
 
@@ -67,8 +68,23 @@ final readonly class CreateGrupo
     {
         $grupo = new Grupo();
         $grupo->configure($gestion, $input->codigo, $input->nombre, $input->cupo, $input->inscritosEstimados);
+        $grupo->turno = $this->resolveTurno($input);
 
         return $grupo;
+    }
+
+    private function resolveTurno(GrupoInput $input): ?\App\Academico\Turno\Domain\Entity\Turno
+    {
+        if ($input->turnoId === null) {
+            return null;
+        }
+
+        $turno = $this->turnos->findById($input->turnoId);
+        if ($turno === null) {
+            throw new GrupoException('El turno seleccionado no existe.');
+        }
+
+        return $turno;
     }
 
     private function saveGrupo(Grupo $grupo): void

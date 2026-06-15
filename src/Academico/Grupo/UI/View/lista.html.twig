@@ -78,6 +78,15 @@
                 <label>Nombre <input name="nombre" placeholder="Grupo 01" required></label>
                 <label>Cupo <input type="number" name="cupo" min="1" value="70" required></label>
                 <label>Inscritos estimados <input type="number" name="inscritosEstimados" min="0" value="0"></label>
+                <label>
+                    Turno
+                    <select name="turnoId">
+                        <option value="">Sin turno</option>
+                        {% for turno in turnos %}
+                            <option value="{{ turno.id }}">{{ turno.nombre|capitalize }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
             </div>
             <div class="gestion-actions"><button class="gestion-button" type="submit">Crear grupo</button></div>
         </section>

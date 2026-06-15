@@ -12,6 +12,7 @@ final readonly class GrupoInput
         public string $nombre,
         public int $cupo,
         public int $inscritosEstimados,
+        public ?int $turnoId,
         public ?int $actorUserId,
     ) {
     }

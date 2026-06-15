@@ -34,6 +34,14 @@ final readonly class AgendarEntrevista
             throw new InscripcionException('Agenda la entrevista despues de validar la documentacion.');
         }
 
+        if ($fecha <= new \DateTimeImmutable()) {
+            throw new InscripcionException('La fecha de la entrevista debe ser futura.');
+        }
+
+        if ($inscripcion->fechaPresentacionDocs !== null && $fecha < $inscripcion->fechaPresentacionDocs) {
+            throw new InscripcionException('La entrevista no puede ser anterior a la revision de documentos.');
+        }
+
         $inscripcion->agendarEntrevista($fecha);
         $this->inscripciones->flush();
 

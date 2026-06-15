@@ -13,12 +13,15 @@ final class GrupoRequest
 {
     public static function fromRequest(Request $request): GrupoInput
     {
+        $turnoId = (int) $request->request->get('turnoId', 0);
+
         return new GrupoInput(
             (int) $request->request->get('gestionId', 0),
             trim((string) $request->request->get('codigo', '')),
             trim((string) $request->request->get('nombre', '')),
             (int) $request->request->get('cupo', 0),
             (int) $request->request->get('inscritosEstimados', 0),
+            $turnoId > 0 ? $turnoId : null,
             self::actorUserId($request),
         );
     }

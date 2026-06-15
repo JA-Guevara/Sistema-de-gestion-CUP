@@ -33,9 +33,14 @@ final readonly class RegistrarPagoManual
             throw new InscripcionException('Este pago ya esta registrado como pagado.');
         }
 
+        // Defensa en profundidad: el arancel es solo del estudiante.
+        $inscripcion = $pago->inscripcion;
+        if (!$inscripcion->esEstudiante()) {
+            throw new InscripcionException('El registro de pago manual solo aplica a postulaciones de estudiante.');
+        }
+
         // Confirma la inscripcion (VALIDADA -> CONFIRMADA, asigna el rol). Si ya
         // estaba confirmada, no se vuelve a confirmar.
-        $inscripcion = $pago->inscripcion;
         if (!$inscripcion->isConfirmada()) {
             $this->confirmar->execute((int) $inscripcion->id, $actorUserId);
         }

@@ -10,7 +10,7 @@
 
 {% block javascripts %}
     <script src="/assets/vendor/chartjs/chart.umd.min.js?v=4.4.1" defer></script>
-    <script src="/assets/gestion/js/dashboard-reportes.js?v=3" defer></script>
+    <script src="/assets/gestion/js/dashboard-reportes.js?v=4" defer></script>
     <script src="/assets/gestion/js/dashboard-asistente.js?v=1" defer></script>
     <script src="/assets/vendor/sheetjs/xlsx.full.min.js?v=0.18.5" defer></script>
     <script src="/assets/gestion/js/dashboard-export.js?v=3" defer></script>
@@ -56,6 +56,10 @@
             <button type="button" class="rep-tab" data-rep-tab="list" role="tab" aria-selected="false">
                 <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
                 Detalle / Lista
+            </button>
+            <button type="button" class="rep-tab" data-rep-tab="docentes" role="tab" aria-selected="false">
+                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Docentes
             </button>
         </div>
 
@@ -168,6 +172,31 @@
                             </tr>
                         </thead>
                         <tbody data-rep-tbody></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        {# ============ VISTA 3: DOCENTES ============ #}
+        <div data-rep-panel="docentes" hidden>
+            <section class="gestion-panel">
+                <div class="gestion-panel__header">
+                    <div>
+                        <h2>Reporte de docentes</h2>
+                        <p class="gestion-panel__hint">Carga academica (materias y grupos), asignaciones y estado de las postulaciones de docentes de la gestion.</p>
+                    </div>
+                </div>
+                <div class="gestion-dashboard">
+                    <section class="gestion-metric"><span class="gestion-metric__label">Docentes con asignacion</span><strong data-doc-kpi="totalDocentes">0</strong></section>
+                    <section class="gestion-metric"><span class="gestion-metric__label">Entrevistas agendadas</span><strong data-doc-kpi="entrevistasAgendadas">0</strong></section>
+                </div>
+                <p class="gestion-panel__hint" style="padding:0 18px"><strong>Postulaciones de docente por estado:</strong> <span data-doc-postulaciones>&mdash;</span></p>
+                <div class="gestion-table-wrap">
+                    <table class="gestion-table gestion-table--stack">
+                        <thead>
+                            <tr><th>Docente</th><th class="gestion-col--num">Materias</th><th class="gestion-col--num">Grupos</th></tr>
+                        </thead>
+                        <tbody data-doc-tbody></tbody>
                     </table>
                 </div>
             </section>

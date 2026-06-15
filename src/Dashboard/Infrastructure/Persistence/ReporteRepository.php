@@ -112,6 +112,62 @@ final readonly class ReporteRepository
             ->getQuery()->getArrayResult();
     }
 
+    /**
+     * Carga docente: materias DISTINTAS y grupos por docente (regla: la misma
+     * materia en varios grupos cuenta como 1 materia, pero varios grupos).
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function cargaDocentes(int $gestionId, ?int $docenteId): array
+    {
+        $qb = $this->em->createQueryBuilder()
+            ->select('u.firstName AS firstName, u.lastName AS lastName, COUNT(DISTINCT a.materia) AS materias, COUNT(DISTINCT a.grupo) AS grupos')
+            ->from(AsignacionDocente::class, 'a')
+            ->join('a.docente', 'u')
+            ->where('a.gestion = :gestion')
+            ->setParameter('gestion', $gestionId);
+
+        if ($docenteId !== null) {
+            $qb->andWhere('a.docente = :docente')->setParameter('docente', $docenteId);
+        }
+
+        return $qb->groupBy('u.id')->addGroupBy('u.firstName')->addGroupBy('u.lastName')
+            ->orderBy('materias', 'DESC')->addOrderBy('grupos', 'DESC')
+            ->getQuery()->getArrayResult();
+    }
+
+    /**
+     * Postulaciones de DOCENTE por estado (para el reporte de admisiones docente).
+     *
+     * @return list<array{estado: string, total: int|string}>
+     */
+    public function postulacionesDocentesPorEstado(int $gestionId): array
+    {
+        return $this->em->createQueryBuilder()
+            ->select('i.estado AS estado, COUNT(i.id) AS total')
+            ->from(Inscripcion::class, 'i')
+            ->where('i.gestion = :gestion')
+            ->andWhere('i.tipo = :tipo')
+            ->setParameter('gestion', $gestionId)
+            ->setParameter('tipo', TipoPostulacion::DOCENTE)
+            ->groupBy('i.estado')
+            ->getQuery()->getArrayResult();
+    }
+
+    /** Entrevistas de docente agendadas (fechaEntrevista no nula). */
+    public function entrevistasDocentesAgendadas(int $gestionId): int
+    {
+        return (int) $this->em->createQueryBuilder()
+            ->select('COUNT(i.id)')
+            ->from(Inscripcion::class, 'i')
+            ->where('i.gestion = :gestion')
+            ->andWhere('i.tipo = :tipo')
+            ->andWhere('i.fechaEntrevista IS NOT NULL')
+            ->setParameter('gestion', $gestionId)
+            ->setParameter('tipo', TipoPostulacion::DOCENTE)
+            ->getQuery()->getSingleScalarResult();
+    }
+
     public function totalDocentes(int $gestionId): int
     {
         return (int) $this->em->createQueryBuilder()

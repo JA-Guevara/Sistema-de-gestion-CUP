@@ -19,7 +19,7 @@
                     <td class="bitacora-table__user" data-label="Usuario">{{ entry.userLabel }}</td>
                     <td class="bitacora-table__center" data-label="Accion">
                         <span class="bitacora-badge bitacora-badge--{{ entry.level|lower }} bitacora-badge--action-{{ entry.action|lower|replace({'_': '-'}) }}">
-                            {{ entry.action }}
+                            {{ actionLabels[entry.action]|default(entry.action) }}
                         </span>
                     </td>
                     <td class="bitacora-table__center" data-label="Modulo">

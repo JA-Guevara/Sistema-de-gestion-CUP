@@ -20,6 +20,7 @@
 {% set estadoClass = {'VALIDADA':'activa','CONFIRMADA':'activa','RECHAZADA':'inactiva','ANULADA':'inactiva','PRESENTADA':'borrador','BORRADOR':'borrador','PENDIENTE':'borrador','COMPLETADA':'activa'} %}
 {% set ordenEtapas = {'BORRADOR':0,'PRESENTADA':1,'VALIDADA':2,'CONFIRMADA':3} %}
 {% set etapaActual = ordenEtapas[inscripcion.estado] is defined ? ordenEtapas[inscripcion.estado] : -1 %}
+{% set etapaValidadaLabel = inscripcion.tipo == 'DOCENTE' ? 'Entrevista' : 'Pago' %}
 
 {% block app_content %}
     <section class="gestion-head">
@@ -35,7 +36,7 @@
     {# ---- Linea de etapas ---- #}
     {% if etapaActual >= 0 %}
         <div class="cup-stepper">
-            {% for paso in [{'i':0,'l':'Borrador'},{'i':1,'l':'Presentada'},{'i':2,'l':'Validada'},{'i':3,'l':'Confirmada'}] %}
+            {% for paso in [{'i':0,'l':'Borrador'},{'i':1,'l':'Revision'},{'i':2,'l':etapaValidadaLabel},{'i':3,'l':'Confirmada'}] %}
                 <div class="cup-step {{ paso.i < etapaActual ? 'cup-step--done' : (paso.i == etapaActual ? 'cup-step--current' : '') }}">
                     <span class="cup-step__num">{{ paso.i + 1 }}</span> {{ paso.l }}
                 </div>
@@ -103,7 +104,12 @@
                     <h2>{{ inscripcion.tipo == 'DOCENTE' ? 'Entrevista habilitada' : 'Billetera de pago habilitada' }}</h2>
                     <p class="gestion-panel__hint">
                         {% if inscripcion.tipo == 'DOCENTE' %}
-                            &#10003; Tu documentacion fue aprobada. La coordinacion te contactara para la entrevista.
+                            &#10003; Tu documentacion fue aprobada.
+                            {% if inscripcion.fechaEntrevista %}
+                                Tu entrevista fue agendada para el <strong>{{ inscripcion.fechaEntrevista|date('d/m/Y H:i') }}</strong>.
+                            {% else %}
+                                La coordinacion todavia debe agendar tu entrevista.
+                            {% endif %}
                         {% else %}
                             &#10003; Tu documentacion fue aprobada. Ya puedes pagar para confirmar tu inscripcion como estudiante.
                         {% endif %}
@@ -116,8 +122,6 @@
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token|default('') }}">
                         <button class="gestion-button gestion-button--primary" type="submit">Pagar arancel y confirmar inscripcion</button>
                     </form>
-                {% elseif inscripcion.fechaEntrevista %}
-                    <p class="gestion-panel__hint" style="padding:0">Entrevista agendada: <strong>{{ inscripcion.fechaEntrevista|date('d/m/Y H:i') }}</strong>.</p>
                 {% endif %}
             </div>
         </section>

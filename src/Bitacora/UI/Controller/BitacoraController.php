@@ -41,6 +41,13 @@ final class BitacoraController extends AbstractController
         $filter = BitacoraFilterRequest::fromRequest($request);
         $result = $this->queryLog->execute($filter);
 
+        // Mapa accion(codigo) => etiqueta legible, para mostrar chips cortos en
+        // espanol en la tabla en vez del identificador tecnico crudo.
+        $actionLabels = [];
+        foreach (ActionCatalog::all() as $code) {
+            $actionLabels[$code] = ActionCatalog::label($code);
+        }
+
         return $this->render('@bitacora/lista.html.twig', [
             'items' => $result['items'],
             'total' => $result['total'],
@@ -49,6 +56,7 @@ final class BitacoraController extends AbstractController
             'totalPages' => $result['totalPages'],
             'filter' => $filter,
             'actions' => ActionCatalog::all(),
+            'actionLabels' => $actionLabels,
             'modules' => ModuleCatalog::all(),
             'userLabels' => $this->logRepository->distinctUserLabels(),
             'user' => $user,

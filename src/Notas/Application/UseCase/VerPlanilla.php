@@ -7,6 +7,7 @@ namespace App\Notas\Application\UseCase;
 use App\Academico\Grupo\Infrastructure\Persistence\GrupoRepository;
 use App\Academico\Materia\Infrastructure\Persistence\MateriaRepository;
 use App\Gestion\Infrastructure\Persistence\GestionRepository;
+use App\Notas\Application\Security\PlanillaAccessPolicy;
 use App\Notas\Domain\Exception\NotaException;
 use App\Notas\Infrastructure\Persistence\AsignacionGrupoRepository;
 use App\Notas\Infrastructure\Persistence\NotaRepository;
@@ -22,6 +23,7 @@ final readonly class VerPlanilla
         private GestionRepository $gestiones,
         private AsignacionGrupoRepository $asignacionesGrupo,
         private NotaRepository $notas,
+        private PlanillaAccessPolicy $accessPolicy,
     ) {
     }
 
@@ -35,7 +37,7 @@ final readonly class VerPlanilla
      *     filas: list<array{inscripcion: \App\Inscripcion\Domain\Entity\Inscripcion, valores: array<int, int|null>, promedio: int|null, aprobado: bool|null}>
      * }
      */
-    public function execute(int $materiaId, int $grupoId): array
+    public function execute(int $materiaId, int $grupoId, ?int $actorUserId): array
     {
         $gestion = $this->gestiones->findActive();
         if ($gestion === null) {
@@ -51,6 +53,9 @@ final readonly class VerPlanilla
         if ($grupo === null) {
             throw new NotaException('El grupo seleccionado no existe.');
         }
+
+        // Autorizacion a nivel de objeto: el docente solo ve su materia+grupo.
+        $this->accessPolicy->assertPuede($actorUserId, $materiaId, $grupoId, (int) $gestion->id);
 
         $cantidadExamenes = max(1, $gestion->configuracion?->cantidadExamenes ?? self::DEFAULT_EXAMENES);
         $notaMinima = $gestion->configuracion?->notaMinimaAprobacion ?? self::DEFAULT_NOTA_MINIMA;

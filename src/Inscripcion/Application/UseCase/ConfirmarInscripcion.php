@@ -45,6 +45,10 @@ final readonly class ConfirmarInscripcion
             throw new InscripcionException('Solo puedes confirmar una postulacion con la documentacion validada (aprobada).');
         }
 
+        if ($inscripcion->esDocente() && $inscripcion->fechaEntrevista === null) {
+            throw new InscripcionException('Agenda la entrevista antes de aprobar o contratar al docente.');
+        }
+
         if ($this->inscripciones->existeConfirmadaPorCiTipo($inscripcion->ci, $inscripcion->tipo, $inscripcion->gestion->id)) {
             throw new InscripcionException('Ya existe una postulacion confirmada para este CI y tipo en esta gestion.');
         }

@@ -36,6 +36,15 @@
                 <label>Nombre <input name="nombre" value="{{ grupo.nombre }}" required></label>
                 <label>Cupo <input type="number" name="cupo" min="1" value="{{ grupo.cupo }}" required></label>
                 <label>Inscritos estimados <input type="number" name="inscritosEstimados" min="0" value="{{ grupo.inscritosEstimados }}"></label>
+                <label>
+                    Turno
+                    <select name="turnoId">
+                        <option value="">Sin turno</option>
+                        {% for turno in turnos %}
+                            <option value="{{ turno.id }}" {{ grupo.turno and grupo.turno.id == turno.id ? 'selected' : '' }}>{{ turno.nombre|capitalize }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
             </div>
         </section>
         <div class="gestion-actions">

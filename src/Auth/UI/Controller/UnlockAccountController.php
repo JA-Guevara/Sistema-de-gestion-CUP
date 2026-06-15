@@ -40,12 +40,10 @@ final class UnlockAccountController extends AbstractController
         $session = $request->getSession();
         $email = $session->get(self::SESSION_PENDING_EMAIL);
 
-        // Sin contexto de bloqueo: no hay nada que desbloquear, volver al login.
         if (!is_string($email) || $email === '') {
             return $this->redirectToRoute('auth_login');
         }
 
-        // Mostrar formulario
         if (!$request->isMethod('POST')) {
             return $this->render('@auth/unlock.html.twig', [
                 'csrf_token' => $this->csrf->issue(self::CSRF_INTENTION),
@@ -53,44 +51,29 @@ final class UnlockAccountController extends AbstractController
             ]);
         }
 
-        // Validar CSRF
         $submittedToken = (string) $request->request->get('_csrf_token', '');
         if (!$this->csrf->validate(self::CSRF_INTENTION, $submittedToken)) {
-            $this->addFlash('error', 'La sesión expiró. Volvé a intentarlo.');
+            $this->addFlash('error', 'La sesion expiro. Volve a intentarlo.');
 
             return $this->redirectToRoute('auth_unlock');
         }
 
-        // Aplicar el desbloqueo
         try {
             $this->unlockAccount->execute(new UnlockAccountRequest(
                 email: $email,
                 code: trim((string) $request->request->get('code', '')),
             ));
-        } catch (UnlockCodeExpired $exception) {
-            $this->addFlash('error', $exception->getMessage());
-
-            return $this->redirectToRoute('auth_unlock');
-        } catch (UnlockCodeInvalid $exception) {
+        } catch (UnlockCodeExpired|UnlockCodeInvalid $exception) {
             $this->addFlash('error', $exception->getMessage());
 
             return $this->redirectToRoute('auth_unlock');
         }
 
-        // Log de desbloqueo exitoso ANTES de limpiar la sesión.
-        $userId = $session->get(self::SESSION_PENDING_USER_ID);
-        if (is_int($userId)) {
-            $unlockedUser = $this->users->findById($userId);
-            if ($unlockedUser !== null) {
-                $this->authEvents->cuentaDesbloqueada($unlockedUser);
-            }
-        }
-
-        // Limpiar contexto: el unlock se consumió.
+        $this->registerSuccessfulUnlock($session->get(self::SESSION_PENDING_USER_ID));
         $session->remove(self::SESSION_PENDING_EMAIL);
         $session->remove(self::SESSION_PENDING_USER_ID);
 
-        $this->addFlash('success', 'Cuenta desbloqueada. Ya podés iniciar sesión.');
+        $this->addFlash('success', 'Cuenta desbloqueada. Ya podes iniciar sesion.');
 
         return $this->redirectToRoute('auth_login');
     }
@@ -98,10 +81,9 @@ final class UnlockAccountController extends AbstractController
     #[Route('/resend', name: 'auth_unlock_resend', methods: ['POST'])]
     public function resend(Request $request): Response
     {
-        // Validar CSRF (mismo intent que el form principal)
         $submittedToken = (string) $request->request->get('_csrf_token', '');
         if (!$this->csrf->validate(self::CSRF_INTENTION, $submittedToken)) {
-            $this->addFlash('error', 'La sesión expiró. Volvé a intentarlo.');
+            $this->addFlash('error', 'La sesion expiro. Volve a intentarlo.');
 
             return $this->redirectToRoute('auth_unlock');
         }
@@ -112,22 +94,40 @@ final class UnlockAccountController extends AbstractController
         }
 
         try {
-            $this->resendUnlockCode->execute($email);
+            $sent = $this->resendUnlockCode->execute($email);
         } catch (UnlockCodeRequestedTooSoon $exception) {
             $this->addFlash('error', $exception->getMessage());
 
             return $this->redirectToRoute('auth_unlock');
+        } catch (\Throwable $exception) {
+            $this->addFlash('error', 'No pudimos enviar el codigo en este momento. Revisa la configuracion SMTP o intenta otra vez.');
+
+            return $this->redirectToRoute('auth_unlock');
         }
 
-        $this->addFlash('success', 'Te enviamos un nuevo código. Revisá tu correo.');
+        if (!$sent) {
+            $this->addFlash('error', 'La cuenta ya no esta bloqueada o no existe un codigo pendiente.');
+
+            return $this->redirectToRoute('auth_unlock');
+        }
+
+        $this->addFlash('success', 'Te enviamos un nuevo codigo. Revisa tu correo.');
 
         return $this->redirectToRoute('auth_unlock');
     }
 
-    /**
-     * Enmascara un email para mostrarlo en pantalla sin revelar el dominio o el local part completo.
-     * Ej: "jose.guevara@gmail.com" → "j*****a@gmail.com"
-     */
+    private function registerSuccessfulUnlock(mixed $userId): void
+    {
+        if (!is_int($userId)) {
+            return;
+        }
+
+        $unlockedUser = $this->users->findById($userId);
+        if ($unlockedUser !== null) {
+            $this->authEvents->cuentaDesbloqueada($unlockedUser);
+        }
+    }
+
     private function maskEmail(string $email): string
     {
         $atPos = strpos($email, '@');
@@ -137,16 +137,15 @@ final class UnlockAccountController extends AbstractController
 
         $local = substr($email, 0, $atPos);
         $domain = substr($email, $atPos);
-
         $len = mb_strlen($local);
 
         if ($len <= 2) {
-            return mb_substr($local, 0, 1).'***'.$domain;
+            return mb_substr($local, 0, 1) . '***' . $domain;
         }
 
         return mb_substr($local, 0, 1)
-            .str_repeat('*', max(3, $len - 2))
-            .mb_substr($local, -1)
-            .$domain;
+            . str_repeat('*', max(3, $len - 2))
+            . mb_substr($local, -1)
+            . $domain;
     }
 }

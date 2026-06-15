@@ -14,6 +14,7 @@ use App\Academico\Grupo\Application\UseCase\UpdateGrupo;
 use App\Academico\Grupo\Application\UseCase\UpdateGruposStateBulk;
 use App\Academico\Grupo\Domain\Exception\GrupoException;
 use App\Academico\Grupo\UI\Request\GrupoRequest;
+use App\Academico\Turno\Infrastructure\Persistence\TurnoRepository;
 use App\Auth\Entity\User;
 use App\Auth\Infrastructure\Persistence\UserRepository;
 use App\Gestion\Infrastructure\Persistence\GestionRepository;
@@ -34,6 +35,7 @@ final class GrupoController extends AbstractController
         private readonly UpdateGruposStateBulk $updateGruposStateBulk,
         private readonly GenerateGrupos $generateGrupos,
         private readonly GestionRepository $gestiones,
+        private readonly TurnoRepository $turnos,
         private readonly UserRepository $users,
     ) {
     }
@@ -44,6 +46,7 @@ final class GrupoController extends AbstractController
         return $this->render('@grupo/lista.html.twig', [
             'grupos' => $this->listGrupos->execute(),
             'gestiones' => $this->gestiones->listAll(),
+            'turnos' => $this->turnos->listActive(),
             'user' => $this->requireUser($request),
         ]);
     }
@@ -81,6 +84,7 @@ final class GrupoController extends AbstractController
             return $this->render('@grupo/form.html.twig', [
                 'grupo' => $grupo,
                 'gestiones' => $this->gestiones->listAll(),
+                'turnos' => $this->turnos->listActive(),
                 'user' => $user,
             ]);
         }
@@ -96,6 +100,7 @@ final class GrupoController extends AbstractController
             return $this->render('@grupo/form.html.twig', [
                 'grupo' => $grupo,
                 'gestiones' => $this->gestiones->listAll(),
+                'turnos' => $this->turnos->listActive(),
                 'user' => $user,
             ]);
         }

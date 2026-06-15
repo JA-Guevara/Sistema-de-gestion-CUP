@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Academico\Grupo\Domain\Entity;
 
+use App\Academico\Turno\Domain\Entity\Turno;
 use App\Gestion\Domain\Entity\Gestion;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -23,6 +24,11 @@ class Grupo
     #[ORM\ManyToOne(targetEntity: Gestion::class)]
     #[ORM\JoinColumn(nullable: false)]
     public Gestion $gestion;
+
+    /** Turno del grupo (Manana/Tarde/Noche). Nullable: se asigna luego. */
+    #[ORM\ManyToOne(targetEntity: Turno::class)]
+    #[ORM\JoinColumn(name: 'turno_id', nullable: true, onDelete: 'SET NULL')]
+    public ?Turno $turno = null;
 
     #[ORM\Column(length: 30)]
     public string $codigo;

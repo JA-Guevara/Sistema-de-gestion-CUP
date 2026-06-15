@@ -16,7 +16,7 @@ use App\Auth\UI\Request\LoginRequest;
  *
  * Defensa contra fuerza bruta:
  * - Cuenta cada intento fallido consecutivo.
- * - Al MAX_FAILED_ATTEMPTS (3), bloquea la cuenta, genera código y envía email.
+ * - Al MAX_FAILED_ATTEMPTS bloquea la cuenta, genera codigo y envia email.
  * - Un login exitoso resetea el contador.
  */
 final readonly class LoginUser
@@ -38,59 +38,85 @@ final readonly class LoginUser
     {
         $user = $this->users->findByEmail($input->email);
 
-        // Email no existe: error genérico (defensa anti-enumeración en primer intento).
         if ($user === null) {
-            throw new InvalidCredentials('Credenciales inválidas.');
+            throw new InvalidCredentials('Credenciales invalidas.');
         }
 
-        // Cuenta ya bloqueada: rechazar antes de chequear password.
         if ($user->locked) {
-            throw new AccountLocked('Tu cuenta está bloqueada. Revisá tu correo o desbloqueá desde el enlace.');
+            throw new AccountLocked('Tu cuenta esta bloqueada. Revisa tu correo o desbloquea desde el enlace.');
         }
 
         if (!$user->active) {
             throw new InvalidCredentials('Tu cuenta esta inactiva. Comunicate con administracion.');
         }
 
-        // Password mal: incrementar contador y eventualmente bloquear.
         if (!password_verify($input->password, $user->passwordHash)) {
-            $user->failedLoginAttempts++;
-
-            if ($user->failedLoginAttempts >= self::MAX_FAILED_ATTEMPTS) {
-                $this->lockAccount($user);
-                throw new AccountLocked('Tu cuenta fue bloqueada por demasiados intentos fallidos. Te enviamos un código de desbloqueo por correo.');
-            }
-
-            $this->users->save($user);
-            throw new InvalidCredentials('Credenciales inválidas.');
+            $this->registerFailedAttempt($user);
         }
 
-        // Login OK: resetear contador si venía acumulado.
-        if ($user->failedLoginAttempts > 0) {
-            $user->failedLoginAttempts = 0;
-            $this->users->save($user);
-        }
+        $this->resetFailedAttempts($user);
 
         return $user;
     }
 
-    private function lockAccount(User $user): void
+    /**
+     * @throws InvalidCredentials
+     * @throws AccountLocked
+     */
+    private function registerFailedAttempt(User $user): void
     {
-        $now = new \DateTimeImmutable();
+        $user->failedLoginAttempts++;
+
+        if ($user->failedLoginAttempts < self::MAX_FAILED_ATTEMPTS) {
+            $this->users->save($user);
+
+            throw new InvalidCredentials('Credenciales invalidas.');
+        }
+
+        $mailSent = $this->lockAccount($user);
+        $message = $mailSent
+            ? 'Tu cuenta fue bloqueada por demasiados intentos fallidos. Te enviamos un codigo de desbloqueo por correo.'
+            : 'Tu cuenta fue bloqueada por demasiados intentos fallidos. No pudimos enviar el codigo automaticamente; usa Reenviar codigo.';
+
+        throw new AccountLocked($message);
+    }
+
+    private function resetFailedAttempts(User $user): void
+    {
+        if ($user->failedLoginAttempts <= 0) {
+            return;
+        }
+
+        $user->failedLoginAttempts = 0;
+        $this->users->save($user);
+    }
+
+    private function lockAccount(User $user): bool
+    {
+        $now = new \DateTimeImmutable('now', new \DateTimeZone('America/La_Paz'));
 
         $user->locked = true;
         $user->unlockCode = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         $user->unlockCodeExpiresAt = $now->modify(sprintf('+%d minutes', self::UNLOCK_CODE_TTL_MINUTES));
-        $user->unlockCodeLastSentAt = $now;
+        $user->unlockCodeLastSentAt = null;
 
         $this->users->save($user);
 
-        // El correo no debe tumbar el flujo de bloqueo: si el SMTP falla, la cuenta
-        // queda bloqueada igual y el usuario puede reenviar el código desde /auth/unlock.
         try {
             $this->lockedMailer->send($user, $user->unlockCode);
-        } catch (\Throwable $e) {
-            error_log(sprintf('[CUP][auth] No se pudo enviar el código de desbloqueo (user %d): %s', $user->id, $e->getMessage()));
+        } catch (\Throwable $exception) {
+            error_log(sprintf(
+                '[CUP][auth] No se pudo enviar el codigo de desbloqueo (user %d): %s',
+                $user->id,
+                $exception->getMessage(),
+            ));
+
+            return false;
         }
+
+        $user->unlockCodeLastSentAt = $now;
+        $this->users->save($user);
+
+        return true;
     }
 }

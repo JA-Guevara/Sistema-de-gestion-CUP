@@ -36,6 +36,7 @@ use App\Inscripcion\Application\UseCase\PagarInscripcion;
 use App\Inscripcion\Application\UseCase\PresentarInscripcion;
 use App\Inscripcion\Application\UseCase\RechazarInscripcion;
 use App\Inscripcion\Application\UseCase\RechazarInscripcionesBulk;
+use App\Inscripcion\Application\UseCase\ResolverResultadoAdmision;
 use App\Inscripcion\Application\UseCase\RevisarDocumento;
 use App\Inscripcion\Application\UseCase\SubirDocumento;
 use App\Inscripcion\Application\UseCase\ValidarInscripcion;
@@ -74,6 +75,7 @@ final class InscripcionController extends AbstractController
         private readonly RechazarInscripcionesBulk $rechazarInscripcionesBulk,
         private readonly AgendarEntrevista $agendarEntrevista,
         private readonly ConfirmarInscripcion $confirmarInscripcion,
+        private readonly ResolverResultadoAdmision $resolverResultadoAdmision,
         private readonly PagarInscripcion $pagarInscripcion,
         private readonly PresentarInscripcion $presentarInscripcion,
         private readonly EditarBorrador $editarBorrador,
@@ -855,7 +857,7 @@ final class InscripcionController extends AbstractController
 
         try {
             $this->validarInscripcion->execute($id, $this->actorUserId($request));
-            $this->addFlash('success', 'Documentacion validada. Continua con la confirmacion.');
+            $this->addFlash('success', 'Documentacion aprobada. Continua con el siguiente paso de admision.');
         } catch (InscripcionException $e) {
             $this->addFlash('error', $e->getMessage());
         }
@@ -880,7 +882,7 @@ final class InscripcionController extends AbstractController
 
         try {
             $this->rechazarInscripcion->execute($id, $motivo, $this->actorUserId($request));
-            $this->addFlash('success', 'Postulacion rechazada.');
+            $this->addFlash('success', 'Postulacion descartada.');
         } catch (InscripcionException $e) {
             $this->addFlash('error', $e->getMessage());
         }
@@ -915,6 +917,32 @@ final class InscripcionController extends AbstractController
             $this->addFlash('error', $e->getMessage());
         } catch (\Exception) {
             $this->addFlash('error', 'La fecha indicada no es valida.');
+        }
+
+        return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $id]);
+    }
+
+    #[Route('/admin/{id}/resolver', name: 'inscripcion_admin_resolver', methods: ['POST'])]
+    public function resolver(Request $request, int $id): RedirectResponse
+    {
+        if ($this->currentUser($request) === null) {
+            return $this->redirectToRoute('auth_login');
+        }
+
+        if (!$this->isCsrfValid($request)) {
+            $this->addFlash('error', self::CSRF_ERROR);
+
+            return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $id]);
+        }
+
+        $resultado = strtoupper(trim((string) $request->request->get('resultado', '')));
+        $motivo = self::nullableString($request->request->get('motivo'));
+
+        try {
+            $this->resolverResultadoAdmision->execute($id, $resultado, $motivo, $this->actorUserId($request));
+            $this->addFlash('success', $resultado === 'APROBADO' ? 'Postulacion aprobada y rol asignado.' : 'Postulacion descartada.');
+        } catch (InscripcionException $e) {
+            $this->addFlash('error', $e->getMessage());
         }
 
         return $this->redirectToRoute('inscripcion_admin_detalle', ['id' => $id]);

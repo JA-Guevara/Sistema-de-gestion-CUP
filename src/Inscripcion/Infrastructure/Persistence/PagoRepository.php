@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Inscripcion\Infrastructure\Persistence;
 
+use App\Inscripcion\Domain\Catalog\EstadoInscripcion;
 use App\Inscripcion\Domain\Catalog\EstadoPago;
 use App\Inscripcion\Domain\Entity\Pago;
 use Doctrine\ORM\EntityManagerInterface;
@@ -84,7 +85,11 @@ final readonly class PagoRepository
             ->select('p.estado AS estado', 'COUNT(p.id) AS total', 'SUM(p.amount) AS monto')
             ->join('p.inscripcion', 'i')
             ->where('i.gestion = :gestion')
+            // El recaudado/resumen NO debe contar pagos de inscripciones que
+            // luego fueron anuladas o rechazadas (esos no son recaudacion valida).
+            ->andWhere('i.estado NOT IN (:excluidos)')
             ->setParameter('gestion', $gestionId)
+            ->setParameter('excluidos', [EstadoInscripcion::ANULADA, EstadoInscripcion::RECHAZADA])
             ->groupBy('p.estado')
             ->getQuery()
             ->getResult();

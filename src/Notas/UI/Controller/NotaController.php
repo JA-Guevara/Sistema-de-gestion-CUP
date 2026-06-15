@@ -6,6 +6,7 @@ namespace App\Notas\UI\Controller;
 
 use App\Academico\Grupo\Infrastructure\Persistence\GrupoRepository;
 use App\Academico\Materia\Infrastructure\Persistence\MateriaRepository;
+use App\Academico\Turno\Infrastructure\Persistence\TurnoRepository;
 use App\Auth\Entity\User;
 use App\Auth\Infrastructure\Persistence\UserRepository;
 use App\Gestion\Infrastructure\Persistence\GestionRepository;
@@ -59,6 +60,7 @@ final class NotaController extends AbstractController
         private readonly GrupoRepository $grupos,
         private readonly InscripcionRepository $inscripciones,
         private readonly GestionRepository $gestiones,
+        private readonly TurnoRepository $turnos,
         private readonly UserRepository $users,
     ) {
     }
@@ -117,6 +119,7 @@ final class NotaController extends AbstractController
             'asignaciones' => $gestion !== null ? $this->listAsignaciones->execute($gestion->id) : [],
             'materias' => $this->materias->listActive(),
             'grupos' => $gestion !== null ? $this->grupos->listByGestion($gestion->id) : [],
+            'turnos' => $this->turnos->listActive(),
             'docentes' => $this->asignacionesDocente->listDocentes(),
         ]);
     }
@@ -203,6 +206,7 @@ final class NotaController extends AbstractController
             'gestion' => $gestion,
             'materias' => $this->materias->listActive(),
             'grupos' => $gestion !== null ? $this->grupos->listByGestion($gestion->id) : [],
+            'turnos' => $this->turnos->listActive(),
             'materiaSel' => $materiaId,
             'grupoSel' => $grupoId,
             'asignados' => $asignados,
@@ -289,7 +293,7 @@ final class NotaController extends AbstractController
         }
 
         try {
-            $data = $this->verPlanilla->execute($materiaId, $grupoId);
+            $data = $this->verPlanilla->execute($materiaId, $grupoId, $this->actorUserId($request));
         } catch (NotaException $exception) {
             $this->addFlash('error', $exception->getMessage());
 
@@ -331,7 +335,7 @@ final class NotaController extends AbstractController
         }
 
         try {
-            $data = $this->verPlanilla->execute($materiaId, $grupoId);
+            $data = $this->verPlanilla->execute($materiaId, $grupoId, $this->actorUserId($request));
         } catch (NotaException $exception) {
             $this->addFlash('error', $exception->getMessage());
 

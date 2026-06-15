@@ -378,7 +378,9 @@ select.bitacora-filters__input {
 .bitacora-table__ip {
     font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
     font-size: 12px;
-    color: var(--color-accent);
+    /* Tono neutro: el acento (guindo) se reserva para indicadores criticos,
+       no para IPs normales que no son una alerta. */
+    color: var(--color-text-muted);
     white-space: nowrap;
 }
 

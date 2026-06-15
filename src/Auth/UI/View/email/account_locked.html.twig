@@ -13,6 +13,12 @@
                         <td>
                             <h1 style="margin:0 0 16px;font-size:22px;color:#1f2933;">Cuenta bloqueada</h1>
 
+                            {% if is_test|default(false) %}
+                                <p style="margin:0 0 16px;line-height:1.5;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:12px;color:#9a3412;">
+                                    Este es un correo de prueba. El codigo mostrado no desbloquea ninguna cuenta real.
+                                </p>
+                            {% endif %}
+
                             <p style="margin:0 0 16px;line-height:1.5;">
                                 Hola <strong>{{ user.firstName }}</strong>,
                             </p>

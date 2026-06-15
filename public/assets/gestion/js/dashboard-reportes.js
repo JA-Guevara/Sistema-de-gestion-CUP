@@ -49,8 +49,26 @@
     function canvas(name) { return document.querySelector('[data-chart="' + name + '"]'); }
     function val(sel) { var el = document.querySelector(sel); return el ? el.value : ''; }
 
+    // Trunca etiquetas largas en el eje (con elipsis). El nombre completo igual
+    // se ve en el tooltip, asi que no se pierde informacion.
+    function truncTick(maxLen) {
+        return function (value) {
+            var lbl = this.getLabelForValue ? this.getLabelForValue(value) : value;
+            lbl = String(lbl == null ? '' : lbl);
+            return lbl.length > maxLen ? lbl.slice(0, maxLen - 1) + '…' : lbl;
+        };
+    }
+
     function bar(ctx, labels, datasets, opts) {
         opts = opts || {};
+        // Alto dinamico para barras horizontales: ~30px por categoria, para que
+        // no queden aplastadas cuando hay muchos docentes/grupos/carreras.
+        if (opts.horizontal && ctx && ctx.parentNode) {
+            ctx.parentNode.style.height = Math.max(220, labels.length * 30 + 48) + 'px';
+        }
+        // Eje de categoria (y si es horizontal, x si es vertical): mostrar TODAS
+        // las etiquetas (autoSkip:false), sin rotar y truncadas.
+        var catTicks = { autoSkip: false, maxRotation: 0, minRotation: 0, callback: truncTick(opts.horizontal ? 24 : 14), font: { size: 11 } };
         return new Chart(ctx, {
             type: 'bar',
             data: { labels: labels, datasets: datasets },
@@ -58,10 +76,13 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    x: { grid: { display: !!opts.horizontal, color: COL.grid }, beginAtZero: true, ticks: { precision: 0 } },
-                    y: { grid: { display: !opts.horizontal, color: COL.grid }, beginAtZero: true, ticks: { precision: 0 } },
+                    x: { grid: { display: !!opts.horizontal, color: COL.grid }, beginAtZero: true, ticks: opts.horizontal ? { precision: 0 } : catTicks },
+                    y: { grid: { display: !opts.horizontal, color: COL.grid }, beginAtZero: true, ticks: opts.horizontal ? catTicks : { precision: 0 } },
                 },
-                plugins: { legend: { display: !!opts.legend, position: 'bottom' } },
+                plugins: {
+                    legend: { display: !!opts.legend, position: 'bottom' },
+                    tooltip: { callbacks: { title: function (items) { return items && items.length ? items[0].label : ''; } } },
+                },
             }, opts.horizontal ? { indexAxis: 'y' } : {}, opts.extra || {}),
         });
     }
@@ -93,7 +114,7 @@
                     labels: ['Aprobados', 'Reprobados', 'Incompletos'],
                     datasets: [{ data: [d.estadoAprobacion.aprobados, d.estadoAprobacion.reprobados, d.estadoAprobacion.incompletos], backgroundColor: [COL.ok, COL.bad, COL.warn], borderWidth: 0 }],
                 },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'right' } } },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'right' }, tooltip: { callbacks: { label: function (c) { var data = (c.dataset && c.dataset.data) || []; var t = data.reduce(function (a, b) { return a + (b || 0); }, 0); var v = c.parsed || 0; var p = t ? Math.round(v * 100 / t) : 0; return (c.label || '') + ': ' + v + ' (' + p + '%)'; } } } } },
             });
         }
 
@@ -104,7 +125,7 @@
                 data: d.promedioPorMateria.map(function (x) { return x.promedio; }),
                 backgroundColor: d.promedioPorMateria.map(function (x) { return x.promedio >= d.meta.notaMinima ? COL.ok : COL.bad; }),
                 borderRadius: 4,
-            }], { extra: { scales: { y: { beginAtZero: true, max: 100, grid: { color: COL.grid } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } });
+            }], { extra: { scales: { y: { beginAtZero: true, max: 100, grid: { color: COL.grid }, ticks: { precision: 0 } }, x: { grid: { display: false }, ticks: { autoSkip: false, maxRotation: 0, minRotation: 0, callback: truncTick(14), font: { size: 11 } } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { title: function (i) { return i && i.length ? i[0].label : ''; } } } } } });
         }
 
         var am = canvas('aprobMateria');
@@ -120,8 +141,8 @@
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, grid: { color: COL.grid }, ticks: { precision: 0 } } },
-                    plugins: { legend: { position: 'bottom' } },
+                    scales: { x: { stacked: true, grid: { display: false }, ticks: { autoSkip: false, maxRotation: 0, minRotation: 0, callback: truncTick(14), font: { size: 11 } } }, y: { stacked: true, beginAtZero: true, grid: { color: COL.grid }, ticks: { precision: 0 } } },
+                    plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { title: function (i) { return i && i.length ? i[0].label : ''; } } } },
                 },
             });
         }
@@ -155,6 +176,35 @@
         if (cnt) { cnt.textContent = rows.length + ' postulantes'; }
     }
 
+    function renderDocentes(dd) {
+        dd = dd || {};
+        document.querySelectorAll('[data-doc-kpi]').forEach(function (el) {
+            var k = el.getAttribute('data-doc-kpi');
+            if (dd[k] !== undefined && dd[k] !== null) { el.textContent = String(dd[k]); }
+        });
+        var pe = document.querySelector('[data-doc-postulaciones]');
+        if (pe) {
+            var ps = (dd.postulaciones || []).map(function (p) { return cap(p.estado) + ': ' + p.total; });
+            pe.textContent = ps.length ? ps.join(' · ') : 'Sin postulaciones de docente';
+        }
+        var tb = document.querySelector('[data-doc-tbody]');
+        if (tb) {
+            tb.innerHTML = '';
+            var carga = dd.carga || [];
+            if (!carga.length) {
+                tb.innerHTML = '<tr><td colspan="3">No hay docentes con asignacion en esta gestion.</td></tr>';
+                return;
+            }
+            carga.forEach(function (d) {
+                var tr = document.createElement('tr');
+                tr.innerHTML = '<td data-label="Docente">' + esc(d.docente) + '</td>' +
+                    '<td class="gestion-col--num" data-label="Materias">' + (d.materias | 0) + '</td>' +
+                    '<td class="gestion-col--num" data-label="Grupos">' + (d.grupos | 0) + '</td>';
+                tb.appendChild(tr);
+            });
+        }
+    }
+
     // ---- Filtros ----
     function filtersOf(formSel) {
         var p = new URLSearchParams();
@@ -178,7 +228,7 @@
 
     // Vista Reportes
     function refreshCharts() {
-        fetchData(filtersOf('[data-rep-form="charts"]'), function (d) { chartsData = d; renderKpis(d.kpis); buildCharts(d); });
+        fetchData(filtersOf('[data-rep-form="charts"]'), function (d) { chartsData = d; renderKpis(d.kpis); buildCharts(d); renderDocentes(d.docentes); });
     }
 
     // Vista Lista (carrera/materia/docente => server; estado/texto => client)
@@ -313,9 +363,15 @@
         (d.topGrupos || []).forEach(function (x) { rows.push([x.grupo, x.aprobados]); });
         rows.push([]);
 
-        rows.push(['CARGA DOCENTE (grupos por docente)']);
-        rows.push(['Docente', 'Grupos']);
-        (d.docentesPorGrupo || []).forEach(function (x) { rows.push([x.docente, x.grupos]); });
+        rows.push(['CARGA DOCENTE (materias y grupos por docente)']);
+        rows.push(['Docente', 'Materias', 'Grupos']);
+        ((d.docentes && d.docentes.carga) || []).forEach(function (x) { rows.push([x.docente, x.materias, x.grupos]); });
+        rows.push([]);
+
+        rows.push(['POSTULACIONES DE DOCENTE POR ESTADO']);
+        rows.push(['Estado', 'Cantidad']);
+        ((d.docentes && d.docentes.postulaciones) || []).forEach(function (x) { rows.push([x.estado, x.total]); });
+        rows.push(['Entrevistas agendadas', (d.docentes && d.docentes.entrevistasAgendadas) || 0]);
 
         downloadCsv('reporte_dashboard_' + (d.meta.gestionCodigo || 'cup') + '.csv', rows);
     }); }
@@ -324,4 +380,5 @@
     renderKpis(initial.kpis);
     buildCharts(initial);
     renderList();
+    renderDocentes(initial.docentes);
 }());

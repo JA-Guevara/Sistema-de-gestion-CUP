@@ -29,6 +29,14 @@
             </div>
             <form method="post" class="gestion-form">
                 <div class="gestion-grid gestion-grid--three">
+                    <label>Turno (filtro)
+                        <select data-turno-filter="docentes">
+                            <option value="">Todos los turnos</option>
+                            {% for turno in turnos %}
+                                <option value="{{ turno.id }}">{{ turno.nombre|capitalize }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
                     <label>Materia
                         <select name="materia" required>
                             <option value="">Seleccionar materia</option>
@@ -38,10 +46,10 @@
                         </select>
                     </label>
                     <label>Grupo
-                        <select name="grupo" required>
+                        <select name="grupo" required data-grupo-select="docentes">
                             <option value="">Seleccionar grupo</option>
                             {% for grupo in grupos %}
-                                <option value="{{ grupo.id }}">{{ grupo.codigo }} - {{ grupo.nombre }}</option>
+                                <option value="{{ grupo.id }}" data-turno="{{ grupo.turno ? grupo.turno.id : '' }}">{{ grupo.codigo }} - {{ grupo.nombre }}{{ grupo.turno ? ' · ' ~ grupo.turno.nombre|capitalize : '' }}</option>
                             {% endfor %}
                         </select>
                     </label>
@@ -57,6 +65,26 @@
                 {% if docentes is empty %}
                     <p class="gestion-help">No hay usuarios con rol Docente. Asigna el rol "Docente" desde el modulo Usuarios.</p>
                 {% endif %}
+                <script>
+                    (function () {
+                        document.querySelectorAll('[data-turno-filter]').forEach(function (tf) {
+                            var key = tf.getAttribute('data-turno-filter');
+                            var gs = document.querySelector('[data-grupo-select="' + key + '"]');
+                            if (!gs) { return; }
+                            tf.addEventListener('change', function () {
+                                var t = tf.value;
+                                Array.prototype.forEach.call(gs.options, function (o) {
+                                    if (!o.value) { return; }
+                                    var match = !t || o.getAttribute('data-turno') === t;
+                                    o.hidden = !match;
+                                    o.disabled = !match;
+                                });
+                                var cur = gs.options[gs.selectedIndex];
+                                if (cur && cur.value && cur.hidden) { gs.value = ''; }
+                            });
+                        });
+                    }());
+                </script>
                 {% if grupos is empty %}
                     <p class="gestion-help">No hay grupos en esta gestion. Crea grupos en el modulo Grupos.</p>
                 {% endif %}

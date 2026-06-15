@@ -9,6 +9,7 @@ use App\Academico\Materia\Infrastructure\Persistence\MateriaRepository;
 use App\Auth\Infrastructure\Persistence\UserRepository;
 use App\Bitacora\Application\EventLog\NotasEvents;
 use App\Gestion\Infrastructure\Persistence\GestionRepository;
+use App\Notas\Application\Security\PlanillaAccessPolicy;
 use App\Notas\Domain\Entity\Nota;
 use App\Notas\Domain\Exception\NotaException;
 use App\Notas\Infrastructure\Persistence\AsignacionGrupoRepository;
@@ -31,6 +32,7 @@ final readonly class ImportarNotas
         private AsignacionGrupoRepository $asignacionesGrupo,
         private NotaRepository $notas,
         private UserRepository $users,
+        private PlanillaAccessPolicy $accessPolicy,
         private NotasEvents $events,
     ) {
     }
@@ -47,6 +49,9 @@ final readonly class ImportarNotas
         if ($materia === null || $grupo === null) {
             throw new NotaException('Materia o grupo no encontrados.');
         }
+
+        // Autorizacion a nivel de objeto: solo el docente asignado (o admin) importa.
+        $this->accessPolicy->assertPuede($actorUserId, $materiaId, $grupoId, (int) $gestion->id);
 
         $cantidadExamenes = max(1, $gestion->configuracion?->cantidadExamenes ?? self::DEFAULT_EXAMENES);
         $actor = $actorUserId !== null ? $this->users->findById($actorUserId) : null;

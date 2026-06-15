@@ -225,6 +225,9 @@ final readonly class GenerarHorarioMultiGrupo
         $total = count($materias);
         $paso = $input->duracionMinutos + $input->descansoMinutos;
         $horarios = [];
+        // Franjas (aula, dia, hora) ya agregadas en ESTE lote, para detectar
+        // choques de aula entre grupos del mismo lote (hasOverlap solo ve la BD).
+        $ocupadas = [];
 
         foreach ($gruposConAula as $indiceGrupo => $par) {
             $grupo = $par['grupo'];
@@ -251,9 +254,20 @@ final readonly class GenerarHorarioMultiGrupo
                         ));
                     }
 
+                    if ($this->solapaEnLote($ocupadas, $aula->id ?? 0, $dia, $horaInicio, $horaFin)) {
+                        throw new HorarioException(sprintf(
+                            'Choque de aula en el lote: el aula %s ya esta ocupada el %s a las %s-%s por otro grupo del mismo lote.',
+                            $aula->codigo,
+                            $dia,
+                            $horaInicio->format('H:i'),
+                            $horaFin->format('H:i'),
+                        ));
+                    }
+
                     $horario = new Horario();
                     $horario->configure($grupo, $materia, $aula, $dia, $horaInicio, $horaFin);
                     $horarios[] = $horario;
+                    $ocupadas[] = ['aulaId' => $aula->id ?? 0, 'dia' => $dia, 'inicio' => $horaInicio, 'fin' => $horaFin];
                 }
             }
         }
@@ -268,5 +282,22 @@ final readonly class GenerarHorarioMultiGrupo
     private function registerAudit(string $estrategia, array $horarios, array $gruposConAula, HorarioMultiGrupoInput $input): void
     {
         $this->events->generadoMultiGrupo($estrategia, count($horarios), count($gruposConAula), $input->actorUserId);
+    }
+
+    /**
+     * Choque de aula dentro del mismo lote: misma aula, mismo dia y rango horario
+     * solapado (inicioA < finB AND inicioB < finA).
+     *
+     * @param list<array{aulaId:int, dia:string, inicio:\DateTimeImmutable, fin:\DateTimeImmutable}> $ocupadas
+     */
+    private function solapaEnLote(array $ocupadas, int $aulaId, string $dia, \DateTimeImmutable $inicio, \DateTimeImmutable $fin): bool
+    {
+        foreach ($ocupadas as $o) {
+            if ($o['aulaId'] === $aulaId && $o['dia'] === $dia && $inicio < $o['fin'] && $o['inicio'] < $fin) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
