@@ -7,10 +7,12 @@ namespace App\Dashboard\UI\Controller;
 use App\Auth\Entity\User;
 use App\Auth\Infrastructure\Persistence\UserRepository;
 use App\Dashboard\Application\UseCase\GetReportes;
+use App\Dashboard\Application\UseCase\GetReportesComparativo;
 use App\Dashboard\Application\UseCase\InterpretarConsulta;
 use App\Dashboard\Infrastructure\Persistence\ReporteRepository;
 use App\Gestion\Domain\Entity\Gestion;
 use App\Gestion\Infrastructure\Persistence\GestionRepository;
+use App\Gestion\UI\Twig\GestionExtension;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,9 +26,11 @@ final class DashboardController extends AbstractController
 
     public function __construct(
         private readonly GetReportes $reportes,
+        private readonly GetReportesComparativo $comparativo,
         private readonly InterpretarConsulta $asistente,
         private readonly ReporteRepository $reporteRepo,
         private readonly GestionRepository $gestiones,
+        private readonly GestionExtension $gestionLabel,
         private readonly UserRepository $users,
     ) {
     }
@@ -74,6 +78,26 @@ final class DashboardController extends AbstractController
         return new JsonResponse(
             $this->reportes->execute($gestion, $filtros['carrera'], $filtros['materia'], $filtros['docente'])
         );
+    }
+
+    #[Route('/dashboard/comparativo', name: 'dashboard_comparativo', methods: ['GET'])]
+    public function comparativo(Request $request): JsonResponse
+    {
+        if ($this->currentUser($request) === null) {
+            return new JsonResponse(['error' => 'unauthorized'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $gestiones = $this->gestiones->listAll();
+        // Orden cronologico ascendente para leer la tendencia de izquierda a derecha.
+        usort($gestiones, static fn (Gestion $a, Gestion $b): int => (int) $a->id <=> (int) $b->id);
+
+        $filas = $this->comparativo->execute($gestiones);
+        foreach ($filas as &$fila) {
+            $fila['label'] = $this->gestionLabel->label((string) $fila['codigo']);
+        }
+        unset($fila);
+
+        return new JsonResponse(['gestiones' => $filas]);
     }
 
     #[Route('/dashboard/asistente', name: 'dashboard_asistente', methods: ['POST'])]

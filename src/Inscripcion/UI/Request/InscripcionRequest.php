@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Inscripcion\UI\Request;
 
+use App\Academico\Materia\Domain\Catalog\AreaCatalog;
 use App\Inscripcion\Application\DTO\InscripcionInput;
 use App\Inscripcion\Domain\Catalog\ModalidadPostulacion;
 use App\Inscripcion\Domain\Catalog\TipoPostulacion;
@@ -44,6 +45,7 @@ final class InscripcionRequest
             docenteMaestria: $request->request->has('docenteMaestria'),
             docenteDiplomado: $request->request->has('docenteDiplomado'),
             docenteExperiencia: self::nullableString($request->request->get('docenteExperiencia')),
+            docenteAreas: AreaCatalog::filterValid((array) $request->request->all('docenteAreas')),
             otros: self::nullableString($request->request->get('otros')),
             accion: $accion === InscripcionInput::ACCION_PRESENTAR ? InscripcionInput::ACCION_PRESENTAR : InscripcionInput::ACCION_GUARDAR,
             actorUserId: self::actorUserId($request),

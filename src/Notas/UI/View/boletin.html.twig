@@ -24,6 +24,12 @@
         <div><dt>Emitido</dt><dd>{{ "now"|date('d/m/Y H:i') }}</dd></div>
     </dl>
 
+    <div class="boleta__resultado boleta__resultado--{{ boletin.estadoFinal|lower }}">
+        <span>Resultado del CUP:</span>
+        <strong>{% if boletin.estadoFinal == 'APROBADO' %}APROBADO{% elseif boletin.estadoFinal == 'REPROBADO' %}REPROBADO{% else %}NOTAS INCOMPLETAS{% endif %}</strong>
+        {% if boletin.promedioGeneral is not null %}<span>&middot; Promedio general: <strong>{{ boletin.promedioGeneral }}</strong> (mín. {{ boletin.notaMinima }} en cada materia)</span>{% endif %}
+    </div>
+
     <table class="boleta__table">
         <thead>
             <tr>
@@ -40,7 +46,7 @@
             {% for fila in boletin.materias %}
                 <tr>
                     <td class="boleta__left" data-label="Materia">{{ fila.materia.codigo }} - {{ fila.materia.nombre }}</td>
-                    <td data-label="Grupo">{{ fila.grupo.codigo }}</td>
+                    <td data-label="Grupo">{{ fila.grupo ? fila.grupo.codigo : '— sin asignar' }}</td>
                     {% for examen in 1..boletin.cantidadExamenes %}
                         <td data-label="Examen {{ examen }}">{{ fila.valores[examen] is not null ? fila.valores[examen] : '-' }}</td>
                     {% endfor %}
@@ -89,6 +95,19 @@
         .boleta__estado--aprobado { color: #166534; font-weight: 700; }
         .boleta__estado--reprobado { color: #9b1c1c; font-weight: 700; }
         .boleta__estado--incompleto { color: #64748b; }
+        .boleta__resultado { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 18px; padding: 11px 16px; border-radius: 8px; font-size: 13.5px; border: 1px solid; }
+        .boleta__resultado strong { font-size: 15px; letter-spacing: .4px; }
+        .boleta__resultado--aprobado { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+        .boleta__resultado--reprobado { background: #fef2f2; border-color: #fecaca; color: #9b1c1c; }
+        .boleta__resultado--incompleto { background: #f8fafc; border-color: #e2e8f0; color: #64748b; }
+        /* Cartel del resultado CUP en la vista de pagina */
+        .boletin-resultado { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin: 0 0 18px; padding: 16px 22px; border-radius: 12px; border: 1px solid; }
+        .boletin-resultado__label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; opacity: .8; margin-bottom: 2px; }
+        .boletin-resultado__estado { font-size: 23px; font-weight: 800; line-height: 1; }
+        .boletin-resultado__meta { font-size: 13px; text-align: right; }
+        .boletin-resultado--aprobado { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+        .boletin-resultado--reprobado { background: #fef2f2; border-color: #fecaca; color: #9b1c1c; }
+        .boletin-resultado--incompleto { background: #f8fafc; border-color: #e2e8f0; color: #475569; }
         .boleta__foot { margin-top: 22px; font-size: 11px; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 12px; }
 
         /* ---- Datos del estudiante en la vista principal (estilo consulta) ---- */
@@ -209,6 +228,40 @@
             </dl>
         </section>
 
+        {# ---- Resultado final del CUP (aprueba con TODAS las materias >= nota minima) ---- #}
+        <section class="boletin-resultado boletin-resultado--{{ boletin.estadoFinal|lower }}">
+            <div>
+                <span class="boletin-resultado__label">Resultado del CUP</span>
+                <strong class="boletin-resultado__estado">{% if boletin.estadoFinal == 'APROBADO' %}Aprobado{% elseif boletin.estadoFinal == 'REPROBADO' %}Reprobado{% else %}Notas incompletas{% endif %}</strong>
+            </div>
+            <div class="boletin-resultado__meta">
+                {% if boletin.promedioGeneral is not null %}Promedio general: <strong>{{ boletin.promedioGeneral }}</strong><br>{% endif %}
+                Aprueba con las {{ boletin.materias|length }} materias &ge; {{ boletin.notaMinima }}
+            </div>
+        </section>
+
+        {# ---- Resultado de la Admision Final a carrera (si ya se ejecuto) ---- #}
+        {% if boletin.inscripcion.resultadoAdmision %}
+            {% set admRes = boletin.inscripcion.resultadoAdmision %}
+            {% set admLabels = {
+                'ADMITIDO_PRIMERA': 'Admitido a tu 1ra opcion',
+                'ADMITIDO_SEGUNDA': 'Admitido a tu 2da opcion',
+                'LISTA_ESPERA': 'En lista de espera',
+                'REPROBADO': 'No admitido',
+                'PENDIENTE': 'Pendiente (notas incompletas)'
+            } %}
+            {% set admVariant = admRes starts with 'ADMITIDO' ? 'aprobado' : (admRes == 'REPROBADO' ? 'reprobado' : 'incompleto') %}
+            <section class="boletin-resultado boletin-resultado--{{ admVariant }}">
+                <div>
+                    <span class="boletin-resultado__label">Admision a carrera</span>
+                    <strong class="boletin-resultado__estado">{{ admLabels[admRes] ?? admRes }}</strong>
+                </div>
+                <div class="boletin-resultado__meta">
+                    {% if boletin.inscripcion.carreraAdmitida %}Carrera admitida: <strong>{{ boletin.inscripcion.carreraAdmitida.nombre }}</strong>{% else %}&mdash;{% endif %}
+                </div>
+            </section>
+        {% endif %}
+
         {# ---- Vista principal: detalle de notas (lista) ---- #}
         <section class="gestion-panel">
             <div class="gestion-panel__header">
@@ -234,7 +287,7 @@
                         {% for fila in boletin.materias %}
                             <tr>
                                 <td class="gestion-col--text" data-label="Materia">{{ fila.materia.codigo }} - {{ fila.materia.nombre }}</td>
-                                <td data-label="Grupo">{{ fila.grupo.codigo }}</td>
+                                <td data-label="Grupo">{{ fila.grupo ? fila.grupo.codigo : '— sin asignar' }}</td>
                                 {% for examen in 1..boletin.cantidadExamenes %}
                                     <td class="gestion-col--num" data-label="Examen {{ examen }}">{{ fila.valores[examen] is not null ? fila.valores[examen] : '-' }}</td>
                                 {% endfor %}

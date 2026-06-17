@@ -1,0 +1,86 @@
+# -*- coding: utf-8 -*-
+"""Datos (fieles al codigo) y render del diagrama de secuencia del flujo de inscripcion + pago + confirmacion."""
+import json
+import render_sequence as RS
+
+seq = {
+  "titulo": "Inscripcion CUP: datos del postulante, carrera, documentos, pago (pasarela) y confirmacion",
+  "lifelines": [
+    {"id": "post",     "nombre": "Postulante",                     "tipo": "actor"},
+    {"id": "coord",    "nombre": "Coordinador",                    "tipo": "actor"},
+    {"id": "vista",    "nombre": ": Vistas (Twig)",                "tipo": "boundary"},
+    {"id": "ctrlIns",  "nombre": ": InscripcionController",        "tipo": "control"},
+    {"id": "ctrlPago", "nombre": ": PagoController",               "tipo": "control"},
+    {"id": "ucIns",    "nombre": ": Casos de Uso - Inscripcion",   "tipo": "control"},
+    {"id": "ucPago",   "nombre": ": Casos de Uso - Pago",          "tipo": "control"},
+    {"id": "ctrlWh",   "nombre": ": StripeWebhookController",      "tipo": "control"},
+    {"id": "gw",       "nombre": ": StripeGateway",                "tipo": "control"},
+    {"id": "stripe",   "nombre": "Stripe Checkout",               "tipo": "external"},
+    {"id": "db",       "nombre": ": Doctrine ORM + PostgreSQL",    "tipo": "database"},
+  ],
+  "fragmentos": [
+    {"label": "PRE-INSCRIPCION  -  datos del postulante y carrera (1ra / 2da opcion, turno)", "from": 0,  "to": 6},
+    {"label": "DOCUMENTOS  -  carga de los requisitos",                                       "from": 7,  "to": 10},
+    {"label": "VALIDACION DOCUMENTAL  -  el Coordinador habilita el pago",                    "from": 11, "to": 14},
+    {"label": "PAGO  -  pasarela Stripe Checkout",                                            "from": 15, "to": 26},
+    {"label": "CONFIRMACION  -  webhook autoritativo + asignacion de rol",                    "from": 27, "to": 38},
+    {"label": "RETORNO AL POSTULANTE  -  pagina de exito (idempotente)",                      "from": 39, "to": 42},
+  ],
+  "mensajes": [
+    # A) PRE-INSCRIPCION
+    {"de":"post","a":"vista","txt":"completa formulario: datos personales, carrera 1ra/2da, turno","tipo":"call"},
+    {"de":"vista","a":"ctrlIns","txt":"POST /inscripcion/formulario","tipo":"call"},
+    {"de":"ctrlIns","a":"ucIns","txt":"crearInscripcion.execute(InscripcionRequest, user)  [valida CSRF]","tipo":"call"},
+    {"de":"ucIns","a":"db","txt":"gestiones.findActive() ; carreras.findById(1ra/2da)","tipo":"call"},
+    {"de":"ucIns","a":"db","txt":"inscripciones.save(Inscripcion: BORRADOR/PRESENTADA)","tipo":"call"},
+    {"de":"ucIns","a":"ctrlIns","txt":"Inscripcion","tipo":"return"},
+    {"de":"ctrlIns","a":"vista","txt":"redirect: pre-inscripcion guardada/presentada","tipo":"return"},
+    # B) DOCUMENTOS
+    {"de":"post","a":"vista","txt":"adjuntar documento (archivo)","tipo":"call"},
+    {"de":"vista","a":"ctrlIns","txt":"POST /inscripcion/{id}/documentos/subir","tipo":"call"},
+    {"de":"ctrlIns","a":"ucIns","txt":"subirDocumento.execute(inscripcion, file, nombre)  [valida ext / <=5MB ; file.move()]","tipo":"call"},
+    {"de":"ucIns","a":"db","txt":"documentos.save(Documento)","tipo":"call"},
+    # C) VALIDACION DOCUMENTAL
+    {"de":"coord","a":"vista","txt":"revisa acta de recepcion y aprueba","tipo":"call"},
+    {"de":"vista","a":"ctrlIns","txt":"POST validar (acta de recepcion)","tipo":"call"},
+    {"de":"ctrlIns","a":"ucIns","txt":"validarInscripcion.execute(id, actor)  [actaConforme()]","tipo":"call"},
+    {"de":"ucIns","a":"db","txt":"inscripciones.save(estado = VALIDADA)  -> pago habilitado","tipo":"call"},
+    # D) PAGO
+    {"de":"post","a":"vista","txt":"clic 'Pagar arancel'","tipo":"call"},
+    {"de":"vista","a":"ctrlPago","txt":"POST /inscripcion/pago/iniciar/{id}","tipo":"call"},
+    {"de":"ctrlPago","a":"ucPago","txt":"iniciarPago.execute(id, userId, successUrl, cancelUrl)  [valida isValidada()]","tipo":"call"},
+    {"de":"ucPago","a":"db","txt":"pagos.save(Pago: PENDIENTE)","tipo":"call"},
+    {"de":"ucPago","a":"gw","txt":"createCheckoutSession(pago, urls, descripcion)","tipo":"call"},
+    {"de":"gw","a":"stripe","txt":"checkout.sessions.create()","tipo":"call"},
+    {"de":"stripe","a":"gw","txt":"Session(id, url)","tipo":"return"},
+    {"de":"gw","a":"ucPago","txt":"Session","tipo":"return"},
+    {"de":"ucPago","a":"db","txt":"pagos.save(stripeSessionId)","tipo":"call"},
+    {"de":"ucPago","a":"ctrlPago","txt":"URL de pago","tipo":"return"},
+    {"de":"ctrlPago","a":"vista","txt":"redirect(url)  -> Stripe","tipo":"return"},
+    {"de":"post","a":"stripe","txt":"paga en Stripe Checkout (tarjeta)","tipo":"call"},
+    # E) CONFIRMACION (webhook)
+    {"de":"stripe","a":"ctrlWh","txt":"webhook POST /stripe/webhook (checkout.session.completed)","tipo":"async"},
+    {"de":"ctrlWh","a":"gw","txt":"constructWebhookEvent(payload, firma)","tipo":"call"},
+    {"de":"gw","a":"ctrlWh","txt":"Event (firma valida)","tipo":"return"},
+    {"de":"ctrlWh","a":"ucPago","txt":"confirmarPago.porSession(sessionId)","tipo":"call"},
+    {"de":"ucPago","a":"db","txt":"pagos.findByStripeSessionId()","tipo":"call"},
+    {"de":"ucPago","a":"gw","txt":"retrieveSession(sessionId)","tipo":"call"},
+    {"de":"gw","a":"ucPago","txt":"payment_status = 'paid'","tipo":"return"},
+    {"de":"ucPago","a":"ucIns","txt":"confirmar.execute(inscripcionId, userId)","tipo":"call"},
+    {"de":"ucIns","a":"db","txt":"inscripcion.confirmar(CONFIRMADA) ; user.syncRoles(Estudiante) ; flush","tipo":"call"},
+    {"de":"ucIns","a":"ucPago","txt":"rol Estudiante asignado","tipo":"return"},
+    {"de":"ucPago","a":"db","txt":"pago.marcarPagado(paymentIntent) ; pagos.save()","tipo":"call"},
+    {"de":"ucPago","a":"ctrlWh","txt":"HTTP 200 OK","tipo":"return"},
+    # F) RETORNO AL POSTULANTE
+    {"de":"post","a":"vista","txt":"GET /inscripcion/pago/exito?session_id","tipo":"call"},
+    {"de":"vista","a":"ctrlPago","txt":"exito() -> confirmarPago.porSession() [idempotente]","tipo":"call"},
+    {"de":"ctrlPago","a":"vista","txt":"render pago_exito (pagado = true)","tipo":"return"},
+    {"de":"vista","a":"post","txt":"Inscripcion CONFIRMADA  -  rol Estudiante habilitado","tipo":"return"},
+  ],
+}
+
+json.dump(seq, open("data/secuencia.json","w",encoding="utf-8"), ensure_ascii=False, indent=2)
+RS.render(seq, "png/SECUENCIA_INSCRIPCION.png")
+from PIL import Image
+im = Image.open("png/SECUENCIA_INSCRIPCION.png")
+print("OK SECUENCIA_INSCRIPCION.png", im.size)

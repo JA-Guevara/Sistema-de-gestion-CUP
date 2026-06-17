@@ -39,6 +39,8 @@
         {% endif %}
     </div>
 
+    {% include '@inscripcion/partials/_admision_tabs.html.twig' with {'active': 'postulaciones'} %}
+
     {% include '@gestion/partials/_flash.html.twig' %}
 
     {% if gestion is null %}

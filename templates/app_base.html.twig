@@ -174,7 +174,7 @@
                     {% endif %}
 
                     {% if puedeAdmisiones %}
-                    <a href="{{ path('inscripcion_admin') }}" class="app-sidebar__item {{ (current starts with 'inscripcion_admin' or current starts with 'inscripcion_buscar' or current starts with 'inscripcion_edit') and not (current starts with 'inscripcion_admin_pagos') ? 'app-sidebar__item--active' : '' }}">
+                    <a href="{{ path('inscripcion_admin') }}" class="app-sidebar__item {{ ((current starts with 'inscripcion_admin' or current starts with 'inscripcion_buscar' or current starts with 'inscripcion_edit' or current starts with 'admision_') and not (current starts with 'inscripcion_admin_pagos')) ? 'app-sidebar__item--active' : '' }}">
                         <span class="app-sidebar__icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M22 12h-6l-2 3h-4l-2-3H2"/>
@@ -305,6 +305,39 @@
             </main>
         </div>
     </div>
+
+    {# ==================== ASISTENTE DE AYUDA GLOBAL ==================== #}
+    {% block help_assistant %}
+        {% if user is defined and user %}
+            <link rel="stylesheet" href="/assets/gestion/css/ayuda-asistente.css?v=1">
+            <button type="button" class="ayuda-launcher" data-ayuda-launcher aria-expanded="false" aria-label="Ayuda: cómo funciona el sistema">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span class="ayuda-launcher__text">¿Cómo funciona?</span>
+            </button>
+            <section class="ayuda-panel" data-ayuda-panel hidden aria-label="Asistente de ayuda">
+                <div class="ayuda-panel__head">
+                    <span class="ayuda-panel__avatar"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                    <span class="ayuda-panel__title">Asistente de ayuda<small>Te explico cómo usar el sistema</small></span>
+                    <button type="button" class="ayuda-panel__close" data-ayuda-close aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+                </div>
+                <div class="ayuda-messages" data-ayuda-messages>
+                    <div class="ayuda-hint">Hola {{ user.firstName }}. Preguntame <strong>cómo funciona</strong> cualquier parte del sistema.</div>
+                    <div class="ayuda-suggest">
+                        <button type="button" data-ayuda-q="¿Cómo asigno docentes a un grupo?">Asignar docentes</button>
+                        <button type="button" data-ayuda-q="¿Cómo agrego estudiantes a un grupo?">Asignar estudiantes</button>
+                        <button type="button" data-ayuda-q="¿Cómo cargo las notas de un examen?">Cargar notas</button>
+                        <button type="button" data-ayuda-q="¿Cuándo un estudiante aprueba el CUP?">Aprobar el CUP</button>
+                    </div>
+                </div>
+                <div class="ayuda-inputbar">
+                    <input type="text" data-ayuda-input placeholder="Escribí tu pregunta…" aria-label="Tu pregunta">
+                    <button type="button" data-ayuda-send aria-label="Enviar"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+                </div>
+            </section>
+            <script type="application/json" data-ayuda-config>{{ {'url': path('ayuda_asistente')}|json_encode|raw }}</script>
+            <script src="/assets/gestion/js/ayuda-asistente.js?v=1" defer></script>
+        {% endif %}
+    {% endblock %}
 
     <script src="/assets/gestion/js/app-dialogs.js?v=2" defer></script>
     {% block javascripts %}{% endblock %}

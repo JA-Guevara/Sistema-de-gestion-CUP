@@ -128,6 +128,10 @@ final readonly class CrearInscripcion
         if ($input->docenteProfesion === null || trim($input->docenteProfesion) === '') {
             throw new InscripcionException('Para presentar como docente debes indicar tu profesion o area.');
         }
+
+        if ($input->docenteAreas === []) {
+            throw new InscripcionException('Selecciona al menos un area de conocimiento que puedas dictar.');
+        }
     }
 
     private function createInscripcion(InscripcionInput $input, User $user, Gestion $gestion, ?Carrera $carrera, ?Carrera $carreraSegunda): Inscripcion
@@ -155,6 +159,7 @@ final readonly class CrearInscripcion
         $inscripcion->docenteMaestria = $input->docenteMaestria;
         $inscripcion->docenteDiplomado = $input->docenteDiplomado;
         $inscripcion->docenteExperiencia = $input->docenteExperiencia;
+        $inscripcion->docenteAreas = $input->docenteAreas !== [] ? $input->docenteAreas : null;
         $inscripcion->otros = $input->otros;
 
         return $inscripcion;

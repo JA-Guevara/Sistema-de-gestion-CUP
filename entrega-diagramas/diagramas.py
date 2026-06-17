@@ -187,8 +187,8 @@ def draw_frame(img, draw, W, H, title):
 # ----------------------------------------------------------------------------
 # Diagrama de analisis de clases
 # ----------------------------------------------------------------------------
-def render_analisis(d, outpath):
-    GAP_COL = int(70 * S)      # separacion entre columnas
+def render_analisis(d, outpath, show_stereo=True):
+    GAP_COL = int(105 * S)     # separacion entre columnas (aireado, estilo EA)
     MARGIN  = int(45 * S)
     TOP     = int(55 * S)
 
@@ -199,7 +199,7 @@ def render_analisis(d, outpath):
     def meas_list(items, kind):
         out = []
         for it in items:
-            stereo = {'b':'«boundary»','c':'«control»','e':'«entity»'}[kind]
+            stereo = "" if not show_stereo else {'b':'«boundary»','c':'«control»','e':'«entity»'}[kind]
             attrs = it.get('atributos', []) or []
             meths = it.get('metodos', []) or []
             w, h, *_ = measure_class(md, stereo, it['nombre'], attrs, meths)
@@ -223,7 +223,7 @@ def render_analisis(d, outpath):
     xs = [x_f, x_c, x_e]
     W = int(x_e + col_w[2] + MARGIN)
 
-    GAP_ROW = int(30 * S)
+    GAP_ROW = int(42 * S)
     def stack_height(col):
         if not col: return 0
         return sum(b['h'] for b in col) + GAP_ROW*(len(col)-1)

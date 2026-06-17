@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Academico\Materia\Domain\Entity;
 
+use App\Academico\Materia\Domain\Catalog\AreaCatalog;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -28,6 +29,10 @@ class Materia
     #[ORM\Column(type: 'text', nullable: true)]
     public ?string $descripcion = null;
 
+    /** Area de conocimiento (AreaCatalog). Nullable: las materias previas no la tienen. */
+    #[ORM\Column(length: 40, nullable: true)]
+    public ?string $area = null;
+
     #[ORM\Column(length: 20)]
     public string $estado = self::ESTADO_ACTIVA;
 
@@ -42,11 +47,12 @@ class Materia
         $this->createdAt = new \DateTimeImmutable();
     }
 
-    public function rename(string $codigo, string $nombre, ?string $descripcion): void
+    public function rename(string $codigo, string $nombre, ?string $descripcion, ?string $area = null): void
     {
         $this->codigo = mb_strtoupper(trim($codigo));
         $this->nombre = trim($nombre);
         $this->descripcion = $descripcion !== null && trim($descripcion) !== '' ? trim($descripcion) : null;
+        $this->area = AreaCatalog::normalize($area);
         $this->touch();
     }
 

@@ -18,6 +18,9 @@ use App\Academico\Turno\Infrastructure\Persistence\TurnoRepository;
 use App\Auth\Entity\User;
 use App\Auth\Infrastructure\Persistence\UserRepository;
 use App\Gestion\Infrastructure\Persistence\GestionRepository;
+use App\Inscripcion\Domain\Catalog\EstadoInscripcion;
+use App\Inscripcion\Domain\Catalog\TipoPostulacion;
+use App\Inscripcion\Infrastructure\Persistence\InscripcionRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,15 +40,27 @@ final class GrupoController extends AbstractController
         private readonly GestionRepository $gestiones,
         private readonly TurnoRepository $turnos,
         private readonly UserRepository $users,
+        private readonly InscripcionRepository $inscripciones,
     ) {
     }
 
     #[Route('', name: 'grupo_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
+        $gestiones = $this->gestiones->listAll();
+        $confirmadosPorGestion = [];
+        foreach ($gestiones as $gestion) {
+            $confirmadosPorGestion[(int) $gestion->id] = $this->inscripciones->countByGestionTipoEstado(
+                (int) $gestion->id,
+                TipoPostulacion::ESTUDIANTE,
+                EstadoInscripcion::CONFIRMADA,
+            );
+        }
+
         return $this->render('@grupo/lista.html.twig', [
             'grupos' => $this->listGrupos->execute(),
-            'gestiones' => $this->gestiones->listAll(),
+            'gestiones' => $gestiones,
+            'confirmadosPorGestion' => $confirmadosPorGestion,
             'turnos' => $this->turnos->listActive(),
             'user' => $this->requireUser($request),
         ]);

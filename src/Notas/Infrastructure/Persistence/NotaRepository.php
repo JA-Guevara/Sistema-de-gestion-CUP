@@ -54,6 +54,31 @@ final readonly class NotaRepository
             ->getResult();
     }
 
+    /**
+     * Valores planos de todas las notas de los estudiantes de una gestion, para
+     * calcular promedios en lote (Admision Final) sin cargar entidades.
+     *
+     * @return list<array{insId:int, materiaId:int, numeroExamen:int, valor:int}>
+     */
+    public function listValoresByGestion(int $gestionId): array
+    {
+        $rows = $this->entityManager->createQueryBuilder()
+            ->select('IDENTITY(n.inscripcion) AS insId, IDENTITY(n.materia) AS materiaId, n.numeroExamen AS numeroExamen, n.valor AS valor')
+            ->from(Nota::class, 'n')
+            ->join('n.inscripcion', 'i')
+            ->where('i.gestion = :gestionId')
+            ->setParameter('gestionId', $gestionId)
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_map(static fn (array $r): array => [
+            'insId' => (int) $r['insId'],
+            'materiaId' => (int) $r['materiaId'],
+            'numeroExamen' => (int) $r['numeroExamen'],
+            'valor' => (int) $r['valor'],
+        ], $rows);
+    }
+
     /** @return list<Nota> */
     public function listByInscripcion(int $inscripcionId): array
     {

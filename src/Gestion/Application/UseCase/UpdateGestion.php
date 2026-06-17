@@ -85,6 +85,15 @@ final readonly class UpdateGestion
         if ($input->notaMinimaAprobacion < 0 || $input->notaMinimaAprobacion > 100) {
             throw new GestionException('La nota minima debe estar entre 0 y 100.');
         }
+
+        if ($input->ponderacionesExamenes !== []) {
+            if (count($input->ponderacionesExamenes) !== $input->cantidadExamenes) {
+                throw new GestionException('Debes indicar la ponderacion de los 3 examenes (o dejarlas todas vacias).');
+            }
+            if (abs(array_sum($input->ponderacionesExamenes) - 100.0) > 0.5) {
+                throw new GestionException('Las ponderaciones de los examenes deben sumar 100%.');
+            }
+        }
     }
 
     private function validatePeriods(GestionInput $input): void
@@ -172,6 +181,7 @@ final readonly class UpdateGestion
             $input->permiteReinscripcion,
             $input->permiteCambioGrupo,
             $input->generarBitacora,
+            $input->ponderacionesExamenes,
         );
 
         $configuracion->updateValues(
@@ -183,6 +193,7 @@ final readonly class UpdateGestion
             $input->permiteReinscripcion,
             $input->permiteCambioGrupo,
             $input->generarBitacora,
+            $input->ponderacionesExamenes,
         );
 
         return $configuracion;

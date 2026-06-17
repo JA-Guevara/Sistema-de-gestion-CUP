@@ -8,6 +8,7 @@ use App\Academico\Grupo\Domain\Entity\Grupo;
 use App\Academico\Grupo\Infrastructure\Persistence\GrupoRepository;
 use App\Academico\Horario\Domain\Entity\Horario;
 use App\Academico\Horario\Infrastructure\Persistence\HorarioRepository;
+use App\Academico\Materia\Domain\Catalog\AreaCatalog;
 use App\Academico\Materia\Domain\Entity\Materia;
 use App\Academico\Materia\Infrastructure\Persistence\MateriaRepository;
 use App\Asignacion\Application\DTO\AsignarDocenteInput;
@@ -16,6 +17,8 @@ use App\Auth\Infrastructure\Persistence\UserRepository;
 use App\Bitacora\Application\EventLog\NotasEvents;
 use App\Gestion\Domain\Entity\Gestion;
 use App\Gestion\Infrastructure\Persistence\GestionRepository;
+use App\Inscripcion\Domain\Catalog\TipoPostulacion;
+use App\Inscripcion\Infrastructure\Persistence\InscripcionRepository;
 use App\Notas\Domain\Entity\AsignacionDocente;
 use App\Notas\Domain\Exception\NotaException;
 use App\Notas\Infrastructure\Persistence\AsignacionDocenteRepository;
@@ -38,6 +41,7 @@ final readonly class AsignarDocenteAGrupo
         private UserRepository $users,
         private GestionRepository $gestiones,
         private HorarioRepository $horarios,
+        private InscripcionRepository $inscripciones,
         private NotasEvents $events,
     ) {
     }
@@ -72,6 +76,7 @@ final readonly class AsignarDocenteAGrupo
             throw new NotaException('Esa materia y grupo ya tienen un docente asignado en esta gestion.');
         }
 
+        $this->assertAreaHabilitada($docente, $materia, $gestion);
         $this->assertDentroDelLimite($docente, $grupo, $gestion);
         $this->assertSinChoqueHorario($docente, $materia, $grupo, $gestion);
 
@@ -102,6 +107,39 @@ final readonly class AsignarDocenteAGrupo
                 'El docente ya dicta en %d grupos distintos (maximo %d). No se puede asignar a un grupo nuevo.',
                 count($grupoIds),
                 self::MAX_GRUPOS,
+            ));
+        }
+    }
+
+    /**
+     * El docente solo puede dictar materias de su area de especialidad (declarada
+     * y verificada en su postulacion). La validacion se OMITE (permite) si la
+     * materia no tiene area o el docente no declaro areas, para no romper datos
+     * previos a esta funcionalidad.
+     */
+    private function assertAreaHabilitada(User $docente, Materia $materia, Gestion $gestion): void
+    {
+        if ($materia->area === null) {
+            return;
+        }
+
+        $inscripcion = $this->inscripciones->findConfirmadaByUserAndGestion(
+            (int) $docente->id,
+            (int) $gestion->id,
+            TipoPostulacion::DOCENTE,
+        );
+
+        $areas = $inscripcion?->docenteAreas ?? [];
+        if ($areas === []) {
+            return;
+        }
+
+        if (!in_array($materia->area, $areas, true)) {
+            throw new NotaException(sprintf(
+                'El docente no esta habilitado en el area de la materia %s (area %s). Sus areas: %s.',
+                $materia->codigo,
+                AreaCatalog::label($materia->area),
+                implode(', ', array_map(static fn (string $a): string => AreaCatalog::label($a), $areas)),
             ));
         }
     }

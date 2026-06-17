@@ -25,6 +25,7 @@ final class ModuleCatalog
     public const HORARIOS = 'Horarios';
     public const NOTAS = 'Notas';
     public const ASIGNACIONES = 'Asignaciones';
+    public const ADMISION = 'Admision Final';
     public const PAGOS = 'Pagos';
     public const BITACORA = 'Bitacora';
 
@@ -51,6 +52,7 @@ final class ModuleCatalog
             self::HORARIOS,
             self::NOTAS,
             self::ASIGNACIONES,
+            self::ADMISION,
             self::PAGOS,
             self::BITACORA,
         ];

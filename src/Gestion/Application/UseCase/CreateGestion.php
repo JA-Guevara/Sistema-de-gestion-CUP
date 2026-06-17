@@ -81,6 +81,27 @@ final readonly class CreateGestion
         if ($input->cantidadExamenes !== 3) {
             throw new GestionException('El CUP debe configurar exactamente 3 examenes por materia.');
         }
+
+        $this->validatePonderaciones($input);
+    }
+
+    /**
+     * Las ponderaciones son opcionales: si se dejan vacias, el promedio es simple.
+     * Si se ingresan, deben ser una por examen y sumar 100.
+     */
+    private function validatePonderaciones(GestionInput $input): void
+    {
+        if ($input->ponderacionesExamenes === []) {
+            return;
+        }
+
+        if (count($input->ponderacionesExamenes) !== $input->cantidadExamenes) {
+            throw new GestionException('Debes indicar la ponderacion de los 3 examenes (o dejarlas todas vacias).');
+        }
+
+        if (abs(array_sum($input->ponderacionesExamenes) - 100.0) > 0.5) {
+            throw new GestionException('Las ponderaciones de los examenes deben sumar 100%.');
+        }
     }
 
     private function validatePeriods(GestionInput $input): void
@@ -181,6 +202,7 @@ final readonly class CreateGestion
             $input->permiteReinscripcion,
             $input->permiteCambioGrupo,
             $input->generarBitacora,
+            $input->ponderacionesExamenes,
         );
     }
 

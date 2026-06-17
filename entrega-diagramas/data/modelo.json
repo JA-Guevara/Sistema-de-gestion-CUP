@@ -1,0 +1,2516 @@
+[
+  {
+    "name": "AsignacionDocente",
+    "table": "notas_docente_materia",
+    "path": "Notas/Domain/Entity/AsignacionDocente.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "createdAt",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Gestion",
+        "prop": "gestion",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      },
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Materia",
+        "prop": "materia",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      },
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Grupo",
+        "prop": "grupo",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      },
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "User",
+        "prop": "docente",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      }
+    ],
+    "methods": [
+      "+ assign(): void"
+    ]
+  },
+  {
+    "name": "AsignacionGrupo",
+    "table": "notas_inscripcion_grupo",
+    "path": "Notas/Domain/Entity/AsignacionGrupo.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "createdAt",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Inscripcion",
+        "prop": "inscripcion",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      },
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Materia",
+        "prop": "materia",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      },
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Grupo",
+        "prop": "grupo",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      }
+    ],
+    "methods": [
+      "+ assign(): void"
+    ]
+  },
+  {
+    "name": "Aula",
+    "table": "aulas",
+    "path": "Academico/Aula/Domain/Entity/Aula.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "codigo",
+        "php": "string",
+        "sql": "VARCHAR(30)",
+        "nullable": false,
+        "length": "30",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "nombre",
+        "php": "string",
+        "sql": "VARCHAR(120)",
+        "nullable": false,
+        "length": "120",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "piso",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "capacidad",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "ubicacion",
+        "php": "?string",
+        "sql": "VARCHAR(160)",
+        "nullable": true,
+        "length": "160",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "estado",
+        "php": "string",
+        "sql": "VARCHAR(20)",
+        "nullable": false,
+        "length": "20",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "createdAt",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "updatedAt",
+        "php": "?\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [],
+    "methods": [
+      "+ updateData(): void",
+      "+ activate(): void",
+      "+ deactivate(): void",
+      "+ isActive(): bool"
+    ]
+  },
+  {
+    "name": "CalendarioRevision",
+    "table": "inscripcion_calendario_revision",
+    "path": "Inscripcion/Domain/Entity/CalendarioRevision.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "fecha",
+        "php": "\\DateTimeImmutable",
+        "sql": "DATE",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "capacidad",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "agendados",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "habilitado",
+        "php": "bool",
+        "sql": "BOOLEAN",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Gestion",
+        "prop": "gestion",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      }
+    ],
+    "methods": [
+      "+ disponibles(): int",
+      "+ tieneCupo(): bool"
+    ]
+  },
+  {
+    "name": "Carrera",
+    "table": "carreras",
+    "path": "Academico/Carrera/Domain/Entity/Carrera.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "codigo",
+        "php": "string",
+        "sql": "VARCHAR(30)",
+        "nullable": false,
+        "length": "30",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "nombre",
+        "php": "string",
+        "sql": "VARCHAR(160)",
+        "nullable": false,
+        "length": "160",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "descripcion",
+        "php": "?string",
+        "sql": "TEXT",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "facultad",
+        "php": "?string",
+        "sql": "VARCHAR(120)",
+        "nullable": true,
+        "length": "120",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "modalidad",
+        "php": "?string",
+        "sql": "VARCHAR(80)",
+        "nullable": true,
+        "length": "80",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "estado",
+        "php": "string",
+        "sql": "VARCHAR(20)",
+        "nullable": false,
+        "length": "20",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "createdAt",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "updatedAt",
+        "php": "?\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [],
+    "methods": [
+      "+ rename(): void",
+      "+ configure(): void",
+      "+ activate(): void",
+      "+ deactivate(): void",
+      "+ isActive(): bool"
+    ]
+  },
+  {
+    "name": "CarreraGestion",
+    "table": "gestion_carreras",
+    "path": "Gestion/Domain/Entity/CarreraGestion.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "habilitada",
+        "php": "bool",
+        "sql": "BOOLEAN",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "cupoCarrera",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Gestion",
+        "prop": "gestion",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      },
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Carrera",
+        "prop": "carrera",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      }
+    ],
+    "methods": []
+  },
+  {
+    "name": "ConfiguracionGestion",
+    "table": "gestion_configuraciones",
+    "path": "Gestion/Domain/Entity/ConfiguracionGestion.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "cupoTotal",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "maxEstudiantesPorGrupo",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "maxGruposPorDocente",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "notaMinimaAprobacion",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "cantidadExamenes",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "permiteReinscripcion",
+        "php": "bool",
+        "sql": "BOOLEAN",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "permiteCambioGrupo",
+        "php": "bool",
+        "sql": "BOOLEAN",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "generarBitacora",
+        "php": "bool",
+        "sql": "BOOLEAN",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [
+      {
+        "kind": "OneToOne",
+        "card": "1..1",
+        "target": "Gestion",
+        "prop": "gestion",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      }
+    ],
+    "methods": []
+  },
+  {
+    "name": "CupoGestion",
+    "table": "gestion_cupos",
+    "path": "Gestion/Domain/Entity/CupoGestion.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "cupoTotal",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "inscritos",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "reservados",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "disponibles",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Gestion",
+        "prop": "gestion",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      }
+    ],
+    "methods": []
+  },
+  {
+    "name": "Documento",
+    "table": "inscripcion_documentos",
+    "path": "Inscripcion/Domain/Entity/Documento.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "nombre",
+        "php": "string",
+        "sql": "VARCHAR(80)",
+        "nullable": false,
+        "length": "80",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "archivoRuta",
+        "php": "string",
+        "sql": "VARCHAR(255)",
+        "nullable": false,
+        "length": "255",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "archivoExtension",
+        "php": "string",
+        "sql": "VARCHAR(20)",
+        "nullable": false,
+        "length": "20",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "archivoTamanio",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "estado",
+        "php": "string",
+        "sql": "VARCHAR(20)",
+        "nullable": false,
+        "length": "20",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "observacion",
+        "php": "?string",
+        "sql": "TEXT",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "createdAt",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Inscripcion",
+        "prop": "inscripcion",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      }
+    ],
+    "methods": [
+      "+ revisar(): void",
+      "+ isAprobado(): bool",
+      "+ isObservado(): bool"
+    ]
+  },
+  {
+    "name": "Gestion",
+    "table": "gestiones",
+    "path": "Gestion/Domain/Entity/Gestion.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "codigo",
+        "php": "string",
+        "sql": "VARCHAR(40)",
+        "nullable": false,
+        "length": "40",
+        "pk": false,
+        "unique": true
+      },
+      {
+        "name": "nombre",
+        "php": "string",
+        "sql": "VARCHAR(140)",
+        "nullable": false,
+        "length": "140",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "descripcion",
+        "php": "?string",
+        "sql": "TEXT",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "estado",
+        "php": "string",
+        "sql": "VARCHAR(40)",
+        "nullable": false,
+        "length": "40",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "fechaActivacion",
+        "php": "?\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "fechaFinalizacion",
+        "php": "?\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "creadoPor",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "activadoPor",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "createdAt",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "updatedAt",
+        "php": "?\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [
+      {
+        "kind": "OneToOne",
+        "card": "1..1",
+        "target": "ConfiguracionGestion",
+        "prop": "configuracion",
+        "owner": false,
+        "nullable": true,
+        "mappedBy": "gestion",
+        "joinTable": null
+      },
+      {
+        "kind": "OneToMany",
+        "card": "1..*",
+        "target": "PeriodoGestion",
+        "prop": "periodos",
+        "owner": false,
+        "nullable": true,
+        "mappedBy": "gestion",
+        "joinTable": null
+      },
+      {
+        "kind": "OneToMany",
+        "card": "1..*",
+        "target": "CarreraGestion",
+        "prop": "carreras",
+        "owner": false,
+        "nullable": true,
+        "mappedBy": "gestion",
+        "joinTable": null
+      },
+      {
+        "kind": "OneToMany",
+        "card": "1..*",
+        "target": "CupoGestion",
+        "prop": "cupos",
+        "owner": false,
+        "nullable": true,
+        "mappedBy": "gestion",
+        "joinTable": null
+      },
+      {
+        "kind": "OneToMany",
+        "card": "1..*",
+        "target": "HistorialGestion",
+        "prop": "historial",
+        "owner": false,
+        "nullable": true,
+        "mappedBy": "gestion",
+        "joinTable": null
+      }
+    ],
+    "methods": [
+      "+ rename(): void",
+      "+ configure(): void",
+      "+ replacePeriods(): void",
+      "+ replaceCareers(): void",
+      "+ replaceGlobalQuota(): void",
+      "+ activate(): void",
+      "+ replaceAsInactive(): void",
+      "+ isActive(): bool",
+      "+ openInscription(): void",
+      "+ closeInscription(): void",
+      "+ addHistory(): void",
+      "+ touch(): void"
+    ]
+  },
+  {
+    "name": "Grupo",
+    "table": "grupos",
+    "path": "Academico/Grupo/Domain/Entity/Grupo.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "codigo",
+        "php": "string",
+        "sql": "VARCHAR(30)",
+        "nullable": false,
+        "length": "30",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "nombre",
+        "php": "string",
+        "sql": "VARCHAR(120)",
+        "nullable": false,
+        "length": "120",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "cupo",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "inscritosEstimados",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "estado",
+        "php": "string",
+        "sql": "VARCHAR(40)",
+        "nullable": false,
+        "length": "40",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "createdAt",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "updatedAt",
+        "php": "?\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Gestion",
+        "prop": "gestion",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      },
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Turno",
+        "prop": "turno",
+        "owner": true,
+        "nullable": true,
+        "mappedBy": null,
+        "joinTable": null
+      }
+    ],
+    "methods": [
+      "+ configure(): void",
+      "+ close(): void",
+      "+ open(): void",
+      "+ isOpen(): bool"
+    ]
+  },
+  {
+    "name": "HistorialGestion",
+    "table": "gestion_historial",
+    "path": "Gestion/Domain/Entity/HistorialGestion.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "accion",
+        "php": "string",
+        "sql": "VARCHAR(60)",
+        "nullable": false,
+        "length": "60",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "descripcion",
+        "php": "string",
+        "sql": "TEXT",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "usuarioId",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "fecha",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Gestion",
+        "prop": "gestion",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      }
+    ],
+    "methods": []
+  },
+  {
+    "name": "Horario",
+    "table": "horarios",
+    "path": "Academico/Horario/Domain/Entity/Horario.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "dia",
+        "php": "string",
+        "sql": "VARCHAR(20)",
+        "nullable": false,
+        "length": "20",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "horaInicio",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "horaFin",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "createdAt",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Grupo",
+        "prop": "grupo",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      },
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Materia",
+        "prop": "materia",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      },
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Aula",
+        "prop": "aula",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      }
+    ],
+    "methods": [
+      "+ configure(): void"
+    ]
+  },
+  {
+    "name": "Inscripcion",
+    "table": "inscripciones",
+    "path": "Inscripcion/Domain/Entity/Inscripcion.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "tipo",
+        "php": "string",
+        "sql": "VARCHAR(20)",
+        "nullable": false,
+        "length": "20",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "modalidad",
+        "php": "string",
+        "sql": "VARCHAR(20)",
+        "nullable": false,
+        "length": "20",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "ci",
+        "php": "string",
+        "sql": "VARCHAR(20)",
+        "nullable": false,
+        "length": "20",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "nombres",
+        "php": "string",
+        "sql": "VARCHAR(120)",
+        "nullable": false,
+        "length": "120",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "apellidos",
+        "php": "string",
+        "sql": "VARCHAR(120)",
+        "nullable": false,
+        "length": "120",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "fechaNacimiento",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "sexo",
+        "php": "string",
+        "sql": "VARCHAR(1)",
+        "nullable": false,
+        "length": "1",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "direccion",
+        "php": "?string",
+        "sql": "TEXT",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "telefono",
+        "php": "?string",
+        "sql": "VARCHAR(20)",
+        "nullable": true,
+        "length": "20",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "email",
+        "php": "string",
+        "sql": "VARCHAR(180)",
+        "nullable": false,
+        "length": "180",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "ciudad",
+        "php": "?string",
+        "sql": "VARCHAR(80)",
+        "nullable": true,
+        "length": "80",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "colegioProcedencia",
+        "php": "?string",
+        "sql": "VARCHAR(120)",
+        "nullable": true,
+        "length": "120",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "tituloBachiller",
+        "php": "bool",
+        "sql": "BOOLEAN",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "turnoPreferencia",
+        "php": "?string",
+        "sql": "VARCHAR(20)",
+        "nullable": true,
+        "length": "20",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "docenteProfesion",
+        "php": "?string",
+        "sql": "VARCHAR(160)",
+        "nullable": true,
+        "length": "160",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "docenteMaestria",
+        "php": "bool",
+        "sql": "BOOLEAN",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "docenteDiplomado",
+        "php": "bool",
+        "sql": "BOOLEAN",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "docenteExperiencia",
+        "php": "?string",
+        "sql": "TEXT",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "otros",
+        "php": "?string",
+        "sql": "TEXT",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "estado",
+        "php": "string",
+        "sql": "VARCHAR(20)",
+        "nullable": false,
+        "length": "20",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "fechaPresentacionDocs",
+        "php": "?\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "fechaEntrevista",
+        "php": "?\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "validadaPor",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "confirmadaPor",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "motivoRechazo",
+        "php": "?string",
+        "sql": "TEXT",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "anulacionSolicitada",
+        "php": "bool",
+        "sql": "BOOLEAN",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "motivoAnulacion",
+        "php": "?string",
+        "sql": "TEXT",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "createdAt",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "User",
+        "prop": "user",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      },
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Gestion",
+        "prop": "gestion",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      },
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Carrera",
+        "prop": "carrera",
+        "owner": true,
+        "nullable": true,
+        "mappedBy": null,
+        "joinTable": null
+      },
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Carrera",
+        "prop": "carreraSegunda",
+        "owner": true,
+        "nullable": true,
+        "mappedBy": null,
+        "joinTable": null
+      },
+      {
+        "kind": "OneToMany",
+        "card": "1..*",
+        "target": "Documento",
+        "prop": "documentos",
+        "owner": false,
+        "nullable": true,
+        "mappedBy": "inscripcion",
+        "joinTable": null
+      },
+      {
+        "kind": "OneToMany",
+        "card": "1..*",
+        "target": "VerificacionDocumento",
+        "prop": "verificaciones",
+        "owner": false,
+        "nullable": true,
+        "mappedBy": "inscripcion",
+        "joinTable": null
+      }
+    ],
+    "methods": [
+      "+ presentar(): void",
+      "+ completar(): void",
+      "+ isBorrador(): bool",
+      "+ isPendiente(): bool",
+      "+ esEstudiante(): bool",
+      "+ esDocente(): bool",
+      "+ agendarRevision(): void",
+      "+ agendarEntrevista(): void",
+      "+ validar(): void",
+      "+ rechazar(): void",
+      "+ confirmar(): void",
+      "+ isPresentada(): bool",
+      "+ isValidada(): bool",
+      "+ isConfirmada(): bool",
+      "+ isRechazada(): bool",
+      "+ isAnulada(): bool",
+      "+ puedeEditarse(): bool",
+      "+ esTerminal(): bool",
+      "+ solicitarAnulacion(): void",
+      "+ rechazarSolicitudAnulacion(): void",
+      "+ anular(): void",
+      "+ resumenDocumentos(): array",
+      "+ todosAprobados(): bool",
+      "+ verificacionPorCodigo(): ?VerificacionDocumento",
+      "+ resumenActa(): array",
+      "+ actaConforme(): bool"
+    ]
+  },
+  {
+    "name": "LogEntry",
+    "table": "log_entries",
+    "path": "Bitacora/Domain/Entity/LogEntry.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "userId",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "userLabel",
+        "php": "string",
+        "sql": "VARCHAR(180)",
+        "nullable": false,
+        "length": "180",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "action",
+        "php": "string",
+        "sql": "VARCHAR(60)",
+        "nullable": false,
+        "length": "60",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "module",
+        "php": "string",
+        "sql": "VARCHAR(80)",
+        "nullable": false,
+        "length": "80",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "description",
+        "php": "string",
+        "sql": "TEXT",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "level",
+        "php": "string",
+        "sql": "VARCHAR(16)",
+        "nullable": false,
+        "length": "16",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "ip",
+        "php": "?string",
+        "sql": "VARCHAR(45)",
+        "nullable": true,
+        "length": "45",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "userAgent",
+        "php": "?string",
+        "sql": "VARCHAR(255)",
+        "nullable": true,
+        "length": "255",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "metadata",
+        "php": "?array",
+        "sql": "JSONB",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "createdAt",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [],
+    "methods": []
+  },
+  {
+    "name": "Materia",
+    "table": "materias",
+    "path": "Academico/Materia/Domain/Entity/Materia.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "codigo",
+        "php": "string",
+        "sql": "VARCHAR(30)",
+        "nullable": false,
+        "length": "30",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "nombre",
+        "php": "string",
+        "sql": "VARCHAR(120)",
+        "nullable": false,
+        "length": "120",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "descripcion",
+        "php": "?string",
+        "sql": "TEXT",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "estado",
+        "php": "string",
+        "sql": "VARCHAR(20)",
+        "nullable": false,
+        "length": "20",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "createdAt",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "updatedAt",
+        "php": "?\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [],
+    "methods": [
+      "+ rename(): void",
+      "+ activate(): void",
+      "+ deactivate(): void",
+      "+ isActive(): bool"
+    ]
+  },
+  {
+    "name": "Nota",
+    "table": "notas",
+    "path": "Notas/Domain/Entity/Nota.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "numeroExamen",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "valor",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "observacion",
+        "php": "?string",
+        "sql": "TEXT",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "createdAt",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "updatedAt",
+        "php": "?\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Inscripcion",
+        "prop": "inscripcion",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      },
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Materia",
+        "prop": "materia",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      },
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "User",
+        "prop": "registradaPor",
+        "owner": true,
+        "nullable": true,
+        "mappedBy": null,
+        "joinTable": null
+      }
+    ],
+    "methods": [
+      "+ setValor(): void"
+    ]
+  },
+  {
+    "name": "Pago",
+    "table": "pagos",
+    "path": "Inscripcion/Domain/Entity/Pago.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "userId",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "email",
+        "php": "string",
+        "sql": "VARCHAR(180)",
+        "nullable": false,
+        "length": "180",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "amount",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "currency",
+        "php": "string",
+        "sql": "VARCHAR(3)",
+        "nullable": false,
+        "length": "3",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "estado",
+        "php": "string",
+        "sql": "VARCHAR(16)",
+        "nullable": false,
+        "length": "16",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "provider",
+        "php": "string",
+        "sql": "VARCHAR(20)",
+        "nullable": false,
+        "length": "20",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "stripeSessionId",
+        "php": "?string",
+        "sql": "VARCHAR(255)",
+        "nullable": true,
+        "length": "255",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "stripePaymentIntentId",
+        "php": "?string",
+        "sql": "VARCHAR(255)",
+        "nullable": true,
+        "length": "255",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "observacion",
+        "php": "?string",
+        "sql": "TEXT",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "createdAt",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "paidAt",
+        "php": "?\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Inscripcion",
+        "prop": "inscripcion",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      }
+    ],
+    "methods": [
+      "+ isPagado(): bool",
+      "+ isPendiente(): bool",
+      "+ marcarPagado(): void",
+      "+ marcarCancelado(): void",
+      "+ marcarFallido(): void",
+      "+ marcarExpirado(): void",
+      "+ marcarEstado(): void",
+      "+ montoDecimal(): float"
+    ]
+  },
+  {
+    "name": "PasswordResetToken",
+    "table": "password_reset_tokens",
+    "path": "Auth/Entity/PasswordResetToken.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "userId",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "token",
+        "php": "string",
+        "sql": "VARCHAR(64)",
+        "nullable": false,
+        "length": "64",
+        "pk": false,
+        "unique": true
+      },
+      {
+        "name": "expiresAt",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "usedAt",
+        "php": "?\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "createdAt",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [],
+    "methods": [
+      "+ isExpired(): bool",
+      "+ isUsed(): bool"
+    ]
+  },
+  {
+    "name": "PeriodoGestion",
+    "table": "gestion_periodos",
+    "path": "Gestion/Domain/Entity/PeriodoGestion.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "tipoPeriodo",
+        "php": "string",
+        "sql": "VARCHAR(120)",
+        "nullable": false,
+        "length": "120",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "fechaInicio",
+        "php": "\\DateTimeImmutable",
+        "sql": "DATE",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "fechaFin",
+        "php": "\\DateTimeImmutable",
+        "sql": "DATE",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Gestion",
+        "prop": "gestion",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      }
+    ],
+    "methods": []
+  },
+  {
+    "name": "Permission",
+    "table": "permissions",
+    "path": "Usuario/Domain/Entity/Permission.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "code",
+        "php": "string",
+        "sql": "VARCHAR(120)",
+        "nullable": false,
+        "length": "120",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "module",
+        "php": "string",
+        "sql": "VARCHAR(80)",
+        "nullable": false,
+        "length": "80",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "action",
+        "php": "string",
+        "sql": "VARCHAR(80)",
+        "nullable": false,
+        "length": "80",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "description",
+        "php": "string",
+        "sql": "VARCHAR(180)",
+        "nullable": false,
+        "length": "180",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "active",
+        "php": "bool",
+        "sql": "BOOLEAN",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "createdAt",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [],
+    "methods": [
+      "+ configure(): void"
+    ]
+  },
+  {
+    "name": "Role",
+    "table": "roles",
+    "path": "Usuario/Domain/Entity/Role.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "name",
+        "php": "string",
+        "sql": "VARCHAR(80)",
+        "nullable": false,
+        "length": "80",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "description",
+        "php": "?string",
+        "sql": "TEXT",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "active",
+        "php": "bool",
+        "sql": "BOOLEAN",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "createdAt",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "updatedAt",
+        "php": "?\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [
+      {
+        "kind": "ManyToMany",
+        "card": "*..*",
+        "target": "Permission",
+        "prop": "permissions",
+        "owner": true,
+        "nullable": true,
+        "mappedBy": null,
+        "joinTable": "role_permissions"
+      }
+    ],
+    "methods": [
+      "+ configure(): void",
+      "+ syncPermissions(): void",
+      "+ permissions(): array",
+      "+ permissionIds(): array",
+      "+ hasPermission(): bool",
+      "+ activate(): void",
+      "+ deactivate(): void",
+      "+ touch(): void"
+    ]
+  },
+  {
+    "name": "Turno",
+    "table": "turnos",
+    "path": "Academico/Turno/Domain/Entity/Turno.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "nombre",
+        "php": "string",
+        "sql": "VARCHAR(40)",
+        "nullable": false,
+        "length": "40",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "horaInicio",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "horaFin",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "estado",
+        "php": "string",
+        "sql": "VARCHAR(20)",
+        "nullable": false,
+        "length": "20",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "createdAt",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "updatedAt",
+        "php": "?\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [],
+    "methods": [
+      "+ configure(): void",
+      "+ activate(): void",
+      "+ deactivate(): void",
+      "+ isActive(): bool"
+    ]
+  },
+  {
+    "name": "User",
+    "table": "users",
+    "path": "Auth/Entity/User.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "email",
+        "php": "string",
+        "sql": "VARCHAR(180)",
+        "nullable": false,
+        "length": "180",
+        "pk": false,
+        "unique": true
+      },
+      {
+        "name": "firstName",
+        "php": "string",
+        "sql": "VARCHAR(80)",
+        "nullable": false,
+        "length": "80",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "lastName",
+        "php": "string",
+        "sql": "VARCHAR(80)",
+        "nullable": false,
+        "length": "80",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "passwordHash",
+        "php": "string",
+        "sql": "VARCHAR(255)",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "currentSessionId",
+        "php": "?string",
+        "sql": "VARCHAR(128)",
+        "nullable": true,
+        "length": "128",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "lastLoginAt",
+        "php": "?\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "failedLoginAttempts",
+        "php": "int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "locked",
+        "php": "bool",
+        "sql": "BOOLEAN",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "active",
+        "php": "bool",
+        "sql": "BOOLEAN",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "unlockCode",
+        "php": "?string",
+        "sql": "VARCHAR(6)",
+        "nullable": true,
+        "length": "6",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "unlockCodeExpiresAt",
+        "php": "?\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "unlockCodeLastSentAt",
+        "php": "?\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "createdAt",
+        "php": "\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": false,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "updatedAt",
+        "php": "?\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [
+      {
+        "kind": "ManyToMany",
+        "card": "*..*",
+        "target": "Role",
+        "prop": "roles",
+        "owner": true,
+        "nullable": true,
+        "mappedBy": null,
+        "joinTable": "user_roles"
+      }
+    ],
+    "methods": [
+      "+ roles(): array",
+      "+ syncRoles(): void",
+      "+ roleNames(): string",
+      "+ hasRole(): bool",
+      "+ hasPermission(): bool",
+      "+ activate(): void",
+      "+ deactivate(): void",
+      "+ touch(): void"
+    ]
+  },
+  {
+    "name": "VerificacionDocumento",
+    "table": "inscripcion_verificaciones",
+    "path": "Inscripcion/Domain/Entity/VerificacionDocumento.php",
+    "fields": [
+      {
+        "name": "id",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": false,
+        "length": null,
+        "pk": true,
+        "unique": false
+      },
+      {
+        "name": "requisitoCodigo",
+        "php": "string",
+        "sql": "VARCHAR(40)",
+        "nullable": false,
+        "length": "40",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "estado",
+        "php": "string",
+        "sql": "VARCHAR(20)",
+        "nullable": false,
+        "length": "20",
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "observacion",
+        "php": "?string",
+        "sql": "TEXT",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "verificadoPor",
+        "php": "?int",
+        "sql": "INTEGER",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      },
+      {
+        "name": "verificadoAt",
+        "php": "?\\DateTimeImmutable",
+        "sql": "TIMESTAMP",
+        "nullable": true,
+        "length": null,
+        "pk": false,
+        "unique": false
+      }
+    ],
+    "rels": [
+      {
+        "kind": "ManyToOne",
+        "card": "*..1",
+        "target": "Inscripcion",
+        "prop": "inscripcion",
+        "owner": true,
+        "nullable": false,
+        "mappedBy": null,
+        "joinTable": null
+      }
+    ],
+    "methods": [
+      "+ registrar(): void",
+      "+ isEntregado(): bool",
+      "+ isObservado(): bool",
+      "+ isFalta(): bool"
+    ]
+  }
+]

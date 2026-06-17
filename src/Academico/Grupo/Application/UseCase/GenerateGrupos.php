@@ -13,21 +13,29 @@ use App\Bitacora\Domain\Catalog\ActionCatalog;
 use App\Bitacora\Domain\Catalog\ModuleCatalog;
 use App\Gestion\Domain\Entity\Gestion;
 use App\Gestion\Infrastructure\Persistence\GestionRepository;
+use App\Inscripcion\Domain\Catalog\EstadoInscripcion;
+use App\Inscripcion\Domain\Catalog\TipoPostulacion;
+use App\Inscripcion\Infrastructure\Persistence\InscripcionRepository;
 
 final readonly class GenerateGrupos
 {
-    public function __construct(private GrupoRepository $grupos, private GestionRepository $gestiones, private RecordLogEntry $audit)
-    {
+    public function __construct(
+        private GrupoRepository $grupos,
+        private GestionRepository $gestiones,
+        private InscripcionRepository $inscripciones,
+        private RecordLogEntry $audit,
+    ) {
     }
 
+    /** @return list<Grupo> */
     public function execute(GenerateGruposInput $input): array
     {
         $gestion = $this->loadGestion($input);
         $this->validateConfiguration($gestion);
-        $this->validateBusinessRules($input);
-        $generatedGroups = $this->createGroups($gestion, $input);
+        $total = $this->resolveTotalInscritos($input);
+        $generatedGroups = $this->createGroups($gestion, $total);
         $this->saveGroups($generatedGroups);
-        $this->registerAudit($generatedGroups, $input);
+        $this->registerAudit($generatedGroups, $total, $input->actorUserId);
         $this->notifyGroupsGenerated($generatedGroups);
 
         return $generatedGroups;
@@ -50,22 +58,33 @@ final readonly class GenerateGrupos
         }
     }
 
-    private function validateBusinessRules(GenerateGruposInput $input): void
+    /**
+     * Total de inscritos para el calculo: si el admin escribio un valor lo usa
+     * (override manual); si no, cuenta automaticamente los estudiantes CONFIRMADOS
+     * de la gestion.
+     */
+    private function resolveTotalInscritos(GenerateGruposInput $input): int
     {
-        if ($input->totalInscritos <= 0) {
-            throw new GrupoException('El total de inscritos debe ser mayor a cero.');
+        $total = $input->totalInscritos > 0
+            ? $input->totalInscritos
+            : $this->inscripciones->countByGestionTipoEstado($input->gestionId, TipoPostulacion::ESTUDIANTE, EstadoInscripcion::CONFIRMADA);
+
+        if ($total <= 0) {
+            throw new GrupoException('No hay estudiantes confirmados en esta gestion para generar grupos. Ingresa un total manualmente si deseas forzarlo.');
         }
+
+        return $total;
     }
 
     /** @return list<Grupo> */
-    private function createGroups(Gestion $gestion, GenerateGruposInput $input): array
+    private function createGroups(Gestion $gestion, int $totalInscritos): array
     {
         $max = $gestion->configuracion->maxEstudiantesPorGrupo;
-        $quantity = (int) ceil($input->totalInscritos / $max);
+        $quantity = (int) ceil($totalInscritos / $max);
         $groups = [];
 
         for ($i = 1; $i <= $quantity; $i++) {
-            $groups[] = $this->createGroup($gestion, $i, $max, $input->totalInscritos);
+            $groups[] = $this->createGroup($gestion, $i, $max, $totalInscritos);
         }
 
         return $groups;
@@ -80,17 +99,20 @@ final readonly class GenerateGrupos
         return $grupo;
     }
 
+    /** @param list<Grupo> $groups */
     private function saveGroups(array $groups): void
     {
         $this->grupos->saveMany($groups);
     }
 
-    private function registerAudit(array $groups, GenerateGruposInput $input): void
+    /** @param list<Grupo> $groups */
+    private function registerAudit(array $groups, int $totalInscritos, ?int $actorUserId): void
     {
         $gestionCode = $groups !== [] ? $groups[0]->gestion->codigo : 'sin gestion';
-        $this->audit->execute(ActionCatalog::CREATE, ModuleCatalog::GRUPOS, sprintf('Se generaron %d grupos para %s con %d inscritos.', count($groups), $gestionCode, $input->totalInscritos), $input->actorUserId);
+        $this->audit->execute(ActionCatalog::CREATE, ModuleCatalog::GRUPOS, sprintf('Se generaron %d grupos para %s con %d inscritos.', count($groups), $gestionCode, $totalInscritos), $actorUserId);
     }
 
+    /** @param list<Grupo> $groups */
     private function notifyGroupsGenerated(array $groups): void
     {
         // Punto de extension.

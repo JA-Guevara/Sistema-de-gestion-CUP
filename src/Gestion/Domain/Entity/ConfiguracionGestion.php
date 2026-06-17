@@ -34,6 +34,14 @@ class ConfiguracionGestion
     #[ORM\Column]
     public int $cantidadExamenes;
 
+    /**
+     * Pesos por examen (examen_1..N) que suman 100. Null/[] => promedio simple.
+     *
+     * @var array<string,float>|null
+     */
+    #[ORM\Column(type: 'json', nullable: true)]
+    public ?array $ponderacionesExamenes = null;
+
     #[ORM\Column(options: ['default' => false])]
     public bool $permiteReinscripcion = false;
 
@@ -43,6 +51,7 @@ class ConfiguracionGestion
     #[ORM\Column(options: ['default' => true])]
     public bool $generarBitacora = true;
 
+    /** @param array<string,float>|null $ponderacionesExamenes */
     public static function create(
         int $cupoTotal,
         int $maxEstudiantesPorGrupo,
@@ -52,6 +61,7 @@ class ConfiguracionGestion
         bool $permiteReinscripcion,
         bool $permiteCambioGrupo,
         bool $generarBitacora,
+        ?array $ponderacionesExamenes = null,
     ): self {
         $configuracion = new self();
         $configuracion->cupoTotal = $cupoTotal;
@@ -59,6 +69,7 @@ class ConfiguracionGestion
         $configuracion->maxGruposPorDocente = $maxGruposPorDocente;
         $configuracion->notaMinimaAprobacion = $notaMinimaAprobacion;
         $configuracion->cantidadExamenes = $cantidadExamenes;
+        $configuracion->ponderacionesExamenes = $ponderacionesExamenes !== [] ? $ponderacionesExamenes : null;
         $configuracion->permiteReinscripcion = $permiteReinscripcion;
         $configuracion->permiteCambioGrupo = $permiteCambioGrupo;
         $configuracion->generarBitacora = $generarBitacora;
@@ -66,6 +77,7 @@ class ConfiguracionGestion
         return $configuracion;
     }
 
+    /** @param array<string,float>|null $ponderacionesExamenes */
     public function updateValues(
         int $cupoTotal,
         int $maxEstudiantesPorGrupo,
@@ -75,12 +87,14 @@ class ConfiguracionGestion
         bool $permiteReinscripcion,
         bool $permiteCambioGrupo,
         bool $generarBitacora,
+        ?array $ponderacionesExamenes = null,
     ): void {
         $this->cupoTotal = $cupoTotal;
         $this->maxEstudiantesPorGrupo = $maxEstudiantesPorGrupo;
         $this->maxGruposPorDocente = $maxGruposPorDocente;
         $this->notaMinimaAprobacion = $notaMinimaAprobacion;
         $this->cantidadExamenes = $cantidadExamenes;
+        $this->ponderacionesExamenes = $ponderacionesExamenes !== [] ? $ponderacionesExamenes : null;
         $this->permiteReinscripcion = $permiteReinscripcion;
         $this->permiteCambioGrupo = $permiteCambioGrupo;
         $this->generarBitacora = $generarBitacora;

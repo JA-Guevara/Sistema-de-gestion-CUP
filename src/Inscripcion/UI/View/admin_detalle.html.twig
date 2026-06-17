@@ -81,6 +81,7 @@
                         <table class="gestion-table gestion-table--stack">
                             <tbody>
                                 <tr><td class="gestion-col--text" data-label="Profesion / area">{{ inscripcion.docenteProfesion ?? '—' }}</td></tr>
+                                <tr><td class="gestion-col--text" data-label="Areas que dicta">{{ inscripcion.docenteAreas ? inscripcion.docenteAreas|map(a => a|capitalize)|join(', ') : '—' }}</td></tr>
                                 <tr><td class="gestion-col--text" data-label="Maestria">{{ inscripcion.docenteMaestria ? 'Si' : 'No' }}</td><td class="gestion-col--text" data-label="Diplomado">{{ inscripcion.docenteDiplomado ? 'Si' : 'No' }}</td></tr>
                                 <tr><td class="gestion-col--text" data-label="Experiencia">{{ inscripcion.docenteExperiencia ?? '—' }}</td></tr>
                             </tbody>

@@ -10,6 +10,7 @@ use App\Academico\Materia\Application\UseCase\ListMaterias;
 use App\Academico\Materia\Application\UseCase\ShowMateria;
 use App\Academico\Materia\Application\UseCase\ToggleMateriaState;
 use App\Academico\Materia\Application\UseCase\UpdateMateria;
+use App\Academico\Materia\Domain\Catalog\AreaCatalog;
 use App\Academico\Materia\Domain\Exception\MateriaException;
 use App\Academico\Materia\UI\Request\MateriaRequest;
 use App\Auth\Entity\User;
@@ -66,7 +67,7 @@ final class MateriaController extends AbstractController
     {
         $user = $this->requireUser($request);
         if (!$request->isMethod('POST')) {
-            return $this->render('@materia/form.html.twig', ['materia' => $id ? $this->showMateria->execute($id) : null, 'user' => $user]);
+            return $this->render('@materia/form.html.twig', ['materia' => $id ? $this->showMateria->execute($id) : null, 'areas' => AreaCatalog::all(), 'user' => $user]);
         }
 
         try {
@@ -79,7 +80,7 @@ final class MateriaController extends AbstractController
         } catch (MateriaException $exception) {
             $this->addFlash('error', $exception->getMessage());
 
-            return $this->render('@materia/form.html.twig', ['materia' => $id ? $this->showMateria->execute($id) : null, 'user' => $user]);
+            return $this->render('@materia/form.html.twig', ['materia' => $id ? $this->showMateria->execute($id) : null, 'areas' => AreaCatalog::all(), 'user' => $user]);
         }
     }
 

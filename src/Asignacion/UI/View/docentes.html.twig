@@ -17,6 +17,23 @@
 {% block javascripts %}
     {{ parent() }}
     <script src="/assets/gestion/js/asignacion-turno.js?v=1" defer></script>
+    <script>
+        // Deshabilita las materias fuera del area del docente (cuando el docente
+        // declaro areas). Materia sin area o docente sin areas => se permite.
+        (function () {
+            var box = document.querySelector('[data-area-filter]');
+            if (!box) { return; }
+            var areas = (box.getAttribute('data-docente-areas') || '').split(',').filter(Boolean);
+            if (!areas.length) { return; }
+            Array.prototype.forEach.call(box.querySelectorAll('label[data-area]'), function (label) {
+                var area = label.getAttribute('data-area') || '';
+                var allowed = area === '' || areas.indexOf(area) !== -1;
+                var cb = label.querySelector('input[type=checkbox]');
+                if (cb) { cb.disabled = !allowed; if (!allowed) { cb.checked = false; } }
+                label.style.opacity = allowed ? '' : '0.45';
+            });
+        }());
+    </script>
 {% endblock %}
 
 {% block app_content %}
@@ -136,12 +153,17 @@
                             </select>
                         </label>
                     </div>
-                    <p class="gestion-panel__hint" style="margin:16px 0 8px">Materias que dictara en el grupo</p>
-                    <div class="gestion-checks gestion-checks--cards">
+                    <p class="gestion-panel__hint" style="margin:16px 0 8px">
+                        Materias que dictara en el grupo
+                        {% if docenteAreas is not empty %}
+                            &mdash; areas habilitadas del docente: <strong>{{ docenteAreas|map(a => a|capitalize)|join(', ') }}</strong>. Las materias de otra area se deshabilitan.
+                        {% endif %}
+                    </p>
+                    <div class="gestion-checks gestion-checks--cards" data-area-filter data-docente-areas="{{ docenteAreas|join(',') }}">
                         {% for materia in materias %}
-                            <label>
+                            <label data-area="{{ materia.area ?: '' }}">
                                 <input type="checkbox" name="materias[]" value="{{ materia.id }}">
-                                <span>{{ materia.codigo }} - {{ materia.nombre }}</span>
+                                <span>{{ materia.codigo }} - {{ materia.nombre }}{% if materia.area %} <small>· {{ materia.area|capitalize }}</small>{% endif %}</span>
                             </label>
                         {% else %}
                             <p class="gestion-panel__hint">No hay materias activas.</p>

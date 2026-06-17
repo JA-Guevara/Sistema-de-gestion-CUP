@@ -8,6 +8,20 @@
     <script src="/assets/gestion/js/gestion-toggle-panel.js?v=9" defer></script>
     <script src="/assets/gestion/js/gestion-filters.js?v=9" defer></script>
     <script src="/assets/gestion/js/gestion-bulk-actions.js?v=9" defer></script>
+    <script>
+        // Muestra el nro de estudiantes confirmados de la gestion elegida (auto-conteo de grupos).
+        (function () {
+            var sel = document.querySelector('[data-confirmados-select]');
+            var out = document.querySelector('[data-confirmados-value]');
+            if (!sel || !out) { return; }
+            function sync() {
+                var opt = sel.options[sel.selectedIndex];
+                out.textContent = opt ? (opt.getAttribute('data-confirmados') || '0') : '0';
+            }
+            sel.addEventListener('change', sync);
+            sync();
+        }());
+    </script>
 {% endblock %}
 
 {% block app_content %}
@@ -39,20 +53,23 @@
             <div class="gestion-panel__header">
                 <div>
                     <h2>Generar grupos por inscritos</h2>
-                    <p class="gestion-panel__hint">El sistema divide el total de inscritos usando el maximo de estudiantes por grupo definido en la gestion.</p>
+                    <p class="gestion-panel__hint">El sistema cuenta automaticamente los estudiantes confirmados de la gestion y los divide entre el maximo por grupo: <strong>nro de grupos = techo(confirmados / max)</strong>.</p>
                 </div>
             </div>
             <div class="gestion-grid">
                 <label>
                     Gestion
-                    <select name="gestionId" required>
+                    <select name="gestionId" required data-confirmados-select>
                         {% for gestion in gestiones %}
-                            <option value="{{ gestion.id }}">{{ gestion.codigo|gestion_label }} - {{ gestion.nombre|replace({'Curso Preuniversitario 2026-I': 'Curso Preuniversitario CUP 1-2026'}) }}</option>
+                            <option value="{{ gestion.id }}" data-confirmados="{{ confirmadosPorGestion[gestion.id] ?? 0 }}">{{ gestion.codigo|gestion_label }} - {{ gestion.nombre|replace({'Curso Preuniversitario 2026-I': 'Curso Preuniversitario CUP 1-2026'}) }}</option>
                         {% endfor %}
                     </select>
                 </label>
-                <label>Total inscritos <input type="number" name="totalInscritos" min="1" required></label>
+                <label>Total inscritos (opcional)
+                    <input type="number" name="totalInscritos" min="1" placeholder="Auto = confirmados">
+                </label>
             </div>
+            <p class="gestion-help" data-confirmados-hint>Estudiantes confirmados de la gestion seleccionada: <strong data-confirmados-value>0</strong>. Deja "Total inscritos" vacio para usar este valor automaticamente.</p>
             <div class="gestion-actions"><button class="gestion-button gestion-button--primary" type="submit">Generar grupos</button></div>
         </section>
     </form>

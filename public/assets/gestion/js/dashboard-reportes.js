@@ -276,6 +276,106 @@
         }
     }
 
+    // ---- Comparativo entre gestiones (lazy: se carga al abrir la pestaña) ----
+    var cmpLoaded = false;
+    var cmpData = [];
+    var cmpCharts = {};
+
+    function cmpResize() {
+        Object.keys(cmpCharts).forEach(function (k) { if (cmpCharts[k]) { cmpCharts[k].resize(); } });
+    }
+
+    function renderComparativo(rows) {
+        var tb = document.querySelector('[data-cmp-tbody]');
+        if (tb) {
+            tb.innerHTML = '';
+            if (!rows.length) {
+                tb.innerHTML = '<tr><td colspan="10">No hay gestiones para comparar.</td></tr>';
+            }
+            rows.forEach(function (g) {
+                var tr = document.createElement('tr');
+                tr.innerHTML =
+                    '<td data-label="Gestion">' + esc(g.label || g.codigo) + (g.activa ? ' <span class="gestion-badge gestion-badge--activa">activa</span>' : '') + '</td>' +
+                    '<td class="gestion-col--num" data-label="Inscritos">' + (g.inscritos | 0) + '</td>' +
+                    '<td class="gestion-col--num" data-label="Evaluados">' + (g.evaluados | 0) + '</td>' +
+                    '<td class="gestion-col--num" data-label="Aprobados">' + (g.aprobados | 0) + '</td>' +
+                    '<td class="gestion-col--num" data-label="Reprobados">' + (g.reprobados | 0) + '</td>' +
+                    '<td class="gestion-col--num" data-label="Incompletos">' + (g.incompletos | 0) + '</td>' +
+                    '<td class="gestion-col--num" data-label="% aprob.">' + g.pctAprobacion + '%</td>' +
+                    '<td class="gestion-col--num" data-label="Promedio">' + (g.promedioGeneral | 0) + '</td>' +
+                    '<td class="gestion-col--num" data-label="Docentes">' + (g.docentes | 0) + '</td>' +
+                    '<td class="gestion-col--num" data-label="Doc. postul.">' + (g.postulacionesDocentes | 0) + '</td>';
+                tb.appendChild(tr);
+            });
+        }
+
+        var labels = rows.map(function (g) { return g.label || g.codigo; });
+        var max100 = { extra: { scales: { y: { beginAtZero: true, max: 100, grid: { color: COL.grid } }, x: { grid: { display: false }, ticks: { autoSkip: false, maxRotation: 0, minRotation: 0, callback: truncTick(14), font: { size: 11 } } } } } };
+
+        Object.keys(cmpCharts).forEach(function (k) { if (cmpCharts[k]) { cmpCharts[k].destroy(); } });
+        cmpCharts = {};
+
+        var ic = document.querySelector('[data-cmp-chart="inscritos"]');
+        if (ic) { cmpCharts.ic = bar(ic, labels, [{ label: 'Inscritos', data: rows.map(function (g) { return g.inscritos; }), backgroundColor: COL.blue, borderRadius: 4 }]); }
+
+        var rcv = document.querySelector('[data-cmp-chart="resultado"]');
+        if (rcv) {
+            cmpCharts.rc = bar(rcv, labels, [
+                { label: 'Aprobados', data: rows.map(function (g) { return g.aprobados; }), backgroundColor: COL.ok, borderRadius: 4 },
+                { label: 'Reprobados', data: rows.map(function (g) { return g.reprobados; }), backgroundColor: COL.bad, borderRadius: 4 },
+                { label: 'Incompletos', data: rows.map(function (g) { return g.incompletos; }), backgroundColor: COL.warn, borderRadius: 4 },
+            ], { legend: true });
+        }
+
+        var pc = document.querySelector('[data-cmp-chart="pct"]');
+        if (pc) { cmpCharts.pc = bar(pc, labels, [{ label: '% aprobacion', data: rows.map(function (g) { return g.pctAprobacion; }), backgroundColor: COL.ok, borderRadius: 4 }], max100); }
+
+        var prc = document.querySelector('[data-cmp-chart="promedio"]');
+        if (prc) { cmpCharts.prc = bar(prc, labels, [{ label: 'Promedio', data: rows.map(function (g) { return g.promedioGeneral; }), backgroundColor: COL.blueSoft, borderRadius: 4 }], max100); }
+
+        var dcv = document.querySelector('[data-cmp-chart="docentes"]');
+        if (dcv) {
+            cmpCharts.dc = bar(dcv, labels, [
+                { label: 'Asignados', data: rows.map(function (g) { return g.docentes; }), backgroundColor: COL.blue, borderRadius: 4 },
+                { label: 'Postulados', data: rows.map(function (g) { return g.postulacionesDocentes; }), backgroundColor: COL.blueSoft, borderRadius: 4 },
+            ], { legend: true });
+        }
+    }
+
+    function cmpSelectedIds() {
+        var ids = [];
+        document.querySelectorAll('[data-cmp-gestion]:checked').forEach(function (c) { ids.push(parseInt(c.value, 10)); });
+        return ids;
+    }
+
+    function cmpFiltered() {
+        var ids = cmpSelectedIds();
+        return cmpData.filter(function (g) { return ids.indexOf(g.id) !== -1; });
+    }
+
+    function cmpApplyFilter() { renderComparativo(cmpFiltered()); }
+
+    // "Todas" queda marcada solo si TODAS las gestiones estan marcadas.
+    function cmpSyncAll() {
+        var all = document.querySelector('[data-cmp-all]');
+        if (!all) { return; }
+        var boxes = document.querySelectorAll('[data-cmp-gestion]');
+        var checked = document.querySelectorAll('[data-cmp-gestion]:checked');
+        all.checked = boxes.length > 0 && boxes.length === checked.length;
+    }
+
+    function loadComparativo() {
+        if (cmpLoaded) { cmpResize(); return; }
+        if (!cfg.comparativoUrl) { return; }
+        cmpLoaded = true;
+        document.body.style.cursor = 'progress';
+        fetch(cfg.comparativoUrl, { headers: { 'X-Requested-With': 'fetch' } })
+            .then(function (r) { return r.json(); })
+            .then(function (d) { cmpData = (d && d.gestiones) || []; cmpApplyFilter(); })
+            .catch(function () { cmpLoaded = false; })
+            .then(function () { document.body.style.cursor = ''; });
+    }
+
     // ---- Filtros ----
     function filtersOf(formSel) {
         var p = new URLSearchParams();
@@ -359,6 +459,7 @@
     });
 
     // Carrusel / tabs
+    var topToolbar = document.querySelector('.rep-toolbar');
     document.querySelectorAll('[data-rep-tab]').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var tab = btn.getAttribute('data-rep-tab');
@@ -370,11 +471,27 @@
             document.querySelectorAll('[data-rep-panel]').forEach(function (p) {
                 p.hidden = p.getAttribute('data-rep-panel') !== tab;
             });
+            // El selector de UNA gestion no aplica al comparativo (multi-gestion).
+            if (topToolbar) { topToolbar.style.display = (tab === 'comparativo') ? 'none' : ''; }
             if (tab === 'charts') {
                 Object.keys(charts).forEach(function (k) { if (charts[k]) { charts[k].resize(); } });
+            } else if (tab === 'comparativo') {
+                loadComparativo();
             }
         });
     });
+
+    // Comparativo: multi-select de gestiones (filtra en cliente, sin recargar).
+    document.querySelectorAll('[data-cmp-gestion]').forEach(function (c) {
+        c.addEventListener('change', function () { cmpSyncAll(); cmpApplyFilter(); });
+    });
+    var cmpAllBox = document.querySelector('[data-cmp-all]');
+    if (cmpAllBox) {
+        cmpAllBox.addEventListener('change', function () {
+            document.querySelectorAll('[data-cmp-gestion]').forEach(function (c) { c.checked = cmpAllBox.checked; });
+            cmpApplyFilter();
+        });
+    }
 
     var gsel = document.querySelector('[data-rep-gestion]');
     if (gsel) { gsel.addEventListener('change', function () { window.location = window.location.pathname + '?gestion=' + encodeURIComponent(gsel.value); }); }
@@ -488,6 +605,18 @@
         rows.push(['Entrevistas agendadas', (d.docentes && d.docentes.entrevistasAgendadas) || 0]);
 
         downloadCsv('reporte_dashboard_' + (d.meta.gestionCodigo || 'cup') + '.csv', rows);
+    }); }
+
+    // Comparativo: exportar CSV (de lo ya cargado).
+    var cmpCsvBtn = document.querySelector('[data-cmp-export]');
+    if (cmpCsvBtn) { cmpCsvBtn.addEventListener('click', function () {
+        if (!cmpData.length) { loadComparativo(); return; }
+        var rows = [['COMPARATIVO ENTRE GESTIONES']];
+        rows.push(['Gestion', 'Inscritos', 'Evaluados', 'Aprobados', 'Reprobados', 'Incompletos', '% aprobacion', 'Promedio', 'Docentes asignados', 'Docentes postulados']);
+        cmpFiltered().forEach(function (g) {
+            rows.push([g.label || g.codigo, g.inscritos, g.evaluados, g.aprobados, g.reprobados, g.incompletos, g.pctAprobacion + '%', g.promedioGeneral, g.docentes, g.postulacionesDocentes]);
+        });
+        downloadCsv('reporte_comparativo_gestiones.csv', rows);
     }); }
 
     // ---- Render inicial ----

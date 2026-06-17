@@ -1,0 +1,62 @@
+/* =========================================================================
+   Asistente de AYUDA global (chat de onboarding). Widget flotante autocontenido,
+   se inyecta desde app_base.html.twig en todas las paginas (logueado).
+   ========================================================================= */
+.ayuda-launcher {
+    position: fixed; right: 22px; bottom: 22px; z-index: 70;
+    display: inline-flex; align-items: center; gap: 9px;
+    height: 52px; padding: 0 18px 0 14px;
+    border: 0; border-radius: 999px; cursor: pointer;
+    background: #0f766e; color: #fff;
+    box-shadow: 0 10px 26px rgba(15, 118, 110, .38);
+    font: 600 14px/1 'Inter', 'Segoe UI', system-ui, sans-serif;
+    transition: transform .12s ease, box-shadow .12s ease;
+}
+.ayuda-launcher:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(15, 118, 110, .45); }
+.ayuda-launcher svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ayuda-launcher__text { white-space: nowrap; }
+
+.ayuda-panel[hidden] { display: none; }
+.ayuda-panel {
+    position: fixed; right: 22px; bottom: 84px; z-index: 71;
+    width: 360px; max-width: calc(100vw - 32px);
+    display: flex; flex-direction: column;
+    max-height: min(560px, calc(100vh - 120px));
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, .26); overflow: hidden;
+}
+.ayuda-panel__head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 15px; background: #0f766e; color: #fff;
+}
+.ayuda-panel__avatar { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: rgba(255, 255, 255, .18); }
+.ayuda-panel__avatar svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ayuda-panel__title { display: flex; flex-direction: column; line-height: 1.2; font-size: 14px; font-weight: 700; }
+.ayuda-panel__title small { font-size: 11px; font-weight: 400; opacity: .85; }
+.ayuda-panel__close { margin-left: auto; background: 0; border: 0; color: #fff; cursor: pointer; padding: 4px; border-radius: 6px; opacity: .85; }
+.ayuda-panel__close:hover { opacity: 1; background: rgba(255, 255, 255, .15); }
+.ayuda-panel__close svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; }
+
+.ayuda-messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 9px; background: #f8fafc; }
+.ayuda-hint { font-size: 12.5px; color: #475569; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; }
+.ayuda-hint strong { color: #0f766e; }
+.ayuda-suggest { display: flex; flex-wrap: wrap; gap: 6px; }
+.ayuda-suggest button { font: 500 12px 'Inter', system-ui, sans-serif; cursor: pointer; background: #ecfdf5; color: #0f766e; border: 1px solid #99f6e4; border-radius: 999px; padding: 5px 11px; }
+.ayuda-suggest button:hover { background: #d1fae5; }
+.ayuda-msg { max-width: 86%; font-size: 13.5px; line-height: 1.5; padding: 9px 12px; border-radius: 12px; white-space: pre-wrap; word-wrap: break-word; }
+.ayuda-msg--user { align-self: flex-end; background: #0f766e; color: #fff; border-bottom-right-radius: 4px; }
+.ayuda-msg--bot { align-self: flex-start; background: #fff; color: #0f172a; border: 1px solid #e2e8f0; border-bottom-left-radius: 4px; }
+.ayuda-msg--thinking { color: #94a3b8; letter-spacing: 3px; }
+
+.ayuda-inputbar { display: flex; gap: 8px; padding: 11px; border-top: 1px solid #e2e8f0; background: #fff; }
+.ayuda-inputbar input { flex: 1; min-width: 0; height: 40px; border: 1px solid #cbd5e1; border-radius: 10px; padding: 0 12px; font-size: 13.5px; }
+.ayuda-inputbar input:focus { outline: 0; border-color: #0f766e; box-shadow: 0 0 0 3px rgba(15, 118, 110, .15); }
+.ayuda-inputbar button { display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 10px; background: #0f766e; color: #fff; cursor: pointer; }
+.ayuda-inputbar button:hover { background: #0d5f59; }
+.ayuda-inputbar button svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+@media (max-width: 520px) {
+    .ayuda-launcher__text { display: none; }
+    .ayuda-launcher { padding: 0; width: 52px; justify-content: center; }
+    .ayuda-panel { right: 12px; left: 12px; width: auto; bottom: 80px; }
+}

@@ -44,6 +44,7 @@
                     <tr>
                         <th>Codigo</th>
                         <th>Nombre</th>
+                        <th>Area</th>
                         <th>Descripcion</th>
                         <th class="gestion-col--center">Estado</th>
                         <th class="gestion-table__actions-cell">Acciones</th>
@@ -54,6 +55,7 @@
                         <tr data-filter-row data-filter-texto="{{ materia.codigo }} {{ materia.nombre }} {{ materia.descripcion }}" data-filter-estado="{{ materia.estado }}">
                             <td data-label="Codigo">{{ materia.codigo }}</td>
                             <td data-label="Nombre">{{ materia.nombre }}</td>
+                            <td data-label="Area">{{ materia.area ? materia.area|capitalize : '-' }}</td>
                             <td data-label="Descripcion">{{ materia.descripcion ?? '-' }}</td>
                             <td class="gestion-col--center" data-label="Estado"><span class="gestion-badge gestion-badge--{{ materia.estado|lower }}">{{ materia.estado|lower|capitalize }}</span></td>
                             <td class="gestion-table__actions" data-label="Acciones">
@@ -72,7 +74,7 @@
                             </td>
                         </tr>
                     {% endfor %}
-                    <tr data-filter-empty {{ materias ? 'hidden' : '' }}><td colspan="5">Todavia no hay materias registradas.</td></tr>
+                    <tr data-filter-empty {{ materias ? 'hidden' : '' }}><td colspan="6">Todavia no hay materias registradas.</td></tr>
                 </tbody>
             </table>
         </div>

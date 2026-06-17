@@ -39,6 +39,9 @@ final readonly class PermissionGuard implements EventSubscriberInterface
         'inscripcion_pago' => 'inscripciones.ver',
         'inscripcion_' => ['inscripciones.ver', 'inscripciones.gestionar', 'inscripciones.validar'],
 
+        // Admision Final (adjudicacion de carrera por promedio/cupo).
+        'admision_' => ['inscripciones.gestionar', 'inscripciones.validar'],
+
         // Asignaciones y notas.
         'nota_planilla_importar' => ['notas.gestionar', 'notas.registrar'],
         'nota_planilla_exportar' => ['notas.gestionar', 'notas.registrar'],

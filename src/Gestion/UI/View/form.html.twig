@@ -86,6 +86,18 @@
                     <input type="number" name="cantidadExamenes" value="{{ gestion and gestion.configuracion ? gestion.configuracion.cantidadExamenes : 3 }}" min="3" max="3" required>
                 </label>
             </div>
+            <div style="margin-top:14px">
+                <p class="gestion-panel__hint" style="padding:0 0 8px">Ponderacion de los 3 examenes (deben sumar 100%). Dejalas vacias para usar promedio simple.</p>
+                {% set pond = gestion and gestion.configuracion and gestion.configuracion.ponderacionesExamenes ? gestion.configuracion.ponderacionesExamenes : {} %}
+                <div class="gestion-grid gestion-grid--three">
+                    {% for i in 1..3 %}
+                        <label>
+                            Examen {{ i }} (%)
+                            <input type="number" name="ponderaciones[examen_{{ i }}]" min="0" max="100" step="0.01" value="{{ pond['examen_' ~ i] is defined ? pond['examen_' ~ i] : (gestion ? '' : (i == 3 ? 40 : 30)) }}">
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
             <div class="gestion-checks gestion-checks--cards">
                 <label><input type="checkbox" name="permiteReinscripcion" {{ gestion and gestion.configuracion and gestion.configuracion.permiteReinscripcion ? 'checked' : '' }}> <span>Permite reinscripcion</span></label>
                 <label><input type="checkbox" name="permiteCambioGrupo" {{ gestion and gestion.configuracion and gestion.configuracion.permiteCambioGrupo ? 'checked' : '' }}> <span>Permite cambio de grupo</span></label>

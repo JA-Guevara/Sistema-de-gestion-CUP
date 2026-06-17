@@ -19,6 +19,8 @@ final readonly class GestionInput
         public int $maxGruposPorDocente,
         public int $notaMinimaAprobacion,
         public int $cantidadExamenes,
+        /** @var array<string,float> peso por examen (examen_1..N) que deben sumar 100; [] = promedio simple */
+        public array $ponderacionesExamenes,
         public bool $permiteReinscripcion,
         public bool $permiteCambioGrupo,
         public bool $generarBitacora,

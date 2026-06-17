@@ -63,7 +63,7 @@ final readonly class UpdateMateria
 
     private function updateMateria(Materia $materia, MateriaInput $input): void
     {
-        $materia->rename($input->codigo, $input->nombre, $input->descripcion);
+        $materia->rename($input->codigo, $input->nombre, $input->descripcion, $input->area);
     }
 
     private function saveMateria(Materia $materia): void

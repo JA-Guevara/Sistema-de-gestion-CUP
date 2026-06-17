@@ -22,6 +22,7 @@ final class GestionRequest
             maxGruposPorDocente: (int) $request->request->get('maxGruposPorDocente', 0),
             notaMinimaAprobacion: (int) $request->request->get('notaMinimaAprobacion', 0),
             cantidadExamenes: (int) $request->request->get('cantidadExamenes', 0),
+            ponderacionesExamenes: self::ponderacionesFromRequest($request),
             permiteReinscripcion: $request->request->has('permiteReinscripcion'),
             permiteCambioGrupo: $request->request->has('permiteCambioGrupo'),
             generarBitacora: $request->request->has('generarBitacora'),
@@ -76,6 +77,29 @@ final class GestionRequest
         }
 
         return $careers;
+    }
+
+    /**
+     * Pesos por examen (examen_1..N). Solo se devuelven los numericos; si quedan
+     * vacios, el promedio sera simple. La suma (=100) se valida en el use case.
+     *
+     * @return array<string,float>
+     */
+    private static function ponderacionesFromRequest(Request $request): array
+    {
+        $submitted = $request->request->all('ponderaciones');
+        $ponderaciones = [];
+
+        foreach ($submitted as $key => $value) {
+            if (is_string($value) && trim($value) === '') {
+                continue;
+            }
+            if (is_numeric($value)) {
+                $ponderaciones[(string) $key] = (float) $value;
+            }
+        }
+
+        return $ponderaciones;
     }
 
     private static function nullableDate(mixed $value): ?\DateTimeImmutable

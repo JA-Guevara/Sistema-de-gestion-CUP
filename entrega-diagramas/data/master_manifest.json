@@ -1,0 +1,806 @@
+{
+  "contexto": {
+    "img": "png/UC_CONTEXTO.png",
+    "target_w": 701,
+    "target_h": 486,
+    "titulo": "Diagrama de Contexto"
+  },
+  "uc_general": {
+    "img": "png/UC_GENERAL.png",
+    "target_w": 701,
+    "target_h": 296,
+    "titulo": "Casos de Uso General"
+  },
+  "uc_modulos": [
+    {
+      "img": "png/UC_M_AUTENTICACION.png",
+      "target_w": 701,
+      "target_h": 465,
+      "titulo": "Casos de Uso - Autenticacion y Seguridad"
+    },
+    {
+      "img": "png/UC_M_POSTULACIONES.png",
+      "target_w": 701,
+      "target_h": 588,
+      "titulo": "Casos de Uso - Postulaciones"
+    },
+    {
+      "img": "png/UC_M_PAGOS.png",
+      "target_w": 701,
+      "target_h": 405,
+      "titulo": "Casos de Uso - Pagos"
+    },
+    {
+      "img": "png/UC_M_DOCENTES.png",
+      "target_w": 701,
+      "target_h": 473,
+      "titulo": "Casos de Uso - Docentes"
+    },
+    {
+      "img": "png/UC_M_ESTUDIANTES.png",
+      "target_w": 701,
+      "target_h": 408,
+      "titulo": "Casos de Uso - Estudiantes"
+    },
+    {
+      "img": "png/UC_M_ASIGNACIONES.png",
+      "target_w": 701,
+      "target_h": 528,
+      "titulo": "Casos de Uso - Asignaciones"
+    },
+    {
+      "img": "png/UC_M_NOTAS.png",
+      "target_w": 701,
+      "target_h": 465,
+      "titulo": "Casos de Uso - Notas / Evaluaciones"
+    },
+    {
+      "img": "png/UC_M_ADMISIONES.png",
+      "target_w": 701,
+      "target_h": 382,
+      "titulo": "Casos de Uso - Admisiones"
+    },
+    {
+      "img": "png/UC_M_REPORTES.png",
+      "target_w": 701,
+      "target_h": 395,
+      "titulo": "Casos de Uso - Reportes / Dashboard"
+    }
+  ],
+  "bce": [
+    {
+      "img": "png/CU-01.png",
+      "target_w": 701,
+      "target_h": 619,
+      "titulo": "Gestionar Autenticacion y Cuenta",
+      "cu": "CU-01",
+      "actores": [
+        "Postulante",
+        "Docente",
+        "Coordinador Academico",
+        "Autoridad",
+        "Administrador"
+      ],
+      "fronteras": [
+        "frmLogin",
+        "frmForgot",
+        "frmReset",
+        "frmUnlock",
+        "frmRegister"
+      ],
+      "controles": [
+        "LoginController",
+        "SessionController",
+        "ForgotPasswordController",
+        "ResetPasswordController",
+        "UnlockAccountController",
+        "RegisterController",
+        "PerfilController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "User",
+        "PasswordResetToken"
+      ]
+    },
+    {
+      "img": "png/CU-02.png",
+      "target_w": 659,
+      "target_h": 835,
+      "titulo": "Gestionar Usuarios y Seguridad",
+      "cu": "CU-02",
+      "actores": [
+        "Administrador"
+      ],
+      "fronteras": [
+        "frmUsuarios",
+        "frmRoles"
+      ],
+      "controles": [
+        "UsuarioController",
+        "RoleController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "User",
+        "Role",
+        "Permission"
+      ]
+    },
+    {
+      "img": "png/CU-03.png",
+      "target_w": 595,
+      "target_h": 835,
+      "titulo": "Gestionar Estructura Academica",
+      "cu": "CU-03",
+      "actores": [
+        "Administrador"
+      ],
+      "fronteras": [
+        "frmGestionForm",
+        "frmGestionLista",
+        "frmGestionDetalle",
+        "frmCarreraForm"
+      ],
+      "controles": [
+        "GestionController",
+        "CarreraController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Gestion",
+        "ConfiguracionGestion",
+        "Carrera",
+        "CarreraGestion"
+      ]
+    },
+    {
+      "img": "png/CU-04.png",
+      "target_w": 701,
+      "target_h": 661,
+      "titulo": "Gestionar Preinscripcion CUP",
+      "cu": "CU-04",
+      "actores": [
+        "Postulante"
+      ],
+      "fronteras": [
+        "frmInscripcion"
+      ],
+      "controles": [
+        "InscripcionController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Inscripcion",
+        "Documento"
+      ]
+    },
+    {
+      "img": "png/CU-05.png",
+      "target_w": 683,
+      "target_h": 835,
+      "titulo": "Gestionar Validacion Documental",
+      "cu": "CU-05",
+      "actores": [
+        "Coordinador Academico"
+      ],
+      "fronteras": [
+        "frmDetalleInscripcion",
+        "frmCalendarioRevision"
+      ],
+      "controles": [
+        "InscripcionController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Inscripcion",
+        "Documento",
+        "VerificacionDocumento",
+        "CalendarioRevision"
+      ]
+    },
+    {
+      "img": "png/CU-06.png",
+      "target_w": 578,
+      "target_h": 835,
+      "titulo": "Gestionar Pagos",
+      "cu": "CU-06",
+      "actores": [
+        "Postulante",
+        "Coordinador Académico"
+      ],
+      "fronteras": [
+        "frmAdminPagos",
+        "frmPagoExito"
+      ],
+      "controles": [
+        "PagoController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Pago",
+        "Inscripcion",
+        "EstadoPago"
+      ]
+    },
+    {
+      "img": "png/CU-07.png",
+      "target_w": 701,
+      "target_h": 685,
+      "titulo": "Gestionar Postulantes",
+      "cu": "CU-07",
+      "actores": [
+        "Coordinador Academico"
+      ],
+      "fronteras": [
+        "frmAdminLista"
+      ],
+      "controles": [
+        "InscripcionController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Inscripcion",
+        "Documento"
+      ]
+    },
+    {
+      "img": "png/CU-08.png",
+      "target_w": 701,
+      "target_h": 601,
+      "titulo": "Gestionar Docentes",
+      "cu": "CU-08",
+      "actores": [
+        "Coordinador Academico",
+        "Administrador"
+      ],
+      "fronteras": [
+        "frmAdminDetalle"
+      ],
+      "controles": [
+        "InscripcionController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Inscripcion",
+        "User"
+      ]
+    },
+    {
+      "img": "png/CU-09.png",
+      "target_w": 635,
+      "target_h": 835,
+      "titulo": "Gestionar Planificacion Academica",
+      "cu": "CU-09",
+      "actores": [
+        "Coordinador Academico"
+      ],
+      "fronteras": [
+        "frmGrupoGenerador",
+        "frmAsignacionDocente",
+        "frmAsignacionEstudiante",
+        "frmHorarioGenerador"
+      ],
+      "controles": [
+        "GrupoController",
+        "HorarioController",
+        "AsignacionController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Grupo",
+        "AsignacionDocente",
+        "AsignacionGrupo",
+        "Horario"
+      ]
+    },
+    {
+      "img": "png/CU-10.png",
+      "target_w": 701,
+      "target_h": 623,
+      "titulo": "Gestionar Evaluaciones",
+      "cu": "CU-10",
+      "actores": [
+        "Docente"
+      ],
+      "fronteras": [
+        "frmPlanilla",
+        "frmDocente"
+      ],
+      "controles": [
+        "NotaController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Nota",
+        "AsignacionDocente",
+        "AsignacionGrupo"
+      ]
+    },
+    {
+      "img": "png/CU-11.png",
+      "target_w": 619,
+      "target_h": 835,
+      "titulo": "Consultar Informacion Academica",
+      "cu": "CU-11",
+      "actores": [
+        "Postulante"
+      ],
+      "fronteras": [
+        "frmBoletin",
+        "frmHorario"
+      ],
+      "controles": [
+        "NotaController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Inscripcion",
+        "Nota",
+        "AsignacionGrupo",
+        "Horario"
+      ]
+    },
+    {
+      "img": "png/CU-12.png",
+      "target_w": 701,
+      "target_h": 690,
+      "titulo": "Consultar Carga Academica",
+      "cu": "CU-12",
+      "actores": [
+        "Docente"
+      ],
+      "fronteras": [
+        "frmMisMaterias"
+      ],
+      "controles": [
+        "NotaController"
+      ],
+      "entidades": [
+        "AsignacionDocente",
+        "Grupo",
+        "Materia",
+        "Horario"
+      ]
+    },
+    {
+      "img": "png/CU-13.png",
+      "target_w": 701,
+      "target_h": 747,
+      "titulo": "Ejecutar Admisión Final",
+      "cu": "CU-13",
+      "actores": [
+        "Coordinador Académico"
+      ],
+      "fronteras": [
+        "frmAdmisionResolver"
+      ],
+      "controles": [
+        "InscripcionController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Inscripcion",
+        "Carrera",
+        "CarreraGestion",
+        "User"
+      ]
+    },
+    {
+      "img": "png/CU-14.png",
+      "target_w": 701,
+      "target_h": 586,
+      "titulo": "Consultar Resultados de Admision",
+      "cu": "CU-14",
+      "actores": [
+        "Postulante"
+      ],
+      "fronteras": [
+        "frmDetalleInscripcion"
+      ],
+      "controles": [
+        "InscripcionController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Inscripcion",
+        "Carrera"
+      ]
+    },
+    {
+      "img": "png/CU-15.png",
+      "target_w": 516,
+      "target_h": 835,
+      "titulo": "Gestionar Reportes e Indicadores",
+      "cu": "CU-15",
+      "actores": [
+        "Autoridad",
+        "Coordinador Academico"
+      ],
+      "fronteras": [
+        "frmDashboard"
+      ],
+      "controles": [
+        "DashboardController",
+        "ExportController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "Gestion",
+        "Nota",
+        "Inscripcion",
+        "Grupo"
+      ]
+    },
+    {
+      "img": "png/CU-16.png",
+      "target_w": 701,
+      "target_h": 343,
+      "titulo": "Gestionar Auditoria del Sistema",
+      "cu": "CU-16",
+      "actores": [
+        "Administrador"
+      ],
+      "fronteras": [
+        "frmFiltrosBitacora"
+      ],
+      "controles": [
+        "BitacoraController",
+        "Casos de Uso"
+      ],
+      "entidades": [
+        "LogEntry"
+      ]
+    }
+  ],
+  "secuencias": [
+    {
+      "img": "png/SEC_CU-01.png",
+      "target_w": 701,
+      "target_h": 769,
+      "titulo": "Gestionar Autenticacion y Cuenta",
+      "cu": "CU-01",
+      "lifelines": [
+        "Usuario",
+        ": Vistas (Twig)",
+        ": LoginController",
+        ": SessionController",
+        ": LoginUser",
+        ": UserRepository",
+        ": Doctrine ORM + PostgreSQL"
+      ]
+    },
+    {
+      "img": "png/SEC_CU-02.png",
+      "target_w": 701,
+      "target_h": 544,
+      "titulo": "Gestionar Usuarios y Seguridad",
+      "cu": "CU-02",
+      "lifelines": [
+        "Administrador",
+        ": Vistas (Twig)",
+        ": UsuarioController",
+        ": CreateUser",
+        ": RoleRepository",
+        ": UserRepository",
+        ": RecordLogEntry",
+        ": Doctrine ORM + PostgreSQL"
+      ]
+    },
+    {
+      "img": "png/SEC_CU-03.png",
+      "target_w": 591,
+      "target_h": 835,
+      "titulo": "Gestionar Estructura Academica",
+      "cu": "CU-03",
+      "lifelines": [
+        "Administrador",
+        ": Vistas (Twig)",
+        ": GestionController",
+        ": Casos de Uso",
+        ": GestionRepository",
+        ": Doctrine ORM + PostgreSQL",
+        ": RecordLogEntry"
+      ]
+    },
+    {
+      "img": "png/SEC_CU-04.png",
+      "target_w": 457,
+      "target_h": 835,
+      "titulo": "Gestionar Preinscripcion CUP",
+      "cu": "CU-04",
+      "lifelines": [
+        "Postulante",
+        ": Vistas (Twig)",
+        ": InscripcionController",
+        ": CrearInscripcion | SubirDocumento | PresentarInscripcion",
+        ": InscripcionRepository | DocumentoRepository",
+        ": Doctrine ORM + PostgreSQL"
+      ]
+    },
+    {
+      "img": "png/SEC_CU-05.png",
+      "target_w": 515,
+      "target_h": 835,
+      "titulo": "Gestionar Validacion Documental",
+      "cu": "CU-05",
+      "lifelines": [
+        "Coordinador Academico",
+        ": Vistas (Twig)",
+        ": InscripcionController",
+        ": Casos de Uso",
+        ": Doctrine ORM + PostgreSQL"
+      ]
+    },
+    {
+      "img": "png/SEC_CU-06.png",
+      "target_w": 498,
+      "target_h": 835,
+      "titulo": "Gestionar Pagos",
+      "cu": "CU-06",
+      "lifelines": [
+        "Postulante",
+        "Coordinador Académico",
+        ": Vistas (Twig)",
+        ": PagoController",
+        ": Casos de Uso",
+        ": StripeGateway",
+        "Stripe Checkout",
+        ": Doctrine ORM + PostgreSQL"
+      ]
+    },
+    {
+      "img": "png/SEC_CU-07.png",
+      "target_w": 701,
+      "target_h": 687,
+      "titulo": "Gestionar Postulantes",
+      "cu": "CU-07",
+      "lifelines": [
+        "Coordinador Académico",
+        ": Vistas (Twig)",
+        ": InscripcionController",
+        ": Casos de Uso",
+        ": InscripcionRepository",
+        ": Doctrine ORM + PostgreSQL",
+        ": InscripcionEvents"
+      ]
+    },
+    {
+      "img": "png/SEC_CU-08.png",
+      "target_w": 545,
+      "target_h": 835,
+      "titulo": "Gestionar Docentes",
+      "cu": "CU-08",
+      "lifelines": [
+        "Coordinador Academico / Admin",
+        ": Vistas (admin_detalle.twig)",
+        ": InscripcionController",
+        ": Casos de Uso",
+        ": Doctrine ORM + PostgreSQL"
+      ]
+    },
+    {
+      "img": "png/SEC_CU-09.png",
+      "target_w": 400,
+      "target_h": 835,
+      "titulo": "Gestionar Planificacion Academica",
+      "cu": "CU-09",
+      "lifelines": [
+        "Coordinador Academico",
+        ": Vistas (Twig)",
+        ": GrupoController",
+        ": AsignacionController",
+        ": HorarioController",
+        ": Casos de Uso (Dominio)",
+        ": Doctrine ORM + PostgreSQL"
+      ]
+    },
+    {
+      "img": "png/SEC_CU-10.png",
+      "target_w": 452,
+      "target_h": 835,
+      "titulo": "Gestionar Evaluaciones",
+      "cu": "CU-10",
+      "lifelines": [
+        "Docente",
+        ": Vistas (Twig)",
+        ": NotaController",
+        ": Casos de Uso",
+        ": PlanillaAccessPolicy",
+        ": Doctrine ORM + PostgreSQL"
+      ]
+    },
+    {
+      "img": "png/SEC_CU-11.png",
+      "target_w": 701,
+      "target_h": 589,
+      "titulo": "Consultar Información Académica",
+      "cu": "CU-11",
+      "lifelines": [
+        "Postulante",
+        ": Vista boletin.html.twig",
+        ": Vista horario.html.twig",
+        ": NotaController",
+        ": VerBoletin",
+        ": VerHorarioEstudiante",
+        ": GestionRepository + InscripcionRepository + AsignacionGrupoRepository + NotaRepository + HorarioRepository",
+        ": Doctrine ORM + PostgreSQL"
+      ]
+    },
+    {
+      "img": "png/SEC_CU-12.png",
+      "target_w": 701,
+      "target_h": 416,
+      "titulo": "Consultar Carga Academica",
+      "cu": "CU-12",
+      "lifelines": [
+        "Docente",
+        ": Vistas (Twig)",
+        ": NotaController",
+        ": ListMateriasDocente",
+        ": AsignacionController",
+        ": ShowGrupoDetalle",
+        ": AsignacionDocenteRepository",
+        ": AsignacionGrupoRepository",
+        ": Doctrine ORM + PostgreSQL"
+      ]
+    },
+    {
+      "img": "png/SEC_CU-13.png",
+      "target_w": 701,
+      "target_h": 543,
+      "titulo": "Ejecutar Admision Final",
+      "cu": "CU-13",
+      "lifelines": [
+        "Coordinador Academico",
+        ": Admin Detalle Inscripcion (Twig)",
+        ": InscripcionController",
+        ": ResolverResultadoAdmision",
+        ": ConfirmarInscripcion",
+        ": RechazarInscripcion",
+        ": Doctrine ORM + PostgreSQL",
+        ": InscripcionEvents (Bitacora)"
+      ]
+    },
+    {
+      "img": "png/SEC_CU-14.png",
+      "target_w": 701,
+      "target_h": 369,
+      "titulo": "Consultar Resultados de Admision",
+      "cu": "CU-14",
+      "lifelines": [
+        "Postulante",
+        ": Vista (Twig)",
+        ": InscripcionController",
+        ": VerInscripcion",
+        ": InscripcionRepository",
+        ": Doctrine ORM + PostgreSQL"
+      ]
+    },
+    {
+      "img": "png/SEC_CU-15.png",
+      "target_w": 701,
+      "target_h": 715,
+      "titulo": "Gestionar Reportes e Indicadores",
+      "cu": "CU-15",
+      "lifelines": [
+        "Autoridad/Coordinador",
+        ": Vistas (Twig)",
+        ": DashboardController",
+        ": ExportController",
+        ": Casos de Uso",
+        ": Repositorios",
+        ": Doctrine ORM + PostgreSQL"
+      ]
+    },
+    {
+      "img": "png/SEC_CU-16.png",
+      "target_w": 701,
+      "target_h": 718,
+      "titulo": "Gestionar Auditoria del Sistema",
+      "cu": "CU-16",
+      "lifelines": [
+        "Administrador",
+        ": Vistas (Twig)",
+        ": BitacoraController",
+        ": QueryLog",
+        ": LogEntryRepository",
+        ": Doctrine ORM + PostgreSQL"
+      ]
+    }
+  ],
+  "secuencia_integral": {
+    "img": "png/SECUENCIA_INSCRIPCION.png",
+    "target_w": 701,
+    "target_h": 692,
+    "titulo": "Secuencia integral: Inscripcion + Pago + Confirmacion"
+  },
+  "actividades": [
+    {
+      "img": "png/ACT_INSCRIPCION.png",
+      "target_w": 701,
+      "target_h": 821,
+      "titulo": "Proceso de Inscripcion"
+    },
+    {
+      "img": "png/ACT_PAGO.png",
+      "target_w": 701,
+      "target_h": 677,
+      "titulo": "Proceso de Pago"
+    },
+    {
+      "img": "png/ACT_ADMISION.png",
+      "target_w": 489,
+      "target_h": 835,
+      "titulo": "Proceso de Admision"
+    },
+    {
+      "img": "png/ACT_ASIGNACION.png",
+      "target_w": 489,
+      "target_h": 835,
+      "titulo": "Proceso de Asignacion Academica"
+    },
+    {
+      "img": "png/ACT_EVALUACION.png",
+      "target_w": 536,
+      "target_h": 835,
+      "titulo": "Proceso de Evaluacion"
+    }
+  ],
+  "estados": [
+    {
+      "img": "png/EST_POSTULACION.png",
+      "target_w": 701,
+      "target_h": 590,
+      "titulo": "Estados de la Postulacion"
+    },
+    {
+      "img": "png/EST_ESTUDIANTE.png",
+      "target_w": 701,
+      "target_h": 705,
+      "titulo": "Estados del Estudiante"
+    }
+  ],
+  "componentes": {
+    "img": "png/COMPONENTES.png",
+    "target_w": 701,
+    "target_h": 350,
+    "titulo": "Diagrama de Componentes"
+  },
+  "despliegue": {
+    "img": "png/DESPLIEGUE.png",
+    "target_w": 701,
+    "target_h": 497,
+    "titulo": "Diagrama de Despliegue"
+  },
+  "paquetes": {
+    "img": "png/PAQUETES.png",
+    "target_w": 701,
+    "target_h": 324,
+    "titulo": "Diagrama de Paquetes"
+  },
+  "clases": {
+    "img": "png/CLASES.png",
+    "target_w": 701,
+    "target_h": 816,
+    "titulo": "Diagrama de Clases Completo"
+  },
+  "conceptual": {
+    "img": "png/MODELO_CONCEPTUAL.png",
+    "target_w": 701,
+    "target_h": 350,
+    "titulo": "Modelo Conceptual de Datos"
+  },
+  "logico": {
+    "img": "png/MODELO_LOGICO.png",
+    "target_w": 701,
+    "target_h": 740,
+    "titulo": "Modelo Logico de Datos"
+  },
+  "fisico": {
+    "img": "png/MODELO_FISICO.png",
+    "target_w": 701,
+    "target_h": 646,
+    "titulo": "Modelo Fisico de Datos (PostgreSQL)"
+  }
+}

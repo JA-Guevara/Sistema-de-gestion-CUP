@@ -18,9 +18,17 @@
     <form method="post" class="gestion-form">
         <section class="gestion-panel">
             <h2>Datos de materia</h2>
-            <div class="gestion-grid">
+            <div class="gestion-grid gestion-grid--three">
                 <label>Codigo <input name="codigo" value="{{ materia ? materia.codigo : '' }}" placeholder="MAT" required></label>
                 <label>Nombre <input name="nombre" value="{{ materia ? materia.nombre : '' }}" placeholder="Matematicas" required></label>
+                <label>Area de conocimiento
+                    <select name="area">
+                        <option value="">Sin area</option>
+                        {% for a in areas %}
+                            <option value="{{ a.code }}" {{ materia and materia.area == a.code ? 'selected' : '' }}>{{ a.label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
             </div>
             <label>Descripcion <textarea name="descripcion" rows="3">{{ materia ? materia.descripcion : '' }}</textarea></label>
         </section>

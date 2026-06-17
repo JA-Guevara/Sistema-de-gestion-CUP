@@ -238,11 +238,14 @@ final class AsignacionController extends AbstractController
         $asignacionesDocente = [];
         $gruposDelDocente = 0;
         $limiteAlcanzado = false;
+        $docenteAreas = [];
         if ($gestion !== null && $docenteId > 0) {
             $docenteSel = $this->users->findById($docenteId);
             $asignacionesDocente = $this->asignacionesDocente->listByDocenteAndGestion($docenteId, (int) $gestion->id);
             $gruposDelDocente = count($this->asignacionesDocente->grupoIdsByDocente($docenteId, (int) $gestion->id));
             $limiteAlcanzado = $gruposDelDocente >= self::MAX_GRUPOS_DOCENTE;
+            $inscDocente = $this->inscripciones->findConfirmadaByUserAndGestion($docenteId, (int) $gestion->id, TipoPostulacion::DOCENTE);
+            $docenteAreas = $inscDocente?->docenteAreas ?? [];
         }
 
         return $this->render('@asignacion/docentes.html.twig', [
@@ -258,6 +261,7 @@ final class AsignacionController extends AbstractController
             'gruposDelDocente' => $gruposDelDocente,
             'maxGrupos' => self::MAX_GRUPOS_DOCENTE,
             'limiteAlcanzado' => $limiteAlcanzado,
+            'docenteAreas' => $docenteAreas,
             'csrf_token' => $this->csrf->issue(self::CSRF_INTENTION),
         ]);
     }

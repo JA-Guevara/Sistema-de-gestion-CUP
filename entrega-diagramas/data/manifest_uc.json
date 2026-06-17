@@ -1,0 +1,46 @@
+[
+  [
+    "UC_CONTEXTO.png",
+    "Diagrama de Contexto"
+  ],
+  [
+    "UC_GENERAL.png",
+    "Casos de Uso General"
+  ],
+  [
+    "UC_M_AUTENTICACION.png",
+    "Casos de Uso - Autenticacion y Seguridad"
+  ],
+  [
+    "UC_M_POSTULACIONES.png",
+    "Casos de Uso - Postulaciones"
+  ],
+  [
+    "UC_M_PAGOS.png",
+    "Casos de Uso - Pagos"
+  ],
+  [
+    "UC_M_DOCENTES.png",
+    "Casos de Uso - Docentes"
+  ],
+  [
+    "UC_M_ESTUDIANTES.png",
+    "Casos de Uso - Estudiantes"
+  ],
+  [
+    "UC_M_ASIGNACIONES.png",
+    "Casos de Uso - Asignaciones"
+  ],
+  [
+    "UC_M_NOTAS.png",
+    "Casos de Uso - Notas / Evaluaciones"
+  ],
+  [
+    "UC_M_ADMISIONES.png",
+    "Casos de Uso - Admisiones"
+  ],
+  [
+    "UC_M_REPORTES.png",
+    "Casos de Uso - Reportes / Dashboard"
+  ]
+]

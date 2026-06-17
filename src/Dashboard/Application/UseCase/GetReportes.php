@@ -6,8 +6,10 @@ namespace App\Dashboard\Application\UseCase;
 
 use App\Inscripcion\Domain\Catalog\EstadoInscripcion;
 use App\Inscripcion\Domain\Catalog\TipoPostulacion;
+use App\Academico\Materia\Infrastructure\Persistence\MateriaRepository;
 use App\Dashboard\Infrastructure\Persistence\ReporteRepository;
 use App\Gestion\Domain\Entity\Gestion;
+use App\Notas\Domain\Service\PromedioCalculator;
 
 /**
  * Arma el payload analítico del Dashboard/Reportes para una gestión y filtros
@@ -21,7 +23,7 @@ use App\Gestion\Domain\Entity\Gestion;
  */
 final readonly class GetReportes
 {
-    public function __construct(private ReporteRepository $repo)
+    public function __construct(private ReporteRepository $repo, private PromedioCalculator $calc, private MateriaRepository $materias)
     {
     }
 
@@ -32,6 +34,9 @@ final readonly class GetReportes
         $notaMinima = $gestion->configuracion?->notaMinimaAprobacion ?? 60;
         $cantidadExamenes = $gestion->configuracion?->cantidadExamenes ?? 3;
         $maxPorGrupo = $gestion->configuracion?->maxEstudiantesPorGrupo ?? 70;
+        $ponderaciones = $gestion->configuracion?->ponderacionesExamenes;
+        // Materias del CUP esperadas (activas): el estudiante debe tenerlas TODAS.
+        $materiasEsperadas = count($this->materias->listActive());
 
         $estudiantesBase = [];
         foreach ($this->repo->estudiantesDeGestion($gestionId, $carreraId) as $r) {
@@ -80,7 +85,7 @@ final readonly class GetReportes
             }
             $matId = (int) $r['materiaId'];
             $materiaNombre[$matId] = (string) $r['materiaNombre'];
-            $estudiantesBase[$insId]['materias'][$matId][] = (int) $r['valor'];
+            $estudiantesBase[$insId]['materias'][$matId][(int) $r['numeroExamen']] = (int) $r['valor'];
             if (!isset($estudiantesBase[$insId]['asignaciones'][$matId])) {
                 $estudiantesBase[$insId]['asignaciones'][$matId] = [
                     'materiaId' => $matId,
@@ -107,20 +112,31 @@ final readonly class GetReportes
             $promMaterias = [];
             $notasStudent = [];
             $completo = count($e['materias']) > 0;
+            // APROBADO del CUP = todas las materias completas y CADA una >= notaMinima.
+            $aproboTodas = true;
             $tieneAsignaciones = $e['asignaciones'] !== [];
 
             foreach ($e['materias'] as $matId => $valores) {
                 if ($valores === []) {
                     $completo = false;
+                    $aproboTodas = false;
                     continue;
                 }
 
-                $promMat = (int) round(array_sum($valores) / count($valores));
+                $valoresPorExamen = [];
+                for ($ex = 1; $ex <= $cantidadExamenes; $ex++) {
+                    $valoresPorExamen[$ex] = $valores[$ex] ?? null;
+                }
+                $eval = $this->calc->evaluarMateria($valoresPorExamen, $ponderaciones, $cantidadExamenes, $notaMinima);
+                $promMat = (int) $eval['promedio'];
                 $promMaterias[] = $promMat;
                 $notasStudent[$materiaNombre[$matId]] = $promMat;
-                $matCompleta = count($valores) >= $cantidadExamenes;
+                $matCompleta = $eval['contadas'] >= $cantidadExamenes;
                 if (!$matCompleta) {
                     $completo = false;
+                }
+                if ($promMat < $notaMinima) {
+                    $aproboTodas = false;
                 }
 
                 if (!isset($matAcum[$matId])) {
@@ -137,12 +153,18 @@ final readonly class GetReportes
                 }
             }
 
+            // Si le faltan materias del CUP (tiene menos que las activas), no esta
+            // completo: no puede aprobar aunque las que tiene esten bien.
+            if ($materiasEsperadas > 0 && count($e['materias']) < $materiasEsperadas) {
+                $completo = false;
+            }
+
             $global = $promMaterias !== [] ? (int) round(array_sum($promMaterias) / count($promMaterias)) : null;
 
             if ($global === null) {
                 $estado = 'INCOMPLETO';
                 $incompletos++;
-            } elseif ($completo && $global >= $notaMinima) {
+            } elseif ($completo && $aproboTodas) {
                 $estado = 'APROBADO';
                 $aprobados++;
                 $sumaGlobal += $global;

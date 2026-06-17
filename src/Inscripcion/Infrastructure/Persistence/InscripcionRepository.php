@@ -83,6 +83,22 @@ final readonly class InscripcionRepository
             );
     }
 
+    /**
+     * Todas las postulaciones de un tipo en una gestion (cualquier estado).
+     * Para la pestaña Docentes de la Admision Final.
+     *
+     * @return list<Inscripcion>
+     */
+    public function listByGestionTipo(int $gestionId, string $tipo): array
+    {
+        return $this->entityManager
+            ->getRepository(Inscripcion::class)
+            ->findBy(
+                ['gestion' => $gestionId, 'tipo' => $tipo],
+                ['apellidos' => 'ASC', 'nombres' => 'ASC'],
+            );
+    }
+
     public function findByUserAndGestion(int $userId, int $gestionId): ?Inscripcion
     {
         return $this->entityManager
@@ -112,6 +128,26 @@ final readonly class InscripcionRepository
             ->from(Inscripcion::class, 'i')
             ->where('i.gestion = :gestionId')
             ->setParameter('gestionId', $gestionId)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Cuenta las postulaciones de una gestion por tipo y estado. Se usa para
+     * obtener automaticamente el total de estudiantes CONFIRMADOS al generar
+     * grupos (sin cargar entidades).
+     */
+    public function countByGestionTipoEstado(int $gestionId, string $tipo, string $estado): int
+    {
+        return (int) $this->entityManager->createQueryBuilder()
+            ->select('COUNT(i.id)')
+            ->from(Inscripcion::class, 'i')
+            ->where('i.gestion = :gestionId')
+            ->andWhere('i.tipo = :tipo')
+            ->andWhere('i.estado = :estado')
+            ->setParameter('gestionId', $gestionId)
+            ->setParameter('tipo', $tipo)
+            ->setParameter('estado', $estado)
             ->getQuery()
             ->getSingleScalarResult();
     }

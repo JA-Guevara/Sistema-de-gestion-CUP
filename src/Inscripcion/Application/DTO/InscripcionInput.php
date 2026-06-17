@@ -30,6 +30,8 @@ final readonly class InscripcionInput
         public bool $docenteMaestria,
         public bool $docenteDiplomado,
         public ?string $docenteExperiencia,
+        /** @var list<string> codigos de area (AreaCatalog) que el docente esta habilitado a dictar */
+        public array $docenteAreas,
         public ?string $otros,
         public string $accion,
         public ?int $actorUserId,

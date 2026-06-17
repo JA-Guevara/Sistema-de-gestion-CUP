@@ -159,6 +159,12 @@
                             <label><input type="checkbox" name="docenteMaestria" value="1" {{ ins and ins.docenteMaestria ? 'checked' : '' }}> <span>Tengo maestria</span></label>
                             <label><input type="checkbox" name="docenteDiplomado" value="1" {{ ins and ins.docenteDiplomado ? 'checked' : '' }}> <span>Tengo diplomado en educacion superior</span></label>
                         </div>
+                        <p class="gestion-panel__hint" style="padding:8px 0 4px">Areas que puedes dictar <span style="color:#9b1c1c">*</span> (marca al menos una para presentar)</p>
+                        <div class="gestion-checks gestion-checks--days">
+                            {% for a in areas %}
+                                <label><input type="checkbox" name="docenteAreas[]" value="{{ a.code }}" {{ ins and ins.docenteAreas and a.code in ins.docenteAreas ? 'checked' : '' }}> <span>{{ a.label }}</span></label>
+                            {% endfor %}
+                        </div>
                         <label>Experiencia / observaciones
                             <textarea name="docenteExperiencia" rows="3" placeholder="Materias que puedes dictar, anios de experiencia...">{{ ins ? ins.docenteExperiencia : '' }}</textarea>
                         </label>

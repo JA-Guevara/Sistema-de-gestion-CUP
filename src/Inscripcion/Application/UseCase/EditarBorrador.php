@@ -66,11 +66,13 @@ final readonly class EditarBorrador
             $inscripcion->docenteMaestria = false;
             $inscripcion->docenteDiplomado = false;
             $inscripcion->docenteExperiencia = null;
+            $inscripcion->docenteAreas = null;
         } else {
             $inscripcion->docenteProfesion = $input->docenteProfesion;
             $inscripcion->docenteMaestria = $input->docenteMaestria;
             $inscripcion->docenteDiplomado = $input->docenteDiplomado;
             $inscripcion->docenteExperiencia = $input->docenteExperiencia;
+            $inscripcion->docenteAreas = $input->docenteAreas !== [] ? $input->docenteAreas : null;
             $inscripcion->carrera = null;
             $inscripcion->carreraSegunda = null;
             $inscripcion->colegioProcedencia = null;
@@ -82,6 +84,9 @@ final readonly class EditarBorrador
         if ($esPresentar) {
             if ($input->tipo === TipoPostulacion::DOCENTE && ($input->docenteProfesion === null || trim($input->docenteProfesion) === '')) {
                 throw new InscripcionException('Para presentar como docente debes indicar tu profesion o area.');
+            }
+            if ($input->tipo === TipoPostulacion::DOCENTE && $input->docenteAreas === []) {
+                throw new InscripcionException('Selecciona al menos un area de conocimiento que puedas dictar.');
             }
             if ($input->tipo === TipoPostulacion::ESTUDIANTE && $inscripcion->carrera === null) {
                 throw new InscripcionException('Selecciona una carrera para presentar como estudiante.');

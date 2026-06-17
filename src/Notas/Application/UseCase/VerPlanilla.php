@@ -9,13 +9,14 @@ use App\Academico\Materia\Infrastructure\Persistence\MateriaRepository;
 use App\Gestion\Infrastructure\Persistence\GestionRepository;
 use App\Notas\Application\Security\PlanillaAccessPolicy;
 use App\Notas\Domain\Exception\NotaException;
+use App\Notas\Domain\Service\PromedioCalculator;
 use App\Notas\Infrastructure\Persistence\AsignacionGrupoRepository;
 use App\Notas\Infrastructure\Persistence\NotaRepository;
 
 final readonly class VerPlanilla
 {
-    private const DEFAULT_EXAMENES = 2;
-    private const DEFAULT_NOTA_MINIMA = 51;
+    private const DEFAULT_EXAMENES = 3;
+    private const DEFAULT_NOTA_MINIMA = 60;
 
     public function __construct(
         private MateriaRepository $materias,
@@ -24,6 +25,7 @@ final readonly class VerPlanilla
         private AsignacionGrupoRepository $asignacionesGrupo,
         private NotaRepository $notas,
         private PlanillaAccessPolicy $accessPolicy,
+        private PromedioCalculator $calc,
     ) {
     }
 
@@ -65,29 +67,22 @@ final readonly class VerPlanilla
             $existentes[$nota->inscripcion->id][$nota->numeroExamen] = $nota->valor;
         }
 
+        $ponderaciones = $gestion->configuracion?->ponderacionesExamenes;
         $filas = [];
         foreach ($this->asignacionesGrupo->listByMateriaAndGrupo($materiaId, $grupoId) as $asignacion) {
             $inscripcion = $asignacion->inscripcion;
             $valores = [];
-            $suma = 0;
-            $contadas = 0;
             for ($examen = 1; $examen <= $cantidadExamenes; $examen++) {
-                $valor = $existentes[$inscripcion->id][$examen] ?? null;
-                $valores[$examen] = $valor;
-                if ($valor !== null) {
-                    $suma += $valor;
-                    $contadas++;
-                }
+                $valores[$examen] = $existentes[$inscripcion->id][$examen] ?? null;
             }
 
-            $promedio = $contadas > 0 ? (int) round($suma / $contadas) : null;
-            $aprobado = $contadas === $cantidadExamenes ? $promedio >= $notaMinima : null;
+            $eval = $this->calc->evaluarMateria($valores, $ponderaciones, $cantidadExamenes, $notaMinima);
 
             $filas[] = [
                 'inscripcion' => $inscripcion,
                 'valores' => $valores,
-                'promedio' => $promedio,
-                'aprobado' => $aprobado,
+                'promedio' => $eval['promedio'],
+                'aprobado' => $eval['aprobado'],
             ];
         }
 

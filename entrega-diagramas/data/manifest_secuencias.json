@@ -1,0 +1,304 @@
+[
+  {
+    "w_px": 2595,
+    "h_px": 2848,
+    "target_w": 701,
+    "target_h": 769,
+    "cu": "CU-01",
+    "titulo": "Gestionar Autenticacion y Cuenta",
+    "img": "png/SEC_CU-01.png",
+    "lifelines": [
+      "Usuario",
+      ": Vistas (Twig)",
+      ": LoginController",
+      ": SessionController",
+      ": LoginUser",
+      ": UserRepository",
+      ": Doctrine ORM + PostgreSQL"
+    ],
+    "n_msgs": 31
+  },
+  {
+    "w_px": 2933,
+    "h_px": 2276,
+    "target_w": 701,
+    "target_h": 544,
+    "cu": "CU-02",
+    "titulo": "Gestionar Usuarios y Seguridad",
+    "img": "png/SEC_CU-02.png",
+    "lifelines": [
+      "Administrador",
+      ": Vistas (Twig)",
+      ": UsuarioController",
+      ": CreateUser",
+      ": RoleRepository",
+      ": UserRepository",
+      ": RecordLogEntry",
+      ": Doctrine ORM + PostgreSQL"
+    ],
+    "n_msgs": 23
+  },
+  {
+    "w_px": 2636,
+    "h_px": 3728,
+    "target_w": 591,
+    "target_h": 835,
+    "cu": "CU-03",
+    "titulo": "Gestionar Estructura Academica",
+    "img": "png/SEC_CU-03.png",
+    "lifelines": [
+      "Administrador",
+      ": Vistas (Twig)",
+      ": GestionController",
+      ": Casos de Uso",
+      ": GestionRepository",
+      ": Doctrine ORM + PostgreSQL",
+      ": RecordLogEntry"
+    ],
+    "n_msgs": 42
+  },
+  {
+    "w_px": 3136,
+    "h_px": 5728,
+    "target_w": 457,
+    "target_h": 835,
+    "cu": "CU-04",
+    "titulo": "Gestionar Preinscripcion CUP",
+    "img": "png/SEC_CU-04.png",
+    "lifelines": [
+      "Postulante",
+      ": Vistas (Twig)",
+      ": InscripcionController",
+      ": CrearInscripcion | SubirDocumento | PresentarInscripcion",
+      ": InscripcionRepository | DocumentoRepository",
+      ": Doctrine ORM + PostgreSQL"
+    ],
+    "n_msgs": 67
+  },
+  {
+    "w_px": 2045,
+    "h_px": 3316,
+    "target_w": 515,
+    "target_h": 835,
+    "cu": "CU-05",
+    "titulo": "Gestionar Validacion Documental",
+    "img": "png/SEC_CU-05.png",
+    "lifelines": [
+      "Coordinador Academico",
+      ": Vistas (Twig)",
+      ": InscripcionController",
+      ": Casos de Uso",
+      ": Doctrine ORM + PostgreSQL"
+    ],
+    "n_msgs": 36
+  },
+  {
+    "w_px": 2971,
+    "h_px": 4984,
+    "target_w": 498,
+    "target_h": 835,
+    "cu": "CU-06",
+    "titulo": "Gestionar Pagos",
+    "img": "png/SEC_CU-06.png",
+    "lifelines": [
+      "Postulante",
+      "Coordinador Académico",
+      ": Vistas (Twig)",
+      ": PagoController",
+      ": Casos de Uso",
+      ": StripeGateway",
+      "Stripe Checkout",
+      ": Doctrine ORM + PostgreSQL"
+    ],
+    "n_msgs": 56
+  },
+  {
+    "w_px": 2824,
+    "h_px": 2768,
+    "target_w": 701,
+    "target_h": 687,
+    "cu": "CU-07",
+    "titulo": "Gestionar Postulantes",
+    "img": "png/SEC_CU-07.png",
+    "lifelines": [
+      "Coordinador Académico",
+      ": Vistas (Twig)",
+      ": InscripcionController",
+      ": Casos de Uso",
+      ": InscripcionRepository",
+      ": Doctrine ORM + PostgreSQL",
+      ": InscripcionEvents"
+    ],
+    "n_msgs": 30
+  },
+  {
+    "w_px": 2277,
+    "h_px": 3488,
+    "target_w": 545,
+    "target_h": 835,
+    "cu": "CU-08",
+    "titulo": "Gestionar Docentes",
+    "img": "png/SEC_CU-08.png",
+    "lifelines": [
+      "Coordinador Academico / Admin",
+      ": Vistas (admin_detalle.twig)",
+      ": InscripcionController",
+      ": Casos de Uso",
+      ": Doctrine ORM + PostgreSQL"
+    ],
+    "n_msgs": 39
+  },
+  {
+    "w_px": 2859,
+    "h_px": 5968,
+    "target_w": 400,
+    "target_h": 835,
+    "cu": "CU-09",
+    "titulo": "Gestionar Planificacion Academica",
+    "img": "png/SEC_CU-09.png",
+    "lifelines": [
+      "Coordinador Academico",
+      ": Vistas (Twig)",
+      ": GrupoController",
+      ": AsignacionController",
+      ": HorarioController",
+      ": Casos de Uso (Dominio)",
+      ": Doctrine ORM + PostgreSQL"
+    ],
+    "n_msgs": 70
+  },
+  {
+    "w_px": 2279,
+    "h_px": 4208,
+    "target_w": 452,
+    "target_h": 835,
+    "cu": "CU-10",
+    "titulo": "Gestionar Evaluaciones",
+    "img": "png/SEC_CU-10.png",
+    "lifelines": [
+      "Docente",
+      ": Vistas (Twig)",
+      ": NotaController",
+      ": Casos de Uso",
+      ": PlanillaAccessPolicy",
+      ": Doctrine ORM + PostgreSQL"
+    ],
+    "n_msgs": 48
+  },
+  {
+    "w_px": 4248,
+    "h_px": 3568,
+    "target_w": 701,
+    "target_h": 589,
+    "cu": "CU-11",
+    "titulo": "Consultar Información Académica",
+    "img": "png/SEC_CU-11.png",
+    "lifelines": [
+      "Postulante",
+      ": Vista boletin.html.twig",
+      ": Vista horario.html.twig",
+      ": NotaController",
+      ": VerBoletin",
+      ": VerHorarioEstudiante",
+      ": GestionRepository + InscripcionRepository + AsignacionGrupoRepository + NotaRepository + HorarioRepository",
+      ": Doctrine ORM + PostgreSQL"
+    ],
+    "n_msgs": 40
+  },
+  {
+    "w_px": 3717,
+    "h_px": 2208,
+    "target_w": 701,
+    "target_h": 416,
+    "cu": "CU-12",
+    "titulo": "Consultar Carga Academica",
+    "img": "png/SEC_CU-12.png",
+    "lifelines": [
+      "Docente",
+      ": Vistas (Twig)",
+      ": NotaController",
+      ": ListMateriasDocente",
+      ": AsignacionController",
+      ": ShowGrupoDetalle",
+      ": AsignacionDocenteRepository",
+      ": AsignacionGrupoRepository",
+      ": Doctrine ORM + PostgreSQL"
+    ],
+    "n_msgs": 23
+  },
+  {
+    "w_px": 3679,
+    "h_px": 2848,
+    "target_w": 701,
+    "target_h": 543,
+    "cu": "CU-13",
+    "titulo": "Ejecutar Admision Final",
+    "img": "png/SEC_CU-13.png",
+    "lifelines": [
+      "Coordinador Academico",
+      ": Admin Detalle Inscripcion (Twig)",
+      ": InscripcionController",
+      ": ResolverResultadoAdmision",
+      ": ConfirmarInscripcion",
+      ": RechazarInscripcion",
+      ": Doctrine ORM + PostgreSQL",
+      ": InscripcionEvents (Bitacora)"
+    ],
+    "n_msgs": 31
+  },
+  {
+    "w_px": 2367,
+    "h_px": 1248,
+    "target_w": 701,
+    "target_h": 369,
+    "cu": "CU-14",
+    "titulo": "Consultar Resultados de Admision",
+    "img": "png/SEC_CU-14.png",
+    "lifelines": [
+      "Postulante",
+      ": Vista (Twig)",
+      ": InscripcionController",
+      ": VerInscripcion",
+      ": InscripcionRepository",
+      ": Doctrine ORM + PostgreSQL"
+    ],
+    "n_msgs": 11
+  },
+  {
+    "w_px": 2712,
+    "h_px": 2768,
+    "target_w": 701,
+    "target_h": 715,
+    "cu": "CU-15",
+    "titulo": "Gestionar Reportes e Indicadores",
+    "img": "png/SEC_CU-15.png",
+    "lifelines": [
+      "Autoridad/Coordinador",
+      ": Vistas (Twig)",
+      ": DashboardController",
+      ": ExportController",
+      ": Casos de Uso",
+      ": Repositorios",
+      ": Doctrine ORM + PostgreSQL"
+    ],
+    "n_msgs": 30
+  },
+  {
+    "w_px": 2310,
+    "h_px": 2368,
+    "target_w": 701,
+    "target_h": 718,
+    "cu": "CU-16",
+    "titulo": "Gestionar Auditoria del Sistema",
+    "img": "png/SEC_CU-16.png",
+    "lifelines": [
+      "Administrador",
+      ": Vistas (Twig)",
+      ": BitacoraController",
+      ": QueryLog",
+      ": LogEntryRepository",
+      ": Doctrine ORM + PostgreSQL"
+    ],
+    "n_msgs": 25
+  }
+]

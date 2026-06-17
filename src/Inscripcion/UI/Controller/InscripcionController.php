@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Inscripcion\UI\Controller;
 
+use App\Academico\Materia\Domain\Catalog\AreaCatalog;
 use App\Auth\Entity\User;
 use App\Auth\Infrastructure\Persistence\UserRepository;
 use App\Auth\Infrastructure\Security\CsrfManager;
@@ -1098,6 +1099,7 @@ final class InscripcionController extends AbstractController
             'carreras' => $carrerasDisponibles,
             'inscripcionAbierta' => $inscripcionAbierta,
             'inscripcion' => $inscripcion,
+            'areas' => AreaCatalog::all(),
             'csrf_token' => $this->csrf->issue(self::CSRF_INTENTION),
         ]);
     }

@@ -83,6 +83,15 @@ class Inscripcion
     #[ORM\JoinColumn(name: 'carrera_segunda_id', nullable: true)]
     public ?Carrera $carreraSegunda = null;
 
+    /** Carrera adjudicada por la Admision Final (1ra o 2da opcion). Null si no admitido. */
+    #[ORM\ManyToOne(targetEntity: Carrera::class)]
+    #[ORM\JoinColumn(name: 'carrera_admitida_id', nullable: true, onDelete: 'SET NULL')]
+    public ?Carrera $carreraAdmitida = null;
+
+    /** Resultado de la Admision Final (ResultadoAdmision). Null si aun no se proceso. */
+    #[ORM\Column(length: 30, nullable: true)]
+    public ?string $resultadoAdmision = null;
+
     #[ORM\Column(length: 120, nullable: true)]
     public ?string $colegioProcedencia = null;
 
@@ -105,6 +114,15 @@ class Inscripcion
 
     #[ORM\Column(type: 'text', nullable: true)]
     public ?string $docenteExperiencia = null;
+
+    /**
+     * Areas de conocimiento (AreaCatalog) que el docente esta habilitado a dictar.
+     * Se valida contra el area de la materia al asignarlo.
+     *
+     * @var list<string>|null
+     */
+    #[ORM\Column(type: 'json', nullable: true)]
+    public ?array $docenteAreas = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
     public ?string $otros = null;

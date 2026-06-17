@@ -1,0 +1,34 @@
+{
+  "actividades": [
+    [
+      "ACT_INSCRIPCION.png",
+      "Proceso de Inscripcion"
+    ],
+    [
+      "ACT_PAGO.png",
+      "Proceso de Pago"
+    ],
+    [
+      "ACT_ADMISION.png",
+      "Proceso de Admision"
+    ],
+    [
+      "ACT_ASIGNACION.png",
+      "Proceso de Asignacion Academica"
+    ],
+    [
+      "ACT_EVALUACION.png",
+      "Proceso de Evaluacion"
+    ]
+  ],
+  "estados": [
+    [
+      "EST_POSTULACION.png",
+      "Estados de la Postulacion"
+    ],
+    [
+      "EST_ESTUDIANTE.png",
+      "Estados del Estudiante"
+    ]
+  ]
+}

@@ -166,6 +166,31 @@ final readonly class AsignacionGrupoRepository
     }
 
     /**
+     * Mapa inscripcionId => lista de materiaIds asignadas al estudiante en la
+     * gestion. Para calcular en lote el promedio/estado en la Admision Final.
+     *
+     * @return array<int, list<int>>
+     */
+    public function mapMateriasByInscripcion(int $gestionId): array
+    {
+        $rows = $this->entityManager->createQueryBuilder()
+            ->select('DISTINCT IDENTITY(a.inscripcion) AS insId, IDENTITY(a.materia) AS materiaId')
+            ->from(AsignacionGrupo::class, 'a')
+            ->join('a.inscripcion', 'i')
+            ->where('i.gestion = :gestionId')
+            ->setParameter('gestionId', $gestionId)
+            ->getQuery()
+            ->getArrayResult();
+
+        $out = [];
+        foreach ($rows as $row) {
+            $out[(int) $row['insId']][] = (int) $row['materiaId'];
+        }
+
+        return $out;
+    }
+
+    /**
      * Mapa inscripcionId => codigo del grupo actual del estudiante en la gestion
      * (un estudiante esta en un solo grupo). Para mostrar "grupo actual" al
      * reasignar.

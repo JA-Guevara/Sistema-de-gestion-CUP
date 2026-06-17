@@ -98,7 +98,7 @@ final readonly class ReporteRepository
     public function notasEstudiantes(int $gestionId, ?int $carreraId, ?int $materiaId, ?int $docenteId = null): array
     {
         $qb = $this->em->createQueryBuilder()
-            ->select('IDENTITY(n.inscripcion) AS insId, i.ci AS ci, i.nombres AS nombres, i.apellidos AS apellidos, i.email AS email, IDENTITY(i.carrera) AS carreraId, c.nombre AS carreraNombre, IDENTITY(n.materia) AS materiaId, m.nombre AS materiaNombre, n.valor AS valor')
+            ->select('IDENTITY(n.inscripcion) AS insId, i.ci AS ci, i.nombres AS nombres, i.apellidos AS apellidos, i.email AS email, IDENTITY(i.carrera) AS carreraId, c.nombre AS carreraNombre, IDENTITY(n.materia) AS materiaId, m.nombre AS materiaNombre, n.numeroExamen AS numeroExamen, n.valor AS valor')
             ->from(Nota::class, 'n')
             ->join('n.inscripcion', 'i')
             ->join('n.materia', 'm')

@@ -10,6 +10,7 @@ final readonly class MateriaInput
         public string $codigo,
         public string $nombre,
         public ?string $descripcion,
+        public ?string $area,
         public ?int $actorUserId,
     ) {
     }

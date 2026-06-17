@@ -19,6 +19,7 @@ twig:
         '%kernel.project_dir%/src/Usuario/UI/View': usuario
         '%kernel.project_dir%/src/Notas/UI/View': notas
         '%kernel.project_dir%/src/Asignacion/UI/View': asignacion
+        '%kernel.project_dir%/src/Admision/UI/View': admision
 
 when@test:
     twig:

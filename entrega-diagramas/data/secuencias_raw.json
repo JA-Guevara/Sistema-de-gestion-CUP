@@ -1,0 +1,4326 @@
+{
+  "summary": "Extrae el flujo real (fiel al codigo) para generar un diagrama de secuencia UML por cada uno de los 16 casos de uso de SIGECUP-FICCT",
+  "agentCount": 16,
+  "logs": [],
+  "result": {
+    "secuencias": [
+      {
+        "cu": "CU-01",
+        "titulo": "Gestionar Autenticacion y Cuenta",
+        "lifelines": [
+          {
+            "id": "usuario",
+            "nombre": "Usuario",
+            "tipo": "actor"
+          },
+          {
+            "id": "vista",
+            "nombre": ": Vistas (Twig)",
+            "tipo": "boundary"
+          },
+          {
+            "id": "loginctrl",
+            "nombre": ": LoginController",
+            "tipo": "control"
+          },
+          {
+            "id": "sessionctrl",
+            "nombre": ": SessionController",
+            "tipo": "control"
+          },
+          {
+            "id": "loginuc",
+            "nombre": ": LoginUser",
+            "tipo": "control"
+          },
+          {
+            "id": "userrepo",
+            "nombre": ": UserRepository",
+            "tipo": "entity"
+          },
+          {
+            "id": "db",
+            "nombre": ": Doctrine ORM + PostgreSQL",
+            "tipo": "database"
+          }
+        ],
+        "mensajes": [
+          {
+            "de": "usuario",
+            "a": "loginctrl",
+            "txt": "GET /auth/login",
+            "tipo": "call"
+          },
+          {
+            "de": "loginctrl",
+            "a": "vista",
+            "txt": "render(@auth/login.html.twig, [csrf_token])",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "usuario",
+            "txt": "login form + csrf_token",
+            "tipo": "return"
+          },
+          {
+            "de": "usuario",
+            "a": "loginctrl",
+            "txt": "POST /auth/login [email, password, _csrf_token]",
+            "tipo": "call"
+          },
+          {
+            "de": "loginctrl",
+            "a": "loginctrl",
+            "txt": "self: validate(CSRF_INTENTION, _csrf_token)",
+            "tipo": "self"
+          },
+          {
+            "de": "loginctrl",
+            "a": "loginuc",
+            "txt": "execute(LoginRequest)",
+            "tipo": "call"
+          },
+          {
+            "de": "loginuc",
+            "a": "userrepo",
+            "txt": "findByEmail(email)",
+            "tipo": "call"
+          },
+          {
+            "de": "userrepo",
+            "a": "db",
+            "txt": "SELECT * FROM users WHERE email = ?",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "userrepo",
+            "txt": "User entity",
+            "tipo": "return"
+          },
+          {
+            "de": "userrepo",
+            "a": "loginuc",
+            "txt": "User",
+            "tipo": "return"
+          },
+          {
+            "de": "loginuc",
+            "a": "loginuc",
+            "txt": "self: password_verify(password, passwordHash)",
+            "tipo": "self"
+          },
+          {
+            "de": "loginuc",
+            "a": "loginuc",
+            "txt": "self: resetFailedAttempts(user)",
+            "tipo": "self"
+          },
+          {
+            "de": "loginuc",
+            "a": "userrepo",
+            "txt": "save(user)",
+            "tipo": "call"
+          },
+          {
+            "de": "userrepo",
+            "a": "db",
+            "txt": "UPDATE users SET failedLoginAttempts = 0",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "userrepo",
+            "txt": "success",
+            "tipo": "return"
+          },
+          {
+            "de": "userrepo",
+            "a": "loginuc",
+            "txt": "void",
+            "tipo": "return"
+          },
+          {
+            "de": "loginuc",
+            "a": "loginctrl",
+            "txt": "User",
+            "tipo": "return"
+          },
+          {
+            "de": "loginctrl",
+            "a": "loginctrl",
+            "txt": "self: session.migrate(true)",
+            "tipo": "self"
+          },
+          {
+            "de": "loginctrl",
+            "a": "loginctrl",
+            "txt": "self: session.set(auth_user_id, lastLoginAt)",
+            "tipo": "self"
+          },
+          {
+            "de": "loginctrl",
+            "a": "userrepo",
+            "txt": "save(user)",
+            "tipo": "call"
+          },
+          {
+            "de": "userrepo",
+            "a": "db",
+            "txt": "UPDATE users SET currentSessionId, lastLoginAt",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "userrepo",
+            "txt": "success",
+            "tipo": "return"
+          },
+          {
+            "de": "userrepo",
+            "a": "loginctrl",
+            "txt": "void",
+            "tipo": "return"
+          },
+          {
+            "de": "loginctrl",
+            "a": "usuario",
+            "txt": "redirect(home) 302",
+            "tipo": "return"
+          },
+          {
+            "de": "usuario",
+            "a": "sessionctrl",
+            "txt": "GET /auth/logout",
+            "tipo": "call"
+          },
+          {
+            "de": "sessionctrl",
+            "a": "userrepo",
+            "txt": "findById(userId)",
+            "tipo": "call"
+          },
+          {
+            "de": "userrepo",
+            "a": "db",
+            "txt": "SELECT * FROM users WHERE id = ?",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "userrepo",
+            "txt": "User entity",
+            "tipo": "return"
+          },
+          {
+            "de": "userrepo",
+            "a": "sessionctrl",
+            "txt": "User",
+            "tipo": "return"
+          },
+          {
+            "de": "sessionctrl",
+            "a": "sessionctrl",
+            "txt": "self: session.invalidate()",
+            "tipo": "self"
+          },
+          {
+            "de": "sessionctrl",
+            "a": "usuario",
+            "txt": "redirect(auth_login) 302",
+            "tipo": "return"
+          }
+        ]
+      },
+      {
+        "cu": "CU-02",
+        "titulo": "Gestionar Usuarios y Seguridad",
+        "lifelines": [
+          {
+            "id": "admin",
+            "nombre": "Administrador",
+            "tipo": "actor"
+          },
+          {
+            "id": "vista",
+            "nombre": ": Vistas (Twig)",
+            "tipo": "boundary"
+          },
+          {
+            "id": "usuarioCtrl",
+            "nombre": ": UsuarioController",
+            "tipo": "control"
+          },
+          {
+            "id": "createUser",
+            "nombre": ": CreateUser",
+            "tipo": "control"
+          },
+          {
+            "id": "roleRepo",
+            "nombre": ": RoleRepository",
+            "tipo": "control"
+          },
+          {
+            "id": "userRepo",
+            "nombre": ": UserRepository",
+            "tipo": "control"
+          },
+          {
+            "id": "audit",
+            "nombre": ": RecordLogEntry",
+            "tipo": "control"
+          },
+          {
+            "id": "bd",
+            "nombre": ": Doctrine ORM + PostgreSQL",
+            "tipo": "database"
+          }
+        ],
+        "mensajes": [
+          {
+            "de": "admin",
+            "a": "vista",
+            "txt": "POST /admin/usuarios/nuevo (con email, nombre, apellido, password, roleIds[])",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "usuarioCtrl",
+            "txt": "new(Request): UsuarioController::new()",
+            "tipo": "call"
+          },
+          {
+            "de": "usuarioCtrl",
+            "a": "createUser",
+            "txt": "execute(UsuarioRequest)",
+            "tipo": "call"
+          },
+          {
+            "de": "createUser",
+            "a": "roleRepo",
+            "txt": "findByIds(roleIds): List<Role>",
+            "tipo": "call"
+          },
+          {
+            "de": "roleRepo",
+            "a": "bd",
+            "txt": "createQueryBuilder + WHERE role_id IN (:ids) AND active=true",
+            "tipo": "call"
+          },
+          {
+            "de": "bd",
+            "a": "roleRepo",
+            "txt": "List<Role>",
+            "tipo": "return"
+          },
+          {
+            "de": "roleRepo",
+            "a": "createUser",
+            "txt": "List<Role>",
+            "tipo": "return"
+          },
+          {
+            "de": "createUser",
+            "a": "createUser",
+            "txt": "validateRequiredData(input), validateEmail(input), validatePassword(input)",
+            "tipo": "self"
+          },
+          {
+            "de": "createUser",
+            "a": "userRepo",
+            "txt": "findByEmail(email): ?User",
+            "tipo": "call"
+          },
+          {
+            "de": "userRepo",
+            "a": "bd",
+            "txt": "findOneBy(['email' => email])",
+            "tipo": "call"
+          },
+          {
+            "de": "bd",
+            "a": "userRepo",
+            "txt": "?User",
+            "tipo": "return"
+          },
+          {
+            "de": "userRepo",
+            "a": "createUser",
+            "txt": "?User",
+            "tipo": "return"
+          },
+          {
+            "de": "createUser",
+            "a": "createUser",
+            "txt": "createUser(input, roles): User instance + syncRoles(roles)",
+            "tipo": "self"
+          },
+          {
+            "de": "createUser",
+            "a": "userRepo",
+            "txt": "save(user): void",
+            "tipo": "call"
+          },
+          {
+            "de": "userRepo",
+            "a": "bd",
+            "txt": "persist(user) + flush()",
+            "tipo": "call"
+          },
+          {
+            "de": "bd",
+            "a": "userRepo",
+            "txt": "INSERT INTO users + INSERT INTO user_roles",
+            "tipo": "return"
+          },
+          {
+            "de": "userRepo",
+            "a": "createUser",
+            "txt": "void",
+            "tipo": "return"
+          },
+          {
+            "de": "createUser",
+            "a": "audit",
+            "txt": "execute(ActionCatalog::CREATE, ModuleCatalog::USUARIOS, message, actorUserId)",
+            "tipo": "call"
+          },
+          {
+            "de": "audit",
+            "a": "bd",
+            "txt": "INSERT INTO bitacora (action, module, message, actor_id, timestamp)",
+            "tipo": "call"
+          },
+          {
+            "de": "bd",
+            "a": "audit",
+            "txt": "void",
+            "tipo": "return"
+          },
+          {
+            "de": "audit",
+            "a": "createUser",
+            "txt": "void",
+            "tipo": "return"
+          },
+          {
+            "de": "createUser",
+            "a": "usuarioCtrl",
+            "txt": "User (creado exitosamente)",
+            "tipo": "return"
+          },
+          {
+            "de": "usuarioCtrl",
+            "a": "admin",
+            "txt": "redirect('usuario_show', ['id' => user.id]) + flash success",
+            "tipo": "return"
+          }
+        ],
+        "fragmentos": [
+          {
+            "label": "FLUJO PRINCIPAL: Crear Usuario con Roles",
+            "from": 0,
+            "to": 23
+          }
+        ]
+      },
+      {
+        "cu": "CU-03",
+        "titulo": "Gestionar Estructura Academica",
+        "lifelines": [
+          {
+            "id": "admin",
+            "nombre": "Administrador",
+            "tipo": "actor"
+          },
+          {
+            "id": "vista",
+            "nombre": ": Vistas (Twig)",
+            "tipo": "boundary"
+          },
+          {
+            "id": "ctrl",
+            "nombre": ": GestionController",
+            "tipo": "control"
+          },
+          {
+            "id": "uc",
+            "nombre": ": Casos de Uso",
+            "tipo": "control"
+          },
+          {
+            "id": "repo",
+            "nombre": ": GestionRepository",
+            "tipo": "control"
+          },
+          {
+            "id": "db",
+            "nombre": ": Doctrine ORM + PostgreSQL",
+            "tipo": "database"
+          },
+          {
+            "id": "audit",
+            "nombre": ": RecordLogEntry",
+            "tipo": "control"
+          }
+        ],
+        "mensajes": [
+          {
+            "de": "admin",
+            "a": "vista",
+            "txt": "completaFormulario(codigo, nombre, descripcion, config, periodos, carreras)",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "ctrl",
+            "txt": "POST /admin/gestiones/nueva",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "createGestion.execute(GestionRequest)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "findByCodigo(codigo)",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "db",
+            "txt": "SELECT * FROM gestiones WHERE codigo=?",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repo",
+            "txt": "gestion | null",
+            "tipo": "return"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "null",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "listActive() [para carreras del catalogo]",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "db",
+            "txt": "SELECT * FROM carreras WHERE activa=true",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repo",
+            "txt": "carreras[]",
+            "tipo": "return"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "carreras[]",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "validateGestionData() / validateConfiguration() / validateCareers()",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "crearGestion(input, catalogCareers) -> Gestion",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "save(gestion)",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "db",
+            "txt": "INSERT INTO gestiones + INSERT INTO configuraciones_gestion + INSERT INTO periodos_gestion + INSERT INTO carreras_gestion + INSERT INTO cupos_gestion",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repo",
+            "txt": "id generado",
+            "tipo": "return"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "void",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "audit",
+            "txt": "execute(CREATE, GESTIONES_CUP, mensaje, actorUserId)",
+            "tipo": "call"
+          },
+          {
+            "de": "audit",
+            "a": "uc",
+            "txt": "void",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "Gestion (creada)",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "vista",
+            "txt": "render detalle.html.twig + flash success",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "admin",
+            "txt": "HTML detalle (estado=BORRADOR, botones: activar, editar)",
+            "tipo": "return"
+          },
+          {
+            "de": "admin",
+            "a": "vista",
+            "txt": "clickea boton Activar",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "ctrl",
+            "txt": "POST /admin/gestiones/{id}/activar",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "activateGestion.execute(GestionActionInput)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "findById(gestionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "db",
+            "txt": "SELECT * FROM gestiones WHERE id=?",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repo",
+            "txt": "gestion",
+            "tipo": "return"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "gestion",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "validateGestionState() / validateConfiguration()",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "closeCurrentGestionesExcept(gestion)",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "void",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "gestion.activate(actorUserId) + addHistory(ACTIVADA)",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "save(gestion)",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "db",
+            "txt": "UPDATE gestiones SET estado=CONFIGURACION, fechaActivacion=NOW()",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repo",
+            "txt": "OK",
+            "tipo": "return"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "void",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "audit",
+            "txt": "execute(APPROVE, GESTIONES_CUP, 'Se activo...', actorUserId)",
+            "tipo": "call"
+          },
+          {
+            "de": "audit",
+            "a": "uc",
+            "txt": "void",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "Gestion (estado=CONFIGURACION)",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "vista",
+            "txt": "redirect + flash 'Accion ejecutada correctamente'",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "admin",
+            "txt": "HTTP 302 -> GET /admin/gestiones/{id}",
+            "tipo": "return"
+          }
+        ]
+      },
+      {
+        "cu": "CU-04",
+        "titulo": "Gestionar Preinscripcion CUP",
+        "lifelines": [
+          {
+            "id": "post",
+            "nombre": "Postulante",
+            "tipo": "actor"
+          },
+          {
+            "id": "vista",
+            "nombre": ": Vistas (Twig)",
+            "tipo": "boundary"
+          },
+          {
+            "id": "ctrl",
+            "nombre": ": InscripcionController",
+            "tipo": "control"
+          },
+          {
+            "id": "uc",
+            "nombre": ": CrearInscripcion | SubirDocumento | PresentarInscripcion",
+            "tipo": "control"
+          },
+          {
+            "id": "repo",
+            "nombre": ": InscripcionRepository | DocumentoRepository",
+            "tipo": "database"
+          },
+          {
+            "id": "db",
+            "nombre": ": Doctrine ORM + PostgreSQL",
+            "tipo": "database"
+          }
+        ],
+        "mensajes": [
+          {
+            "de": "post",
+            "a": "vista",
+            "txt": "GET /inscripcion/formulario",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "ctrl",
+            "txt": "formulario(Request)",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "gestiones.findActive()",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "SELECT gestion WHERE estado=ABIERTA_INSCRIPCION",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "Gestion instance",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "vista",
+            "txt": "render(@inscripcion/formulario.html.twig)",
+            "tipo": "return"
+          },
+          {
+            "de": "vista",
+            "a": "post",
+            "txt": "formulario HTML + csrf_token",
+            "tipo": "return"
+          },
+          {
+            "de": "post",
+            "a": "vista",
+            "txt": "POST /inscripcion/formulario (nombres, apellidos, ci, email, carrera, turno, etc.)",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "ctrl",
+            "txt": "formulario(Request POST)",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "ctrl",
+            "txt": "isCsrfValid(request)",
+            "tipo": "self"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "crearInscripcion.execute(InscripcionInput, User)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "findActive() gestion",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "Gestion",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "validateGestionActiva(gestion)",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "validateInscripcionAbierta(gestion)",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "validateDatosComunes(input)",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "validateCarreraEnGestion(gestion, carreraId)",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "validateCupoDisponible(gestion)",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "createInscripcion(input, user, gestion, carrera)",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "inscripcion.estado = PRESENTADA | BORRADOR",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "inscripciones.save(inscripcion)",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "db",
+            "txt": "persist + flush (INSERT inscripcion)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repo",
+            "txt": "id asignado",
+            "tipo": "return"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "void",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "agendarRevisionAutomatica.execute(inscripcion) [si esPresentar]",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "Inscripcion instance",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "vista",
+            "txt": "addFlash(success, mensaje) + redirectToRoute(inscripcion_index)",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "post",
+            "txt": "302 redirect /inscripcion",
+            "tipo": "return"
+          },
+          {
+            "de": "post",
+            "a": "vista",
+            "txt": "POST /inscripcion/{id}/documentos/subir (archivo, nombreDocumento)",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "ctrl",
+            "txt": "subirDocumento(Request, inscripcionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "ctrl",
+            "txt": "isCsrfValid(request)",
+            "tipo": "self"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "verInscripcion.executeById(id)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "inscripciones.findById(id)",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "db",
+            "txt": "SELECT inscripcion WHERE id",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repo",
+            "txt": "Inscripcion",
+            "tipo": "return"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "Inscripcion",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "Inscripcion",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "subirDocumento.execute(inscripcion, file, nombre, actorUserId)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "validar extension + tamanio archivo",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "crear Documento instance",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "file.move(dir, filename)",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "documentos.save(documento)",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "db",
+            "txt": "persist + flush (INSERT documento)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repo",
+            "txt": "id asignado",
+            "tipo": "return"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "void",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "Documento",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "vista",
+            "txt": "addFlash(success) + redirectToRoute(inscripcion_ver, id)",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "post",
+            "txt": "302 redirect /inscripcion/{id}",
+            "tipo": "return"
+          },
+          {
+            "de": "post",
+            "a": "vista",
+            "txt": "POST /inscripcion/presentar/{id}",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "ctrl",
+            "txt": "presentar(Request, inscripcionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "ctrl",
+            "txt": "isCsrfValid(request)",
+            "tipo": "self"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "presentarInscripcion.execute(inscripcionId, actorUserId)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "inscripciones.findById(inscripcionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "db",
+            "txt": "SELECT inscripcion WHERE id",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repo",
+            "txt": "Inscripcion",
+            "tipo": "return"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "Inscripcion",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "validar user.id == actorUserId",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "validar isBorrador()",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "inscripcion.presentar() [estado = PRESENTADA]",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "agendarRevisionAutomatica.execute(inscripcion)",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "inscripciones.flush()",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "db",
+            "txt": "UPDATE inscripcion SET estado=PRESENTADA",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repo",
+            "txt": "updated",
+            "tipo": "return"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "void",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "cita: DateTimeImmutable | null",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "vista",
+            "txt": "addFlash(success, cita formatted) + redirectToRoute(inscripcion_ver, id)",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "post",
+            "txt": "302 redirect /inscripcion/{id} (detalle con estado PRESENTADA)",
+            "tipo": "return"
+          }
+        ]
+      },
+      {
+        "cu": "CU-05",
+        "titulo": "Gestionar Validacion Documental",
+        "lifelines": [
+          {
+            "id": "actor",
+            "nombre": "Coordinador Academico",
+            "tipo": "actor"
+          },
+          {
+            "id": "view",
+            "nombre": ": Vistas (Twig)",
+            "tipo": "boundary"
+          },
+          {
+            "id": "ctrl",
+            "nombre": ": InscripcionController",
+            "tipo": "control"
+          },
+          {
+            "id": "uc",
+            "nombre": ": Casos de Uso",
+            "tipo": "control"
+          },
+          {
+            "id": "db",
+            "nombre": ": Doctrine ORM + PostgreSQL",
+            "tipo": "database"
+          }
+        ],
+        "mensajes": [
+          {
+            "de": "actor",
+            "a": "ctrl",
+            "txt": "POST /admin/{id} - adminDetalle(id)",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "db",
+            "txt": "inscripciones.findById(id)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "ctrl",
+            "txt": "Inscripcion(id, documentos[], verificaciones[])",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "view",
+            "txt": "render('admin_detalle.html.twig', inscripcion)",
+            "tipo": "call"
+          },
+          {
+            "de": "view",
+            "a": "actor",
+            "txt": "Muestra detalle: documentos y formulario acta",
+            "tipo": "return"
+          },
+          {
+            "de": "actor",
+            "a": "ctrl",
+            "txt": "POST /admin/documentos/{documentoId}/revisar - revisarDocumento(documentoId, estado, observacion)",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "revisarDocumento.execute(documentoId, estado, observacion, actorUserId)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "documentos.findById(documentoId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "Documento(id, estado)",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "documento.revisar(estado, observacion)",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "documentos.save(documento)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "flush()",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "OK",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "view",
+            "txt": "addFlash('success', 'Documento revisado')",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "view",
+            "txt": "redirect(inscripcion_admin_detalle)",
+            "tipo": "call"
+          },
+          {
+            "de": "actor",
+            "a": "ctrl",
+            "txt": "POST /admin/{id}/acta - guardarActa(id, estados[], observaciones[])",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "guardarActaRecepcion.execute(ActaRecepcionInput(id, estados, observaciones, actorUserId))",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "inscripciones.findById(id)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "Inscripcion(verificaciones[])",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "Por cada requisito: crear o actualizar VerificacionDocumento(requisitoCodigo, estado, observacion)",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "verificaciones.saveMany(verificaciones[])",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "flush()",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "OK",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "view",
+            "txt": "addFlash('success', 'Acta de recepcion guardada')",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "view",
+            "txt": "redirect(inscripcion_admin_detalle)",
+            "tipo": "call"
+          },
+          {
+            "de": "actor",
+            "a": "ctrl",
+            "txt": "POST /admin/{id}/validar - validar(id, actorUserId)",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "validarInscripcion.execute(id, actorUserId)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "inscripciones.findById(id)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "Inscripcion(estado=PRESENTADA, verificaciones[])",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "inscripcion.actaConforme() - valida obligatorios ENTREGADOS",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "inscripcion.validar(actorUserId) - estado=VALIDADA",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "inscripciones.save(inscripcion)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "flush()",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "OK",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "view",
+            "txt": "addFlash('success', 'Documentacion aprobada...')",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "view",
+            "txt": "redirect(inscripcion_admin_detalle)",
+            "tipo": "call"
+          }
+        ],
+        "fragmentos": [
+          {
+            "label": "alt: Rechazo (flujo alternativo)",
+            "from": 34,
+            "to": 37
+          }
+        ]
+      },
+      {
+        "cu": "CU-06",
+        "titulo": "Gestionar Pagos",
+        "lifelines": [
+          {
+            "id": "post",
+            "nombre": "Postulante",
+            "tipo": "actor"
+          },
+          {
+            "id": "coord",
+            "nombre": "Coordinador Académico",
+            "tipo": "actor"
+          },
+          {
+            "id": "vista",
+            "nombre": ": Vistas (Twig)",
+            "tipo": "boundary"
+          },
+          {
+            "id": "ctrl",
+            "nombre": ": PagoController",
+            "tipo": "control"
+          },
+          {
+            "id": "uc",
+            "nombre": ": Casos de Uso",
+            "tipo": "control"
+          },
+          {
+            "id": "stripe_gw",
+            "nombre": ": StripeGateway",
+            "tipo": "external"
+          },
+          {
+            "id": "stripe",
+            "nombre": "Stripe Checkout",
+            "tipo": "external"
+          },
+          {
+            "id": "db",
+            "nombre": ": Doctrine ORM + PostgreSQL",
+            "tipo": "database"
+          }
+        ],
+        "mensajes": [
+          {
+            "de": "post",
+            "a": "vista",
+            "txt": "Accede a vista detalle de postulación",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "post",
+            "txt": "Muestra formulario con botón 'Iniciar Pago'",
+            "tipo": "return"
+          },
+          {
+            "de": "post",
+            "a": "ctrl",
+            "txt": "POST /inscripcion/pago/iniciar/{id} + _csrf_token",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "IniciarPagoInscripcion.execute(inscripcionId, userId, successUrl, cancelUrl)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "inscripciones.findById(inscripcionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "Inscripcion(validada, estudiante, no_pagada)",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "pagos.save(Pago PENDIENTE)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "persist + flush",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "stripe_gw",
+            "txt": "createCheckoutSession(pago, successUrl, cancelUrl, descripcion)",
+            "tipo": "call"
+          },
+          {
+            "de": "stripe_gw",
+            "a": "stripe",
+            "txt": "POST /v1/checkout/sessions + API Key",
+            "tipo": "call"
+          },
+          {
+            "de": "stripe",
+            "a": "stripe_gw",
+            "txt": "Session(id, url, payment_status=unpaid)",
+            "tipo": "return"
+          },
+          {
+            "de": "stripe_gw",
+            "a": "uc",
+            "txt": "Session",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "pagos.save(pago + stripeSessionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "persist + flush",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "session.url",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "post",
+            "txt": "redirect(stripeCheckoutUrl)",
+            "tipo": "return"
+          },
+          {
+            "de": "post",
+            "a": "stripe",
+            "txt": "Paga en Stripe Checkout",
+            "tipo": "call"
+          },
+          {
+            "de": "stripe",
+            "a": "stripe",
+            "txt": "self: checkout.session.completed",
+            "tipo": "self"
+          },
+          {
+            "de": "stripe",
+            "a": "ctrl",
+            "txt": "POST /stripe/webhook (async, evento firmado)",
+            "tipo": "async"
+          },
+          {
+            "de": "ctrl",
+            "a": "stripe_gw",
+            "txt": "constructWebhookEvent(payload, signature)",
+            "tipo": "call"
+          },
+          {
+            "de": "stripe_gw",
+            "a": "ctrl",
+            "txt": "Event(checkout.session.completed, sessionId)",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "ConfirmarPagoStripe.porSession(sessionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "pagos.findByStripeSessionId(sessionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "Pago PENDIENTE",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "stripe_gw",
+            "txt": "retrieveSession(sessionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "stripe_gw",
+            "a": "stripe",
+            "txt": "GET /v1/checkout/sessions/{sessionId}",
+            "tipo": "call"
+          },
+          {
+            "de": "stripe",
+            "a": "stripe_gw",
+            "txt": "Session(payment_status=paid, payment_intent)",
+            "tipo": "return"
+          },
+          {
+            "de": "stripe_gw",
+            "a": "uc",
+            "txt": "Session",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "self: confirmarInscripcion(pago)",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "ConfirmarInscripcion.execute(inscripcionId, userId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "db",
+            "txt": "inscripcion.confirmar() + user.syncRoles(Estudiante)",
+            "tipo": "self"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "flush",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "pagos.save(pago.marcarPagado(paymentIntentId))",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "estado=PAGADO, paidAt",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "Pago(pagado=true)",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "post",
+            "txt": "200 OK",
+            "tipo": "return"
+          },
+          {
+            "de": "post",
+            "a": "ctrl",
+            "txt": "GET /inscripcion/pago/exito?session_id={sessionId}",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "ConfirmarPagoStripe.porSession(sessionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "pagos.findByStripeSessionId(sessionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "Pago(ya_pagado=true)",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "Pago (idempotente)",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "vista",
+            "txt": "render pago_exito.html.twig(pago, pagado=true)",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "post",
+            "txt": "Página de éxito 'Pago confirmado'",
+            "tipo": "return"
+          },
+          {
+            "de": "coord",
+            "a": "vista",
+            "txt": "Accede a panel /admin/pagos",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "coord",
+            "txt": "Lista pagos + botón 'Registrar Manual'",
+            "tipo": "return"
+          },
+          {
+            "de": "coord",
+            "a": "ctrl",
+            "txt": "POST /inscripcion/admin/pagos/{id}/registrar + _csrf_token",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "RegistrarPagoManual.execute(pagoId, actorUserId)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "pagos.findById(pagoId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "Pago PENDIENTE",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "ConfirmarInscripcion.execute(inscripcionId, actorUserId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "db",
+            "txt": "inscripcion.confirmar() + user.syncRoles(Estudiante)",
+            "tipo": "self"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "flush",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "pagos.save(pago.marcarPagado(null))",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "estado=PAGADO",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "void (exito)",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "coord",
+            "txt": "redirect /inscripcion/admin/pagos + flash 'Pago registrado'",
+            "tipo": "return"
+          }
+        ],
+        "fragmentos": [
+          {
+            "label": "FLUJO PRINCIPAL: Pago vía Stripe Checkout",
+            "from": 0,
+            "to": 39
+          },
+          {
+            "label": "FLUJO ALTERNATIVO: Registro manual por Coordinador",
+            "from": 40,
+            "to": 56
+          }
+        ]
+      },
+      {
+        "cu": "CU-07",
+        "titulo": "Gestionar Postulantes",
+        "lifelines": [
+          {
+            "id": "coord",
+            "nombre": "Coordinador Académico",
+            "tipo": "actor"
+          },
+          {
+            "id": "vista",
+            "nombre": ": Vistas (Twig)",
+            "tipo": "boundary"
+          },
+          {
+            "id": "ctrl",
+            "nombre": ": InscripcionController",
+            "tipo": "control"
+          },
+          {
+            "id": "uc",
+            "nombre": ": Casos de Uso",
+            "tipo": "control"
+          },
+          {
+            "id": "repo",
+            "nombre": ": InscripcionRepository",
+            "tipo": "control"
+          },
+          {
+            "id": "db",
+            "nombre": ": Doctrine ORM + PostgreSQL",
+            "tipo": "database"
+          },
+          {
+            "id": "log",
+            "nombre": ": InscripcionEvents",
+            "tipo": "control"
+          }
+        ],
+        "mensajes": [
+          {
+            "de": "coord",
+            "a": "vista",
+            "txt": "GET /inscripcion/admin",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "ctrl",
+            "txt": "adminList(Request)",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "listInscripciones.execute(gestionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "listByGestion(gestionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "db",
+            "txt": "SELECT * FROM inscripciones WHERE gestion_id = ?",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repo",
+            "txt": "return List<Inscripcion>",
+            "tipo": "return"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "return array",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "return array",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "vista",
+            "txt": "render('admin_lista.html.twig', [inscripciones, csrf_token])",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "coord",
+            "txt": "HTML: tabla postulantes",
+            "tipo": "return"
+          },
+          {
+            "de": "coord",
+            "a": "vista",
+            "txt": "GET /inscripcion/admin/buscar?q=busqueda",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "ctrl",
+            "txt": "buscar(Request)",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "buscarPostulante.execute(term)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "search(term, gestionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "db",
+            "txt": "SELECT * FROM inscripciones WHERE (ci|nombres|apellidos|email) LIKE ?",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repo",
+            "txt": "return List<Inscripcion>",
+            "tipo": "return"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "return array",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "return array",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "vista",
+            "txt": "render('admin_lista.html.twig', [inscripciones, searchTerm, csrf_token])",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "coord",
+            "txt": "HTML: resultados de búsqueda",
+            "tipo": "return"
+          },
+          {
+            "de": "coord",
+            "a": "vista",
+            "txt": "GET /inscripcion/admin/{id}",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "ctrl",
+            "txt": "adminDetalle(Request, id)",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "verInscripcion.executeById(id)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "findById(id)",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "db",
+            "txt": "SELECT * FROM inscripciones WHERE id = ?",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repo",
+            "txt": "return Inscripcion|null",
+            "tipo": "return"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "return Inscripcion",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "return Inscripcion",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "vista",
+            "txt": "render('admin_detalle.html.twig', [inscripcion, requisitos, csrf_token])",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "coord",
+            "txt": "HTML: expediente + acciones",
+            "tipo": "return"
+          }
+        ]
+      },
+      {
+        "cu": "CU-08",
+        "titulo": "Gestionar Docentes",
+        "lifelines": [
+          {
+            "id": "coord",
+            "nombre": "Coordinador Academico / Admin",
+            "tipo": "actor"
+          },
+          {
+            "id": "vista",
+            "nombre": ": Vistas (admin_detalle.twig)",
+            "tipo": "boundary"
+          },
+          {
+            "id": "ctrl",
+            "nombre": ": InscripcionController",
+            "tipo": "control"
+          },
+          {
+            "id": "uc",
+            "nombre": ": Casos de Uso",
+            "tipo": "control"
+          },
+          {
+            "id": "db",
+            "nombre": ": Doctrine ORM + PostgreSQL",
+            "tipo": "database"
+          }
+        ],
+        "mensajes": [
+          {
+            "de": "coord",
+            "a": "ctrl",
+            "txt": "GET /inscripcion/admin/{id}",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "VerInscripcion.executeById(inscripcionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "inscripciones.findById(inscripcionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "inscripcion: Inscripcion (tipo=DOCENTE)",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "inscripcion",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "vista",
+            "txt": "render(admin_detalle.twig, inscripcion)",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "coord",
+            "txt": "HTML: formulario validar + agendar entrevista + confirmar",
+            "tipo": "return"
+          },
+          {
+            "de": "coord",
+            "a": "ctrl",
+            "txt": "POST /inscripcion/admin/{id}/validar (CSRF)",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "ValidarInscripcion.execute(inscripcionId, actorUserId)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "inscripciones.findById(inscripcionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "inscripcion (estado=PRESENTADA)",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "validar() - verifica actaConforme()",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "inscripciones.save(inscripcion)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "UPDATE inscripciones SET estado=VALIDADA",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "void + bitacora.validada()",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "coord",
+            "txt": "redirect /inscripcion/admin/{id} + flash success",
+            "tipo": "return"
+          },
+          {
+            "de": "coord",
+            "a": "ctrl",
+            "txt": "POST /inscripcion/admin/{id}/entrevista (fecha, CSRF)",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "AgendarEntrevista.execute(inscripcionId, fecha, actorUserId)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "inscripciones.findById(inscripcionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "inscripcion (estado=VALIDADA, tipo=DOCENTE)",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "agendarEntrevista(fecha) - valida fecha futura",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "inscripciones.flush()",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "UPDATE inscripciones SET fechaEntrevista=fecha",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "void + bitacora.entrevistaAgendada()",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "coord",
+            "txt": "redirect /inscripcion/admin/{id} + flash success",
+            "tipo": "return"
+          },
+          {
+            "de": "coord",
+            "a": "ctrl",
+            "txt": "POST /inscripcion/admin/{id}/confirmar (CSRF)",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "ConfirmarInscripcion.execute(inscripcionId, actorUserId)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "inscripciones.findById(inscripcionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "inscripcion (estado=VALIDADA, fechaEntrevista=set)",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "self: validar estado=VALIDADA, fechaEntrevista set, rol no duplicado",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "roles.findByName('Docente')",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "rol: Role",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "confirmar(actorUserId) - estado=CONFIRMADA, confirmadaPor=actorUserId",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "user.syncRoles([...roles, Docente])",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "UPDATE user_roles SET",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "db",
+            "txt": "inscripciones.flush()",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "uc",
+            "txt": "UPDATE inscripciones SET estado=CONFIRMADA, confirmadaPor=actorUserId",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "void + bitacora.confirmada()",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "coord",
+            "txt": "redirect /inscripcion/admin/{id} + flash 'Postulacion confirmada y rol asignado'",
+            "tipo": "return"
+          }
+        ]
+      },
+      {
+        "cu": "CU-09",
+        "titulo": "Gestionar Planificacion Academica",
+        "lifelines": [
+          {
+            "id": "cac",
+            "nombre": "Coordinador Academico",
+            "tipo": "actor"
+          },
+          {
+            "id": "vista",
+            "nombre": ": Vistas (Twig)",
+            "tipo": "boundary"
+          },
+          {
+            "id": "grupoCtrl",
+            "nombre": ": GrupoController",
+            "tipo": "control"
+          },
+          {
+            "id": "asigCtrl",
+            "nombre": ": AsignacionController",
+            "tipo": "control"
+          },
+          {
+            "id": "horarioCtrl",
+            "nombre": ": HorarioController",
+            "tipo": "control"
+          },
+          {
+            "id": "usecases",
+            "nombre": ": Casos de Uso (Dominio)",
+            "tipo": "control"
+          },
+          {
+            "id": "db",
+            "nombre": ": Doctrine ORM + PostgreSQL",
+            "tipo": "database"
+          }
+        ],
+        "mensajes": [
+          {
+            "de": "cac",
+            "a": "vista",
+            "txt": "Accede a formulario de generacion de grupos",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "grupoCtrl",
+            "txt": "POST /admin/grupos/generar (gestionId, totalInscritos, materiaIds)",
+            "tipo": "call"
+          },
+          {
+            "de": "grupoCtrl",
+            "a": "usecases",
+            "txt": "GenerateGrupos.execute(GenerateGruposInput)",
+            "tipo": "call"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "gestiones.findById(gestionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return Gestion",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "usecases",
+            "txt": "self: calcular cantidad = CEIL(total / cupo max)",
+            "tipo": "self"
+          },
+          {
+            "de": "usecases",
+            "a": "usecases",
+            "txt": "self: crear N instancias de Grupo",
+            "tipo": "self"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "grupos.saveMany(List<Grupo>)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return void (flush en BD)",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "grupoCtrl",
+            "txt": "return List<Grupo>",
+            "tipo": "return"
+          },
+          {
+            "de": "grupoCtrl",
+            "a": "vista",
+            "txt": "flash(success) + redirect a grupo_index",
+            "tipo": "return"
+          },
+          {
+            "de": "cac",
+            "a": "vista",
+            "txt": "Accede a formulario de asignacion de estudiantes",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "asigCtrl",
+            "txt": "POST /asignaciones/estudiantes (grupoId, inscripcionIds[], csrfToken)",
+            "tipo": "call"
+          },
+          {
+            "de": "asigCtrl",
+            "a": "usecases",
+            "txt": "AsignarEstudianteAGrupo.execute(AsignarEstudianteGrupoInput)",
+            "tipo": "call"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "gestiones.findActive()",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return Gestion",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "grupos.findById(grupoId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return Grupo",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "materias.listActive()",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return List<Materia>",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "asignacionesGrupo.contarInscritosPorGrupo(gestionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return Map<grupoId, count>",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "usecases",
+            "txt": "self: for each inscripcionId: validar y asignar 4 materias",
+            "tipo": "self"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "inscripciones.findById(inscripcionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return Inscripcion",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "asignacionesGrupo.findByInscripcionAndMateria(inscripcionId, materiaId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return AsignacionGrupo | null",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "asignacionesGrupo.persist(AsignacionGrupo) + flush()",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return void (insert en BD)",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "asigCtrl",
+            "txt": "return {asignados, omitidos}",
+            "tipo": "return"
+          },
+          {
+            "de": "asigCtrl",
+            "a": "vista",
+            "txt": "flash(success) + redirect a asignacion_estudiantes",
+            "tipo": "return"
+          },
+          {
+            "de": "cac",
+            "a": "vista",
+            "txt": "Accede a formulario de asignacion de docentes",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "asigCtrl",
+            "txt": "POST /asignaciones/docentes (docenteId, grupoId, materiaIds[], csrfToken)",
+            "tipo": "call"
+          },
+          {
+            "de": "asigCtrl",
+            "a": "usecases",
+            "txt": "AsignarDocenteAGrupoMaterias.execute(AsignarDocenteGrupoMateriasInput)",
+            "tipo": "call"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "gestiones.findActive()",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return Gestion",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "usecases",
+            "txt": "self: for each materiaId: AsignarDocenteAGrupo.execute(AsignarDocenteInput)",
+            "tipo": "self"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "materias.findById(materiaId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return Materia",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "users.findById(docenteId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return User",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "asignacionesDocente.grupoIdsByDocente(docenteId, gestionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return List<grupoId> (max 4 grupos)",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "usecases",
+            "txt": "self: validar limite de 4 grupos",
+            "tipo": "self"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "horarios.listByGrupoAndMateria(grupoId, materiaId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return List<Horario>",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "usecases",
+            "txt": "self: validar sin choque horario",
+            "tipo": "self"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "asignacionesDocente.save(AsignacionDocente)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return void (insert en BD)",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "asigCtrl",
+            "txt": "return {asignados, omitidos}",
+            "tipo": "return"
+          },
+          {
+            "de": "asigCtrl",
+            "a": "vista",
+            "txt": "flash(success) + redirect a asignacion_docentes",
+            "tipo": "return"
+          },
+          {
+            "de": "cac",
+            "a": "vista",
+            "txt": "Accede a formulario de generacion de horario masivo",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "horarioCtrl",
+            "txt": "POST /admin/horarios/masivo (grupoId, dias[], horaInicio, duracionMinutos, bloques[], reemplazar)",
+            "tipo": "call"
+          },
+          {
+            "de": "horarioCtrl",
+            "a": "usecases",
+            "txt": "GenerarHorarioMasivo.execute(HorarioMasivoInput)",
+            "tipo": "call"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "grupos.findById(grupoId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return Grupo",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "usecases",
+            "txt": "self: validar dias, rango horario, bloques",
+            "tipo": "self"
+          },
+          {
+            "de": "usecases",
+            "a": "usecases",
+            "txt": "self: for each bloque: resolver materia+aula, calcular franja horaria",
+            "tipo": "self"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "materias.findById(materiaId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return Materia",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "aulas.findById(aulaId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return Aula",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "horarios.hasOverlap(grupoId, aulaId, dia, horaInicio, horaFin)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return boolean",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "usecases",
+            "txt": "self: for each dia x franja: crear instancia Horario",
+            "tipo": "self"
+          },
+          {
+            "de": "usecases",
+            "a": "db",
+            "txt": "horarios.saveMany(List<Horario>)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "usecases",
+            "txt": "return void (flush en BD)",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "horarioCtrl",
+            "txt": "return List<Horario>",
+            "tipo": "return"
+          },
+          {
+            "de": "horarioCtrl",
+            "a": "vista",
+            "txt": "flash(success) + redirect a horario_index",
+            "tipo": "return"
+          },
+          {
+            "de": "vista",
+            "a": "cac",
+            "txt": "Mostrar: grupos generados, estudiantes asignados, docentes asignados, horarios programados",
+            "tipo": "return"
+          }
+        ]
+      },
+      {
+        "cu": "CU-10",
+        "titulo": "Gestionar Evaluaciones",
+        "lifelines": [
+          {
+            "id": "docente",
+            "nombre": "Docente",
+            "tipo": "actor"
+          },
+          {
+            "id": "nav",
+            "nombre": ": Vistas (Twig)",
+            "tipo": "boundary"
+          },
+          {
+            "id": "ctrl",
+            "nombre": ": NotaController",
+            "tipo": "control"
+          },
+          {
+            "id": "uc",
+            "nombre": ": Casos de Uso",
+            "tipo": "control"
+          },
+          {
+            "id": "sec",
+            "nombre": ": PlanillaAccessPolicy",
+            "tipo": "control"
+          },
+          {
+            "id": "repo",
+            "nombre": ": Doctrine ORM + PostgreSQL",
+            "tipo": "database"
+          }
+        ],
+        "mensajes": [
+          {
+            "de": "docente",
+            "a": "ctrl",
+            "txt": "GET /notas/mis-materias",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "ListMateriasDocente.execute(docenteId, gestionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "listByDocenteAndGestion(docenteId, gestionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "List<AsignacionDocente>",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "nav",
+            "txt": "render('@notas/docente.html.twig', data)",
+            "tipo": "call"
+          },
+          {
+            "de": "nav",
+            "a": "docente",
+            "txt": "Vista: lista de materias/grupos del docente",
+            "tipo": "return"
+          },
+          {
+            "de": "docente",
+            "a": "ctrl",
+            "txt": "GET /notas/materia/{materiaId}/grupo/{grupoId}/planilla",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "sec",
+            "txt": "assertPuede(actorUserId, materiaId, grupoId, gestionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "sec",
+            "a": "repo",
+            "txt": "findById(actorUserId) [usuarios]",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "sec",
+            "txt": "User",
+            "tipo": "return"
+          },
+          {
+            "de": "sec",
+            "a": "repo",
+            "txt": "isDocenteDeMateriaGrupo(docenteId, materiaId, grupoId, gestionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "sec",
+            "txt": "bool (autorizado)",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "VerPlanilla.execute(materiaId, grupoId, actorUserId)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "findActive() [gestiones]",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "Gestion",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "findById(materiaId) [materias]",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "Materia",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "findById(grupoId) [grupos]",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "Grupo",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "listByMateriaAndGestion(materiaId, gestionId) [notas]",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "List<Nota>",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "listByMateriaAndGrupo(materiaId, grupoId) [asignacionesGrupo]",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "List<AsignacionGrupo>",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "calcularPromedio() y estado aprobado/reprobado",
+            "tipo": "self"
+          },
+          {
+            "de": "ctrl",
+            "a": "nav",
+            "txt": "render('@notas/planilla.html.twig', data)",
+            "tipo": "call"
+          },
+          {
+            "de": "nav",
+            "a": "docente",
+            "txt": "Vista: planilla con estudiantes, 3 examenes, espacios para notas",
+            "tipo": "return"
+          },
+          {
+            "de": "docente",
+            "a": "nav",
+            "txt": "Ingresa notas (0-100) para cada estudiante y examen",
+            "tipo": "call"
+          },
+          {
+            "de": "docente",
+            "a": "ctrl",
+            "txt": "POST /notas/materia/{materiaId}/grupo/{grupoId}/guardar [form nota[...]]",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "sec",
+            "txt": "assertPuede(actorUserId, materiaId, grupoId, gestionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "sec",
+            "a": "repo",
+            "txt": "verificar acceso (docente autorizado)",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "sec",
+            "txt": "bool",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "GuardarNotas.execute(GuardarNotasInput)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "findActive() [gestiones]",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "Gestion",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "listByMateriaAndGrupo(materiaId, grupoId) [asignacionesGrupo]",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "List<AsignacionGrupo>",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "findOne(inscripcionId, materiaId, numeroExamen) [notas]",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "Nota | null",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "new Nota(); persist(nota)",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "setValor(valor, observacion, actor)",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "flush() [Doctrine]",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "repo",
+            "txt": "INSERT/UPDATE notas en PostgreSQL",
+            "tipo": "self"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "confirmacion",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "notasRegistradas(...) [bitacora/auditoría]",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "evento registrado",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "int (cantidad guardada)",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "ctrl",
+            "txt": "addFlash('success', mensaje)",
+            "tipo": "self"
+          },
+          {
+            "de": "ctrl",
+            "a": "docente",
+            "txt": "RedirectResponse a /notas/materia/{materiaId}/grupo/{grupoId}/planilla",
+            "tipo": "return"
+          }
+        ]
+      },
+      {
+        "cu": "CU-11",
+        "titulo": "Consultar Información Académica",
+        "lifelines": [
+          {
+            "id": "postulante",
+            "nombre": "Postulante",
+            "tipo": "actor"
+          },
+          {
+            "id": "vista_boletin",
+            "nombre": ": Vista boletin.html.twig",
+            "tipo": "boundary"
+          },
+          {
+            "id": "vista_horario",
+            "nombre": ": Vista horario.html.twig",
+            "tipo": "boundary"
+          },
+          {
+            "id": "ctrl",
+            "nombre": ": NotaController",
+            "tipo": "control"
+          },
+          {
+            "id": "uc_boletin",
+            "nombre": ": VerBoletin",
+            "tipo": "control"
+          },
+          {
+            "id": "uc_horario",
+            "nombre": ": VerHorarioEstudiante",
+            "tipo": "control"
+          },
+          {
+            "id": "repos",
+            "nombre": ": GestionRepository + InscripcionRepository + AsignacionGrupoRepository + NotaRepository + HorarioRepository",
+            "tipo": "database"
+          },
+          {
+            "id": "db",
+            "nombre": ": Doctrine ORM + PostgreSQL",
+            "tipo": "database"
+          }
+        ],
+        "mensajes": [
+          {
+            "de": "postulante",
+            "a": "ctrl",
+            "txt": "GET /notas/boletin",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "repos",
+            "txt": "findActive()",
+            "tipo": "call"
+          },
+          {
+            "de": "repos",
+            "a": "db",
+            "txt": "SELECT gestion WHERE estado NOT IN (FINALIZADA, CANCELADA) ORDER BY fechaActivacion DESC LIMIT 1",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repos",
+            "txt": "Gestion",
+            "tipo": "return"
+          },
+          {
+            "de": "repos",
+            "a": "ctrl",
+            "txt": "Gestion",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc_boletin",
+            "txt": "execute(userId)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc_boletin",
+            "a": "repos",
+            "txt": "findConfirmadaByUserAndGestion(userId, gestionId, ESTUDIANTE)",
+            "tipo": "call"
+          },
+          {
+            "de": "repos",
+            "a": "db",
+            "txt": "SELECT inscripcion WHERE user_id = ? AND gestion_id = ? AND tipo = ESTUDIANTE AND estado = CONFIRMADA",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repos",
+            "txt": "Inscripcion",
+            "tipo": "return"
+          },
+          {
+            "de": "repos",
+            "a": "uc_boletin",
+            "txt": "Inscripcion",
+            "tipo": "return"
+          },
+          {
+            "de": "uc_boletin",
+            "a": "repos",
+            "txt": "listByInscripcion(inscripcionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "repos",
+            "a": "db",
+            "txt": "SELECT nota, materia WHERE inscripcion_id = ? ORDER BY nombre, numeroExamen",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repos",
+            "txt": "list<Nota>",
+            "tipo": "return"
+          },
+          {
+            "de": "repos",
+            "a": "uc_boletin",
+            "txt": "list<Nota>",
+            "tipo": "return"
+          },
+          {
+            "de": "uc_boletin",
+            "a": "repos",
+            "txt": "listByInscripcion(inscripcionId) con materia + grupo joined",
+            "tipo": "call"
+          },
+          {
+            "de": "repos",
+            "a": "db",
+            "txt": "SELECT asignacionGrupo, materia, grupo WHERE inscripcion_id = ? ORDER BY nombre",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repos",
+            "txt": "list<AsignacionGrupo>",
+            "tipo": "return"
+          },
+          {
+            "de": "repos",
+            "a": "uc_boletin",
+            "txt": "list<AsignacionGrupo>",
+            "tipo": "return"
+          },
+          {
+            "de": "uc_boletin",
+            "a": "uc_boletin",
+            "txt": "calcularPromedios y aprobado para cada materia",
+            "tipo": "self"
+          },
+          {
+            "de": "uc_boletin",
+            "a": "ctrl",
+            "txt": "array{inscripcion, gestion, cantidadExamenes, notaMinima, materias[]}",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "vista_boletin",
+            "txt": "render(@notas/boletin.html.twig, {user, boletin})",
+            "tipo": "call"
+          },
+          {
+            "de": "vista_boletin",
+            "a": "postulante",
+            "txt": "Response: boletin.html.twig renderizado",
+            "tipo": "return"
+          },
+          {
+            "de": "postulante",
+            "a": "ctrl",
+            "txt": "GET /notas/mi-horario",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc_horario",
+            "txt": "execute(userId)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc_horario",
+            "a": "repos",
+            "txt": "findConfirmadaByUserAndGestion(userId, gestionId, ESTUDIANTE)",
+            "tipo": "call"
+          },
+          {
+            "de": "repos",
+            "a": "db",
+            "txt": "SELECT inscripcion WHERE user_id = ? AND gestion_id = ? AND tipo = ESTUDIANTE",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repos",
+            "txt": "Inscripcion",
+            "tipo": "return"
+          },
+          {
+            "de": "repos",
+            "a": "uc_horario",
+            "txt": "Inscripcion",
+            "tipo": "return"
+          },
+          {
+            "de": "uc_horario",
+            "a": "repos",
+            "txt": "listByInscripcion(inscripcionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "repos",
+            "a": "db",
+            "txt": "SELECT asignacionGrupo, materia, grupo WHERE inscripcion_id = ?",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repos",
+            "txt": "list<AsignacionGrupo>",
+            "tipo": "return"
+          },
+          {
+            "de": "repos",
+            "a": "uc_horario",
+            "txt": "list<AsignacionGrupo>",
+            "tipo": "return"
+          },
+          {
+            "de": "uc_horario",
+            "a": "repos",
+            "txt": "listByGrupoAndMateria(grupoId, materiaId) [por cada asignacion]",
+            "tipo": "call"
+          },
+          {
+            "de": "repos",
+            "a": "db",
+            "txt": "SELECT horario WHERE grupo_id = ? AND materia_id = ? ORDER BY dia, horaInicio",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repos",
+            "txt": "list<Horario>",
+            "tipo": "return"
+          },
+          {
+            "de": "repos",
+            "a": "uc_horario",
+            "txt": "list<Horario>",
+            "tipo": "return"
+          },
+          {
+            "de": "uc_horario",
+            "a": "uc_horario",
+            "txt": "usort(franjas, ordenarPorDiaYHora)",
+            "tipo": "self"
+          },
+          {
+            "de": "uc_horario",
+            "a": "ctrl",
+            "txt": "array{inscripcion, gestion, franjas: list<Horario>}",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "vista_horario",
+            "txt": "render(@notas/horario.html.twig, {user, horario})",
+            "tipo": "call"
+          },
+          {
+            "de": "vista_horario",
+            "a": "postulante",
+            "txt": "Response: horario.html.twig renderizado",
+            "tipo": "return"
+          }
+        ]
+      },
+      {
+        "cu": "CU-12",
+        "titulo": "Consultar Carga Academica",
+        "lifelines": [
+          {
+            "id": "docente",
+            "nombre": "Docente",
+            "tipo": "actor"
+          },
+          {
+            "id": "vista",
+            "nombre": ": Vistas (Twig)",
+            "tipo": "boundary"
+          },
+          {
+            "id": "notactrl",
+            "nombre": ": NotaController",
+            "tipo": "control"
+          },
+          {
+            "id": "listuc",
+            "nombre": ": ListMateriasDocente",
+            "tipo": "control"
+          },
+          {
+            "id": "asignactrl",
+            "nombre": ": AsignacionController",
+            "tipo": "control"
+          },
+          {
+            "id": "showuc",
+            "nombre": ": ShowGrupoDetalle",
+            "tipo": "control"
+          },
+          {
+            "id": "repo",
+            "nombre": ": AsignacionDocenteRepository",
+            "tipo": "control"
+          },
+          {
+            "id": "gruporepo",
+            "nombre": ": AsignacionGrupoRepository",
+            "tipo": "control"
+          },
+          {
+            "id": "bd",
+            "nombre": ": Doctrine ORM + PostgreSQL",
+            "tipo": "database"
+          }
+        ],
+        "mensajes": [
+          {
+            "de": "docente",
+            "a": "vista",
+            "txt": "GET /notas/mis-materias",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "notactrl",
+            "txt": "misMaterias(request)",
+            "tipo": "call"
+          },
+          {
+            "de": "notactrl",
+            "a": "notactrl",
+            "txt": "currentUser(request): User",
+            "tipo": "self"
+          },
+          {
+            "de": "notactrl",
+            "a": "notactrl",
+            "txt": "findActive(): Gestion",
+            "tipo": "self"
+          },
+          {
+            "de": "notactrl",
+            "a": "listuc",
+            "txt": "execute(docenteId, gestionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "listuc",
+            "a": "repo",
+            "txt": "listByDocenteAndGestion(docenteId, gestionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "bd",
+            "txt": "SELECT a, m, gr FROM AsignacionDocente WHERE docente=? AND gestion=?",
+            "tipo": "call"
+          },
+          {
+            "de": "bd",
+            "a": "repo",
+            "txt": "list<AsignacionDocente> {id, materia, grupo, docente, gestion}",
+            "tipo": "return"
+          },
+          {
+            "de": "repo",
+            "a": "listuc",
+            "txt": "array<AsignacionDocente>",
+            "tipo": "return"
+          },
+          {
+            "de": "listuc",
+            "a": "notactrl",
+            "txt": "list<AsignacionDocente>",
+            "tipo": "return"
+          },
+          {
+            "de": "notactrl",
+            "a": "vista",
+            "txt": "render('docente.html.twig', {asignaciones, user, gestion})",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "docente",
+            "txt": "HTML: lista materias/grupos/turnos/aulas/horarios",
+            "tipo": "return"
+          },
+          {
+            "de": "docente",
+            "a": "vista",
+            "txt": "GET /asignaciones/grupo/{grupoId}",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "asignactrl",
+            "txt": "verGrupo(request, grupoId)",
+            "tipo": "call"
+          },
+          {
+            "de": "asignactrl",
+            "a": "asignactrl",
+            "txt": "currentUser(request): User",
+            "tipo": "self"
+          },
+          {
+            "de": "asignactrl",
+            "a": "showuc",
+            "txt": "execute(grupoId)",
+            "tipo": "call"
+          },
+          {
+            "de": "showuc",
+            "a": "gruporepo",
+            "txt": "listEstudiantesDistintosByGrupo(grupoId)",
+            "tipo": "call"
+          },
+          {
+            "de": "gruporepo",
+            "a": "bd",
+            "txt": "SELECT DISTINCT i FROM Inscripcion WHERE id IN (SELECT DISTINCT inscripcion FROM AsignacionGrupo WHERE grupo=?)",
+            "tipo": "call"
+          },
+          {
+            "de": "bd",
+            "a": "gruporepo",
+            "txt": "list<Inscripcion> {id, ci, apellidos, nombres}",
+            "tipo": "return"
+          },
+          {
+            "de": "gruporepo",
+            "a": "showuc",
+            "txt": "array<Inscripcion>",
+            "tipo": "return"
+          },
+          {
+            "de": "showuc",
+            "a": "asignactrl",
+            "txt": "{grupo, turno, roster}",
+            "tipo": "return"
+          },
+          {
+            "de": "asignactrl",
+            "a": "vista",
+            "txt": "render('grupo_show.html.twig', {detalle, user})",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "docente",
+            "txt": "HTML: grupo, turno, aulas, horarios, lista nominal estudiantes",
+            "tipo": "return"
+          }
+        ]
+      },
+      {
+        "cu": "CU-13",
+        "titulo": "Ejecutar Admision Final",
+        "lifelines": [
+          {
+            "id": "coord",
+            "nombre": "Coordinador Academico",
+            "tipo": "actor"
+          },
+          {
+            "id": "vista",
+            "nombre": ": Admin Detalle Inscripcion (Twig)",
+            "tipo": "boundary"
+          },
+          {
+            "id": "ctrl",
+            "nombre": ": InscripcionController",
+            "tipo": "control"
+          },
+          {
+            "id": "resolver",
+            "nombre": ": ResolverResultadoAdmision",
+            "tipo": "control"
+          },
+          {
+            "id": "confirmar",
+            "nombre": ": ConfirmarInscripcion",
+            "tipo": "control"
+          },
+          {
+            "id": "rechazar",
+            "nombre": ": RechazarInscripcion",
+            "tipo": "control"
+          },
+          {
+            "id": "db",
+            "nombre": ": Doctrine ORM + PostgreSQL",
+            "tipo": "database"
+          },
+          {
+            "id": "bitacora",
+            "nombre": ": InscripcionEvents (Bitacora)",
+            "tipo": "external"
+          }
+        ],
+        "mensajes": [
+          {
+            "de": "coord",
+            "a": "vista",
+            "txt": "Ejecuta admision final (formulario)",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "ctrl",
+            "txt": "POST /admin/{id}/resolver [resultado=APROBADO|RECHAZADO, motivo, _csrf_token]",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "ctrl",
+            "txt": "isCsrfValid(request)",
+            "tipo": "self"
+          },
+          {
+            "de": "ctrl",
+            "a": "resolver",
+            "txt": "execute(inscripcionId, resultado, motivo, actorUserId)",
+            "tipo": "call"
+          },
+          {
+            "de": "resolver",
+            "a": "resolver",
+            "txt": "normalizeResultado(resultado)",
+            "tipo": "self"
+          },
+          {
+            "de": "resolver",
+            "a": "confirmar",
+            "txt": "execute(inscripcionId, actorUserId) [si APROBADO]",
+            "tipo": "call"
+          },
+          {
+            "de": "confirmar",
+            "a": "db",
+            "txt": "inscripciones.findById(inscripcionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "confirmar",
+            "txt": "Inscripcion",
+            "tipo": "return"
+          },
+          {
+            "de": "confirmar",
+            "a": "confirmar",
+            "txt": "validar estado: isValidada() && !existeConfirmadaPorCiTipo()",
+            "tipo": "self"
+          },
+          {
+            "de": "confirmar",
+            "a": "db",
+            "txt": "roles.findByName(rolNombre)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "confirmar",
+            "txt": "Role",
+            "tipo": "return"
+          },
+          {
+            "de": "confirmar",
+            "a": "confirmar",
+            "txt": "inscripcion.confirmar(actorUserId)",
+            "tipo": "self"
+          },
+          {
+            "de": "confirmar",
+            "a": "confirmar",
+            "txt": "user.syncRoles([...roles, Rol])",
+            "tipo": "self"
+          },
+          {
+            "de": "confirmar",
+            "a": "db",
+            "txt": "inscripciones.flush()",
+            "tipo": "call"
+          },
+          {
+            "de": "confirmar",
+            "a": "bitacora",
+            "txt": "confirmada(ci, tipo, rolNombre, actorUserId)",
+            "tipo": "call"
+          },
+          {
+            "de": "bitacora",
+            "a": "db",
+            "txt": "audit.log(...)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "bitacora",
+            "txt": "Auditoria registrada",
+            "tipo": "return"
+          },
+          {
+            "de": "confirmar",
+            "a": "resolver",
+            "txt": "retorno",
+            "tipo": "return"
+          },
+          {
+            "de": "resolver",
+            "a": "rechazar",
+            "txt": "execute(inscripcionId, motivo, actorUserId) [si RECHAZADO]",
+            "tipo": "call"
+          },
+          {
+            "de": "rechazar",
+            "a": "db",
+            "txt": "inscripciones.findById(inscripcionId)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "rechazar",
+            "txt": "Inscripcion",
+            "tipo": "return"
+          },
+          {
+            "de": "rechazar",
+            "a": "rechazar",
+            "txt": "liberarCupoRevision.execute(inscripcion)",
+            "tipo": "self"
+          },
+          {
+            "de": "rechazar",
+            "a": "rechazar",
+            "txt": "inscripcion.rechazar(motivo, actorUserId)",
+            "tipo": "self"
+          },
+          {
+            "de": "rechazar",
+            "a": "db",
+            "txt": "inscripciones.save(inscripcion)",
+            "tipo": "call"
+          },
+          {
+            "de": "rechazar",
+            "a": "bitacora",
+            "txt": "rechazada(ci, motivo, actorUserId)",
+            "tipo": "call"
+          },
+          {
+            "de": "bitacora",
+            "a": "db",
+            "txt": "audit.log(...)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "bitacora",
+            "txt": "Auditoria registrada",
+            "tipo": "return"
+          },
+          {
+            "de": "rechazar",
+            "a": "resolver",
+            "txt": "retorno",
+            "tipo": "return"
+          },
+          {
+            "de": "resolver",
+            "a": "ctrl",
+            "txt": "retorno",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "vista",
+            "txt": "addFlash(success|error, mensaje); redirectToRoute('inscripcion_admin_detalle')",
+            "tipo": "return"
+          },
+          {
+            "de": "vista",
+            "a": "coord",
+            "txt": "Vista actualizada (resultado confirmado o rechazado)",
+            "tipo": "return"
+          }
+        ]
+      },
+      {
+        "cu": "CU-14",
+        "titulo": "Consultar Resultados de Admision",
+        "lifelines": [
+          {
+            "id": "postulante",
+            "nombre": "Postulante",
+            "tipo": "actor"
+          },
+          {
+            "id": "vista",
+            "nombre": ": Vista (Twig)",
+            "tipo": "boundary"
+          },
+          {
+            "id": "ctrl",
+            "nombre": ": InscripcionController",
+            "tipo": "control"
+          },
+          {
+            "id": "uc",
+            "nombre": ": VerInscripcion",
+            "tipo": "control"
+          },
+          {
+            "id": "repo",
+            "nombre": ": InscripcionRepository",
+            "tipo": "database"
+          },
+          {
+            "id": "db",
+            "nombre": ": Doctrine ORM + PostgreSQL",
+            "tipo": "database"
+          }
+        ],
+        "mensajes": [
+          {
+            "de": "postulante",
+            "a": "ctrl",
+            "txt": "GET /inscripcion/ver/{id}",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "ctrl",
+            "txt": "currentUser(request) [validar sesion]",
+            "tipo": "self"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "executeById(id)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "findById(id)",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "db",
+            "txt": "entityManager.find(Inscripcion::class, id)",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repo",
+            "txt": "Inscripcion {id, estado, nombres, apellidos, carrera, ...}",
+            "tipo": "return"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "Inscripcion|null",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "Inscripcion (o excepcion InscripcionException)",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "ctrl",
+            "txt": "validateOwnership(inscripcion.user.id == user.id)",
+            "tipo": "self"
+          },
+          {
+            "de": "ctrl",
+            "a": "vista",
+            "txt": "render('detalle.html.twig', {inscripcion, requisitos, user, csrf_token})",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "postulante",
+            "txt": "response HTML (estado: CONFIRMADA|RECHAZADA|VALIDADA|PENDIENTE|PRESENTADA)",
+            "tipo": "return"
+          }
+        ]
+      },
+      {
+        "cu": "CU-15",
+        "titulo": "Gestionar Reportes e Indicadores",
+        "lifelines": [
+          {
+            "id": "actor",
+            "nombre": "Autoridad/Coordinador",
+            "tipo": "actor"
+          },
+          {
+            "id": "vista",
+            "nombre": ": Vistas (Twig)",
+            "tipo": "boundary"
+          },
+          {
+            "id": "dashctrl",
+            "nombre": ": DashboardController",
+            "tipo": "control"
+          },
+          {
+            "id": "exctrl",
+            "nombre": ": ExportController",
+            "tipo": "control"
+          },
+          {
+            "id": "usecases",
+            "nombre": ": Casos de Uso",
+            "tipo": "control"
+          },
+          {
+            "id": "repos",
+            "nombre": ": Repositorios",
+            "tipo": "control"
+          },
+          {
+            "id": "db",
+            "nombre": ": Doctrine ORM + PostgreSQL",
+            "tipo": "database"
+          }
+        ],
+        "mensajes": [
+          {
+            "de": "actor",
+            "a": "dashctrl",
+            "txt": "GET /admin/dashboard",
+            "tipo": "call"
+          },
+          {
+            "de": "dashctrl",
+            "a": "repos",
+            "txt": "findById(userId)",
+            "tipo": "call"
+          },
+          {
+            "de": "repos",
+            "a": "db",
+            "txt": "SELECT User WHERE id = :id",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repos",
+            "txt": "User",
+            "tipo": "return"
+          },
+          {
+            "de": "repos",
+            "a": "dashctrl",
+            "txt": "user",
+            "tipo": "return"
+          },
+          {
+            "de": "dashctrl",
+            "a": "repos",
+            "txt": "findActive()",
+            "tipo": "call"
+          },
+          {
+            "de": "repos",
+            "a": "db",
+            "txt": "SELECT Gestion WHERE activa = true",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repos",
+            "txt": "Gestion",
+            "tipo": "return"
+          },
+          {
+            "de": "repos",
+            "a": "dashctrl",
+            "txt": "gestion",
+            "tipo": "return"
+          },
+          {
+            "de": "dashctrl",
+            "a": "usecases",
+            "txt": "execute(gestion, filtros)",
+            "tipo": "call"
+          },
+          {
+            "de": "usecases",
+            "a": "repos",
+            "txt": "estudiantesDeGestion(gestionId, carreraId)",
+            "tipo": "call"
+          },
+          {
+            "de": "repos",
+            "a": "db",
+            "txt": "SELECT Inscripcion, Carrera WHERE gestion = :id AND tipo = ESTUDIANTE",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repos",
+            "txt": "array<Inscripcion>",
+            "tipo": "return"
+          },
+          {
+            "de": "repos",
+            "a": "usecases",
+            "txt": "array<student>",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "repos",
+            "txt": "asignacionesEstudianteMateria(gestionId, carreraId, materiaId, docenteId)",
+            "tipo": "call"
+          },
+          {
+            "de": "repos",
+            "a": "db",
+            "txt": "SELECT AsignacionGrupo, Materia, Grupo, AsignacionDocente, User",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repos",
+            "txt": "array<AsignacionGrupo>",
+            "tipo": "return"
+          },
+          {
+            "de": "repos",
+            "a": "usecases",
+            "txt": "array<asignacion>",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "repos",
+            "txt": "notasEstudiantes(gestionId, carreraId, materiaId, docenteId)",
+            "tipo": "call"
+          },
+          {
+            "de": "repos",
+            "a": "db",
+            "txt": "SELECT Nota, Inscripcion, Materia WHERE gestion = :id AND tipo = ESTUDIANTE",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repos",
+            "txt": "array<Nota>",
+            "tipo": "return"
+          },
+          {
+            "de": "repos",
+            "a": "usecases",
+            "txt": "array<nota>",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "repos",
+            "txt": "postulacionesPorEstado(gestionId, ESTUDIANTE)",
+            "tipo": "call"
+          },
+          {
+            "de": "repos",
+            "a": "db",
+            "txt": "SELECT COUNT(*) GROUP BY estado",
+            "tipo": "call"
+          },
+          {
+            "de": "db",
+            "a": "repos",
+            "txt": "array<estado, total>",
+            "tipo": "return"
+          },
+          {
+            "de": "repos",
+            "a": "usecases",
+            "txt": "array<estado>",
+            "tipo": "return"
+          },
+          {
+            "de": "usecases",
+            "a": "usecases",
+            "txt": "self: calcularKPIs(aprobados, reprobados, incompletos, promedios)",
+            "tipo": "self"
+          },
+          {
+            "de": "usecases",
+            "a": "dashctrl",
+            "txt": "payload (kpis, detalle, graficos)",
+            "tipo": "return"
+          },
+          {
+            "de": "dashctrl",
+            "a": "vista",
+            "txt": "render dashboard.html.twig",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "actor",
+            "txt": "HTML (dashboard con KPIs en tiempo real)",
+            "tipo": "return"
+          }
+        ]
+      },
+      {
+        "cu": "CU-16",
+        "titulo": "Gestionar Auditoria del Sistema",
+        "lifelines": [
+          {
+            "id": "admin",
+            "nombre": "Administrador",
+            "tipo": "actor"
+          },
+          {
+            "id": "vista",
+            "nombre": ": Vistas (Twig)",
+            "tipo": "boundary"
+          },
+          {
+            "id": "ctrl",
+            "nombre": ": BitacoraController",
+            "tipo": "control"
+          },
+          {
+            "id": "uc",
+            "nombre": ": QueryLog",
+            "tipo": "control"
+          },
+          {
+            "id": "repo",
+            "nombre": ": LogEntryRepository",
+            "tipo": "control"
+          },
+          {
+            "id": "bd",
+            "nombre": ": Doctrine ORM + PostgreSQL",
+            "tipo": "database"
+          }
+        ],
+        "mensajes": [
+          {
+            "de": "admin",
+            "a": "ctrl",
+            "txt": "GET /admin/bitacora con query params (usuario, accion, modulo, desde, hasta, page, per_page)",
+            "tipo": "call"
+          },
+          {
+            "de": "ctrl",
+            "a": "ctrl",
+            "txt": "getSession().get(SESSION_USER_KEY) → userId",
+            "tipo": "self"
+          },
+          {
+            "de": "ctrl",
+            "a": "repo",
+            "txt": "users.findById(userId)",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "bd",
+            "txt": "SELECT user WHERE id = :userId",
+            "tipo": "call"
+          },
+          {
+            "de": "bd",
+            "a": "repo",
+            "txt": "User entity",
+            "tipo": "return"
+          },
+          {
+            "de": "repo",
+            "a": "ctrl",
+            "txt": "User | null",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "ctrl",
+            "txt": "BitacoraFilterRequest::fromRequest(request) → parsea query params a LogFilter",
+            "tipo": "self"
+          },
+          {
+            "de": "ctrl",
+            "a": "uc",
+            "txt": "queryLog.execute(filter)",
+            "tipo": "call"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "countByFilter(filter) → COUNT(l.id)",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "bd",
+            "txt": "SELECT COUNT(id) FROM log_entries WHERE (userLabel|action|module|createdAt filters)",
+            "tipo": "call"
+          },
+          {
+            "de": "bd",
+            "a": "repo",
+            "txt": "total: int",
+            "tipo": "return"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "total",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "repo",
+            "txt": "findByFilter(filter) → setFirstResult, setMaxResults, ORDER BY createdAt DESC",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "bd",
+            "txt": "SELECT l FROM log_entries l WHERE (filters) ORDER BY created_at DESC LIMIT :perPage OFFSET :offset",
+            "tipo": "call"
+          },
+          {
+            "de": "bd",
+            "a": "repo",
+            "txt": "list<LogEntry>",
+            "tipo": "return"
+          },
+          {
+            "de": "repo",
+            "a": "uc",
+            "txt": "items (array de LogEntry)",
+            "tipo": "return"
+          },
+          {
+            "de": "uc",
+            "a": "uc",
+            "txt": "ceil(total / perPage) → totalPages",
+            "tipo": "self"
+          },
+          {
+            "de": "uc",
+            "a": "ctrl",
+            "txt": "return {items, total, page, perPage, totalPages}",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "ctrl",
+            "txt": "ActionCatalog::all() → códigos de acciones; ActionCatalog::label(code) → etiquetas",
+            "tipo": "self"
+          },
+          {
+            "de": "ctrl",
+            "a": "repo",
+            "txt": "distinctUserLabels() → lista usuarios únicos de la bitácora",
+            "tipo": "call"
+          },
+          {
+            "de": "repo",
+            "a": "bd",
+            "txt": "SELECT DISTINCT userLabel FROM log_entries ORDER BY userLabel ASC",
+            "tipo": "call"
+          },
+          {
+            "de": "bd",
+            "a": "repo",
+            "txt": "array<string> userLabels",
+            "tipo": "return"
+          },
+          {
+            "de": "repo",
+            "a": "ctrl",
+            "txt": "userLabels",
+            "tipo": "return"
+          },
+          {
+            "de": "ctrl",
+            "a": "vista",
+            "txt": "render(@bitacora/lista.html.twig, {items, total, page, perPage, totalPages, filter, actionLabels, modules, userLabels, user})",
+            "tipo": "call"
+          },
+          {
+            "de": "vista",
+            "a": "admin",
+            "txt": "HTML (grilla paginada de bitácora, filtros, paginación)",
+            "tipo": "return"
+          }
+        ]
+      }
+    ],
+    "total": 16
+  }
+}

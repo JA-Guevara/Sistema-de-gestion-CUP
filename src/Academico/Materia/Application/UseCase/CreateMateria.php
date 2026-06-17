@@ -53,7 +53,7 @@ final readonly class CreateMateria
     private function createMateria(MateriaInput $input): Materia
     {
         $materia = new Materia();
-        $materia->rename($input->codigo, $input->nombre, $input->descripcion);
+        $materia->rename($input->codigo, $input->nombre, $input->descripcion, $input->area);
 
         return $materia;
     }

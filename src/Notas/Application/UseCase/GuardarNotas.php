@@ -18,7 +18,7 @@ use App\Notas\Infrastructure\Persistence\NotaRepository;
 
 final readonly class GuardarNotas
 {
-    private const DEFAULT_EXAMENES = 2;
+    private const DEFAULT_EXAMENES = 3;
 
     public function __construct(
         private MateriaRepository $materias,
